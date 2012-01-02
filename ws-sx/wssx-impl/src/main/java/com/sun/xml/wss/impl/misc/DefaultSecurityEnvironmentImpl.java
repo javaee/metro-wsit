@@ -609,11 +609,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (cred != null) {
             X509Certificate x509Cert = cred.getCertificate();
             BigInteger serialNo = x509Cert.getSerialNumber();
-            String currentIssuerName =
-                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                    x509Cert.getIssuerDN().getName());
+            
+            X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+            X500Principal issuerPrincipal = new X500Principal(issuerName);
             if (serialNo.equals(serialNumber) &&
-                    currentIssuerName.equals(issuerName)) {
+                    currentIssuerPrincipal.equals(issuerPrincipal)) {
                 return cred.getPrivateKey();
             }
         }
@@ -753,13 +753,14 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         X509Certificate cert = null;
         cert = getPublicCredentialsFromLCSubject();
+        
         if (cert != null) {
             BigInteger serialNo = cert.getSerialNumber();
-            String currentIssuerName =
-                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                    cert.getIssuerDN().getName());
+            //Fix for WSIT issue 
+            X500Principal currentIssuerPrincipal = cert.getIssuerX500Principal();
+            X500Principal issuerPrincipal = new X500Principal(issuerName);
             if (serialNo.equals(serialNumber) &&
-                    currentIssuerName.equals(issuerName)) {
+                    currentIssuerPrincipal.equals(issuerPrincipal)) {
                 return cert;
             }
         }       

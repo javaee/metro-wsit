@@ -556,13 +556,12 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
                     BigInteger serialNo = x509Cert.getSerialNumber();
-                    String currentIssuerName =
-                          com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                 x509Cert.getIssuerDN().getName());
-                    if (serialNo.equals(cert.getSerialNumber()) &&
-                        currentIssuerName.equals(issuerName)) {
-                        return cred.getPrivateKey();
-                    }
+                   X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                   X500Principal issuerPrincipal = new X500Principal(issuerName);
+                   if (serialNo.equals(cert.getSerialNumber())
+                           && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                       return cred.getPrivateKey();
+                   }
                  }
               }
            }
@@ -624,13 +623,13 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
                     BigInteger serialNo = x509Cert.getSerialNumber();
-                    String currentIssuerName =
-                          com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                 x509Cert.getIssuerDN().getName());
-                    if (serialNo.equals(serialNumber) &&
-                        currentIssuerName.equals(issuerName)) {
-                        return cred.getPrivateKey();
-                    }
+                    //Fix for WSIT issue 
+                   X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                   X500Principal issuerPrincipal = new X500Principal(issuerName);
+                   if (serialNo.equals(serialNumber)
+                           && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                       return cred.getPrivateKey();
+                   }
                  }
               }
            }
@@ -1245,13 +1244,13 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                  X500PrivateCredential cred = (X500PrivateCredential)it.next();
                  X509Certificate x509Cert = cred.getCertificate();
                  BigInteger serialNo = x509Cert.getSerialNumber();
-                 String currentIssuerName =
-                        com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                x509Cert.getIssuerDN().getName());
-                 if (serialNo.equals(serialNumber) &&
-                     currentIssuerName.equals(issuerName)) {
-                     return x509Cert;
-                 }
+                 //Fix for WSIT issue 
+                   X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                   X500Principal issuerPrincipal = new X500Principal(issuerName);
+                   if (serialNo.equals(serialNumber)
+                           && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                       return x509Cert;
+                   }
               }
            }
         }
@@ -1890,12 +1889,12 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         X509Certificate x509Cert) {
 
         BigInteger serialNumber = x509Cert.getSerialNumber();
-        String issuerName =
-            com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                x509Cert.getIssuerDN().getName());
+        //Fix for WSIT issue 
+        X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+        X500Principal issuerPrincipal = new X500Principal(issuerNameMatch);
 
         if (serialNumber.equals(serialNumberMatch)
-            && issuerName.equals(issuerNameMatch)) {
+            && currentIssuerPrincipal.equals(issuerPrincipal)) {
             return true;
         }
         return false;
