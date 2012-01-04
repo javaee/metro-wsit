@@ -41,12 +41,13 @@
 package com.sun.xml.ws.runtime.dev;
 
 import com.sun.istack.logging.Logger;
-
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
+import com.sun.xml.ws.commons.WSEndpointCollectionBasedMOMListener;
+import com.sun.xml.ws.commons.MOMRegistrationAware;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.util.ServiceFinder;
-
 import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -77,12 +78,18 @@ import java.util.Set;
 @ManagedObject
 @Description("Session manager used by RM and SC")
 @AMXMetadata(type="WSRMSCSessionManager")
-public abstract class SessionManager {
+public abstract class SessionManager extends AbstractMOMRegistrationAware {
     private static final Logger LOGGER = Logger.getLogger(SessionManager.class);
     
     private static final Object LOCK = new Object();
     private static final Map<WSEndpoint, SessionManager> SESSION_MANAGERS = new HashMap<WSEndpoint, SessionManager>();
-     
+    private static final WSEndpointCollectionBasedMOMListener listener;
+    
+    static {
+        listener = new WSEndpointCollectionBasedMOMListener(LOCK, "RM_SC_SessionManager", SESSION_MANAGERS);
+        listener.initialize();
+    }
+
     /**
      * Returns an existing session identified by the Key else null
      *
@@ -182,8 +189,9 @@ public abstract class SessionManager {
                 Object o = SESSION_MANAGERS.remove(endpoint);
                 LOGGER.config(String.format("removeSessionManager(%s): %s",
                                             endpoint, o));
-                if (o != null) {
-                    endpoint.getManagedObjectManager().unregister(o);
+                SessionManager sessionManager = (SessionManager) o;
+                if (sessionManager != null && sessionManager.isRegisteredAtMOM()) {
+                    listener.unregisterFromMOM(sessionManager, endpoint);
                 }
             } finally {
                 LOGGER.exiting();
@@ -213,8 +221,9 @@ public abstract class SessionManager {
                         sm = new SessionManagerImpl(endpoint, isSC);
                     }
                     SESSION_MANAGERS.put(endpoint, sm);
-                    endpoint.getManagedObjectManager()
-                        .registerAtRoot(sm, "RM_SC_SessionManager");
+                    if (listener.canRegisterAtMOM()) {
+                        listener.registerAtMOM(sm, endpoint);
+                    }
                     LOGGER.config(String.format("getSessionManager(%s): created: %s", endpoint, sm));
                 } else {
                     LOGGER.config(String.format("getSessionManager(%s): found existing: %s", endpoint, sm));
@@ -225,8 +234,8 @@ public abstract class SessionManager {
             }
         }
     }
-    
-     public static SessionManager getSessionManager(WSEndpoint endpoint){
+
+    public static SessionManager getSessionManager(WSEndpoint endpoint){
          return getSessionManager(endpoint, false);
      }
 }

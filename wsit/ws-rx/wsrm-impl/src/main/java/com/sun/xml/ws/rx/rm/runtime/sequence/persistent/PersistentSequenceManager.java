@@ -40,15 +40,12 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
-
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
@@ -57,7 +54,11 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceMaintenanceTask;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
+
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -67,7 +68,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PersistentSequenceManager implements SequenceManager {
+public final class PersistentSequenceManager extends AbstractMOMRegistrationAware implements SequenceManager {
 
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceManager.class);
     /**

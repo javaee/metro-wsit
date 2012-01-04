@@ -40,11 +40,19 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.commons.WSEndpointCollectionBasedMOMListener;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceManager;
+import com.sun.xml.ws.server.WSEndpointImpl;
+import com.sun.xml.ws.server.WSEndpointMOMProxy;
 import org.glassfish.gmbal.ManagedObjectManager;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  *
@@ -52,9 +60,15 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 public enum SequenceManagerFactory {
     INSTANCE;
+
+    private final WSEndpointCollectionBasedMOMListener listener;
+    private final WeakHashMap<WSEndpoint, SequenceManager> sequenceManagersForDeferredRegistration = new WeakHashMap<WSEndpoint, SequenceManager>();
         
     private SequenceManagerFactory() {
         // TODO: load from external configuration and revert to default if not present
+
+        listener = new WSEndpointCollectionBasedMOMListener(this, SequenceManager.MANAGED_BEAN_NAME, sequenceManagersForDeferredRegistration);
+        listener.initialize();
     }
 
     /**
@@ -69,19 +83,19 @@ public enum SequenceManagerFactory {
      * @return newly created {@link SequenceManager} instance
      */
     public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
-        SequenceManager result;
-        if (persistent) {
-            result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
-        } else {
-            result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
-        }
+        synchronized (INSTANCE) {
+            SequenceManager result;
+            if (persistent) {
+                result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+            } else {
+                result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+            }
+            
+            ManagedObjectManager mom = configuration.getManagedObjectManager();
+            handleMOMRegistration(result, mom, true);
 
-        ManagedObjectManager mom = configuration.getManagedObjectManager();
-        if (mom != null) {
-            mom.registerAtRoot(result, SequenceManager.MANAGED_BEAN_NAME);
+            return result;
         }
-
-        return result;
     }
     
     /**
@@ -89,12 +103,49 @@ public enum SequenceManagerFactory {
      * 
      * @param manager {@link SequenceManager} instance to be disposed
      */
-    public void dispose(SequenceManager manager, RmConfiguration configuration) {        
-        manager.dispose();                
-        
-        ManagedObjectManager mom = configuration.getManagedObjectManager();
-        if (mom != null) {
-            mom.unregister(manager);
+    public void dispose(SequenceManager manager, RmConfiguration configuration) {
+        synchronized (INSTANCE) {
+            manager.dispose();
+
+            ManagedObjectManager mom = configuration.getManagedObjectManager();
+            handleMOMRegistration(manager, mom, false);
         }
     }
+
+    /**
+     * Handles (un)registration process of {@code SequenceManager} in {@link ManagedObjectManager}.
+     * 
+     * @param manager SequenceManager to be (un)registered
+     * @param managedObjectManager ManagedObjectManager instance where SequenceManager will be registered at
+     * @param register {@code true} if the manager should be registered, {@code false} for unregistration
+     */
+    private void handleMOMRegistration(final SequenceManager manager, final ManagedObjectManager managedObjectManager, final boolean register) {
+        if (manager == null || managedObjectManager == null) {
+            return;
+        }
+
+        if (!listener.canRegisterAtMOM() && !(managedObjectManager instanceof WSEndpointMOMProxy)) {
+            // SequenceManager cannot be (un)registered directly so postpone its (un)registration until JMX connection
+            // is created
+            final WSEndpointMOMProxy endpointMOMProxy = (WSEndpointMOMProxy) managedObjectManager;
+            final WSEndpointImpl wsEndpoint = endpointMOMProxy.getWsEndpoint();
+
+            if (register) {
+                sequenceManagersForDeferredRegistration.put(wsEndpoint, manager);
+            } else {
+                sequenceManagersForDeferredRegistration.remove(wsEndpoint);
+            }
+        } else {
+            // 1) SequenceManager can be (un)registered directly - process its (un)registration
+            // 2) (not expected) SequenceManager cannot be (un)registered directly but also it cannot be postponed hence
+            //    the (un)registration is going to be forced (managedObjectManager (un)registration as well)
+
+            if (register) {
+                listener.registerAtMOM(manager, managedObjectManager);
+            } else {
+                listener.unregisterFromMOM(manager, managedObjectManager);
+            }
+        }
+    }
+    
 }

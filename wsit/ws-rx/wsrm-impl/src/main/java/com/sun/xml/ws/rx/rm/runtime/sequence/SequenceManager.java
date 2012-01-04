@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.commons.MOMRegistrationAware;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Map;
 import org.glassfish.gmbal.AMXMetadata;
@@ -54,7 +55,7 @@ import org.glassfish.gmbal.ManagedObject;
 @ManagedObject
 @Description("Reliable Messaging Sequence Manager")
 @AMXMetadata(type = "WSRMSequenceManager")
-public interface SequenceManager extends TimeSynchronizer {
+public interface SequenceManager extends TimeSynchronizer, MOMRegistrationAware {
     public static final String MANAGED_BEAN_NAME = "RMSequenceManager";
 
     @ManagedAttribute
