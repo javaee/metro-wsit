@@ -39,15 +39,16 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
-import com.sun.xml.ws.rx.ha.HighlyAvailableMap;
-import com.sun.xml.ws.rx.ha.ReplicationManager;
-import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.commons.ha.HaContext;
+import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.ha.HighlyAvailableMap;
+import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
@@ -61,26 +62,27 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceMaintenanceTask;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
 import org.glassfish.ha.store.api.BackingStoreConfiguration;
 import org.glassfish.ha.store.api.BackingStoreException;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class InVmSequenceManager implements SequenceManager, ReplicationManager<String, AbstractSequence> {
+public final class InVmSequenceManager extends AbstractMOMRegistrationAware implements SequenceManager, ReplicationManager<String, AbstractSequence> {
 
     private static final Logger LOGGER = Logger.getLogger(InVmSequenceManager.class);
     /**
