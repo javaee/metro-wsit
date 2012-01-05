@@ -262,7 +262,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                     XWSSecurityException xwse =
                             new XWSSecurityException(
                             "Invalid/Repeated Nonce value for Username Token");
-                    throw SOAPUtil.newSOAPFaultException(
+                    throw DefaultSecurityEnvironmentImpl.newSOAPFaultException(
                             MessageConstants.WSSE_FAILED_AUTHENTICATION,
                             "Invalid/Repeated Nonce value for Username Token",
                             xwse);
