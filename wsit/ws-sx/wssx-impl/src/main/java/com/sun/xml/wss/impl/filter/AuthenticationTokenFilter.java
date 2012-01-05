@@ -324,7 +324,7 @@ public class AuthenticationTokenFilter {
                                 new XWSSecurityException(
                                 "Invalid/Repeated Nonce value for Username Token");
                         log.log(Level.SEVERE, LogStringsMessages.WSS_1406_NOTMET_NONCE(), xwse);
-                        throw SecurableSoapMessage.newSOAPFaultException(
+                        throw DefaultSecurityEnvironmentImpl.newSOAPFaultException(
                                 MessageConstants.WSSE_FAILED_AUTHENTICATION,
                                 "Invalid/Repeated Nonce value for Username Token",
                                 xwse);
