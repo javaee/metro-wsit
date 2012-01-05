@@ -79,11 +79,11 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import com.sun.xml.wss.impl.callback.*;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
-import com.sun.org.apache.xml.internal.security.utils.RFC2253Parser;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
+import javax.security.auth.x500.X500Principal;
 
 
 
@@ -440,10 +440,12 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
                     continue;
                 }
                 X509Certificate x509Cert = (X509Certificate) cert;
-                String thisIssuerName =
-                    RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
+                
+                X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);          
+                
                 BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName) &&
+                if (thisIssuerPrincipal.equals(issuerPrincipal) &&
                     thisSerialNumber.equals(serialNumber)) {
                     return x509Cert;
                 }
@@ -499,10 +501,13 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
                     continue;
                 }
                 X509Certificate x509Cert = (X509Certificate) cert;
-                String thisIssuerName =
-                    RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
-                BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName) &&
+               
+                X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);          
+                
+                BigInteger thisSerialNumber = x509Cert.getSerialNumber();               
+                
+                if (thisIssuerPrincipal.equals(issuerPrincipal) &&
                     thisSerialNumber.equals(serialNumber)) {
                     return (PrivateKey) keyStore.getKey(alias, keyStorePassword.toCharArray());
                 }

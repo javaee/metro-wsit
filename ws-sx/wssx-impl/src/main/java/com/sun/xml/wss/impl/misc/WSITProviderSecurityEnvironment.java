@@ -623,7 +623,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
                     BigInteger serialNo = x509Cert.getSerialNumber();
-                    //Fix for WSIT issue 
+                    //Fix for WSIT issue 1590
                    X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
                    X500Principal issuerPrincipal = new X500Principal(issuerName);
                    if (serialNo.equals(serialNumber)
@@ -1244,7 +1244,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                  X500PrivateCredential cred = (X500PrivateCredential)it.next();
                  X509Certificate x509Cert = cred.getCertificate();
                  BigInteger serialNo = x509Cert.getSerialNumber();
-                 //Fix for WSIT issue 
+                 //Fix for WSIT issue 1590
                    X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
                    X500Principal issuerPrincipal = new X500Principal(issuerName);
                    if (serialNo.equals(serialNumber)
@@ -1889,7 +1889,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         X509Certificate x509Cert) {
 
         BigInteger serialNumber = x509Cert.getSerialNumber();
-        //Fix for WSIT issue 
+        //Fix for WSIT issue 1590
         X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
         X500Principal issuerPrincipal = new X500Principal(issuerNameMatch);
 
@@ -1920,13 +1920,15 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 }
 
                 X509Certificate x509Cert = (X509Certificate) cert;
-                BigInteger serialNo = x509Cert.getSerialNumber();
-                String currentIssuerName =
-                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                        x509Cert.getIssuerDN().getName());
+                //Fix for WSIT issue 1590
+                X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
 
-                if (serialNo.equals(serialNumber) &&
-                    currentIssuerName.equals(issuerName)) {
+                BigInteger thisSerialNumber = x509Cert.getSerialNumber();
+
+
+                if (thisSerialNumber.equals(serialNumber)
+                        && currentIssuerPrincipal.equals(issuerName)) {
                     return x509Cert;
                 }
             }

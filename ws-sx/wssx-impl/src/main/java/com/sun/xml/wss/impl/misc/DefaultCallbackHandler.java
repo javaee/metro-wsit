@@ -128,6 +128,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.security.auth.Subject;
+import javax.security.auth.x500.X500Principal;
 import javax.xml.ws.BindingProvider;
 import org.w3c.dom.Element;
 
@@ -1111,10 +1112,13 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         continue;
                     }
                     X509Certificate x509Cert = (X509Certificate) cert;
-                    String thisIssuerName =
-                            RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
+                    
+                    
+                   X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                   X500Principal issuerPrincipal = new X500Principal(issuerName);
+                   
                     BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                    if (thisIssuerName.equals(issuerName)
+                    if (thisIssuerPrincipal.equals(issuerPrincipal)
                             && thisSerialNumber.equals(serialNumber)) {
                         return x509Cert;
                     }
