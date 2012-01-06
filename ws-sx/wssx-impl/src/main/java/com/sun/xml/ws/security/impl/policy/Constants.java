@@ -260,6 +260,7 @@ public class Constants {
     
     public static final String KerberosConfig = "KerberosConfig";
     public static final String KeyStore = "KeyStore";
+    public static final String SessionManagerStore = "SessionManagerStore";
     public static final String TrustStore = "TrustStore";
     public static final String CallbackHandler = "CallbackHandler";
     public static final String CallbackHandlerConfiguration = "CallbackHandlerConfiguration";

@@ -56,6 +56,7 @@ import org.glassfish.gmbal.ManagedObject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -81,14 +82,34 @@ import java.util.Set;
 public abstract class SessionManager extends AbstractMOMRegistrationAware {
     private static final Logger LOGGER = Logger.getLogger(SessionManager.class);
     
+    private static Properties config = null;
+
     private static final Object LOCK = new Object();
     private static final Map<WSEndpoint, SessionManager> SESSION_MANAGERS = new HashMap<WSEndpoint, SessionManager>();
     private static final WSEndpointCollectionBasedMOMListener listener;
+    public static final String TIMEOUT_INTERVAL = "session-timeout";
+    public static final String SESSION_THRESHOLD = "session-threshold";
+
     
     static {
         listener = new WSEndpointCollectionBasedMOMListener(LOCK, "RM_SC_SessionManager", SESSION_MANAGERS);
         listener.initialize();
     }
+    
+     /**
+     * @return the config
+     */
+    public static Properties getConfig() {
+        return config;
+    }
+
+    /**
+     * @param aConfig the config to set
+     */
+    public static void setConfig(Properties aConfig) {
+        config = aConfig;
+    }
+
 
     /**
      * Returns an existing session identified by the Key else null
@@ -207,7 +228,7 @@ public abstract class SessionManager extends AbstractMOMRegistrationAware {
      *
      * @return The value of the <code>manager</code> field.
      */ 
-    public static SessionManager getSessionManager(WSEndpoint endpoint, boolean isSC) {
+    public static SessionManager getSessionManager(WSEndpoint endpoint, boolean isSC, Properties props) {
         synchronized (LOCK) {
             try {
                 LOGGER.entering();
@@ -218,7 +239,7 @@ public abstract class SessionManager extends AbstractMOMRegistrationAware {
                     if (finder != null && finder.toArray().length > 0) {
                         sm = finder.toArray()[0];
                     } else {
-                        sm = new SessionManagerImpl(endpoint, isSC);
+                        sm = new SessionManagerImpl(endpoint, isSC, props);
                     }
                     SESSION_MANAGERS.put(endpoint, sm);
                     if (listener.canRegisterAtMOM()) {
@@ -235,8 +256,8 @@ public abstract class SessionManager extends AbstractMOMRegistrationAware {
         }
     }
 
-    public static SessionManager getSessionManager(WSEndpoint endpoint){
-         return getSessionManager(endpoint, false);
+    public static SessionManager getSessionManager(WSEndpoint endpoint, Properties props){
+         return getSessionManager(endpoint, false, props);
      }
 }
 

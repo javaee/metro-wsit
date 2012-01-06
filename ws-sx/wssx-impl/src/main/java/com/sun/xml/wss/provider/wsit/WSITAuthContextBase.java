@@ -126,8 +126,10 @@ import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.security.impl.policy.SessionManagerStore;
 import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
@@ -1166,9 +1168,20 @@ public abstract class WSITAuthContextBase  {
                 populateCertStoreProps(props, (CertStoreConfig)as);
             } else if("KerberosConfig".equals(as.getName().getLocalPart())){
                 populateKerberosProps(props, (KerberosConfig)as);
+            } else if ("SessionManagerStore".equals(as.getName().getLocalPart())) {
+                populateSessionMgrProps(props,(SessionManagerStore)as);
             }
         }
         return null;
+    }
+    
+    private void populateSessionMgrProps(Properties props, SessionManagerStore smStore) {
+        if(smStore.getSessionTimeOut() != null) {
+            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());            
+        }
+        if(smStore.getSessionThreshold() != null) {           
+            props.put(SessionManager.SESSION_THRESHOLD, smStore.getSessionThreshold());
+        }
     }
     
     private void populateKerberosProps(Properties props, KerberosConfig kerbConfig){
