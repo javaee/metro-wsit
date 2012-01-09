@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -391,6 +391,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         if (isDelegated) {
             String delegatedtxlogdir = WSATGatewayRM.txlogdir + File.separator + ".." + File.separator + ".." +
                     File.separator + instance + File.separator + WSAT + File.separator;
+            debug("delegatedtxlogdir in recover is" + delegatedtxlogdir);           
             String delegatedtxlogdirOutbound = delegatedtxlogdir + OUTBOUND + File.separator;
             String delegatedtxlogdirInbound = delegatedtxlogdir + INBOUND + File.separator;
             if (WSATHelper.isDebugEnabled()) debug("recover() for delegate flag=" + flag +
@@ -424,10 +425,15 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
 
     static void setTxLogDirs() {
         txlogdir = getTxLogDir();
+        debug("txlogdir is" + txlogdir);
+        String wstxlogdir = txlogdir;
+        File f = new File(txlogdir);
+        wstxlogdir = f.getParent();
+        debug("wstxlogdir is" + wstxlogdir);
         txlogdirInbound =
-                txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + INBOUND + File.separator ;
+                wstxlogdir + File.separator + WSAT + File.separator + INBOUND + File.separator;
         txlogdirOutbound =
-                txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + OUTBOUND + File.separator ;
+                wstxlogdir + File.separator + WSAT + File.separator + OUTBOUND + File.separator ;
     }
 
     static String getTxLogDir() {
