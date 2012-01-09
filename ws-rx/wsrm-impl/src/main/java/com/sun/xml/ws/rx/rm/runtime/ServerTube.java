@@ -495,7 +495,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             return null;
         }
 
-        return SessionManager.getSessionManager(packet.endpoint,null).getSession(sessionId);
+        return SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
     }
 
     /**
@@ -511,7 +511,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private void setSession(String sessionId, Packet packet) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
-        Session session = SessionManager.getSessionManager(packet.endpoint,null).getSession(sessionId);
+        Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
 
         if (session == null) {
             session = Utilities.startSession(packet.endpoint, sessionId);

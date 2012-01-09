@@ -124,7 +124,6 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.Wss11);
         implementedAssertions.add(Constants.X509Token);
         implementedAssertions.add(Constants.KeyStore);
-        implementedAssertions.add(Constants.SessionManagerStore);
         implementedAssertions.add(Constants.TrustStore);
         implementedAssertions.add(Constants.CallbackHandler);
         implementedAssertions.add(Constants.CallbackHandlerConfiguration);

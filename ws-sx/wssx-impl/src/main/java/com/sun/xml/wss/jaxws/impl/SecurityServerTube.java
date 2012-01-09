@@ -199,7 +199,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (!this.getSecureConversationPolicies(null, null).isEmpty()){
                 isSC = true;
             }  
-            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint(), isSC, props);
+            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint(), isSC);
             props.put(PipeConstants.ENDPOINT, context.getEndpoint());
             props.put(PipeConstants.POLICY, context.getPolicyMap());
             props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
