@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -70,8 +70,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.Properties;
 import java.util.Set;
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
@@ -106,10 +104,6 @@ public class SessionManagerImpl extends SessionManager {
 
     private final BackingStore<StickyKey, HASecurityContextTokenInfo> sctBs;
     
-    private static final long DEFAULT_TIMEOUT = 30 * 60 * 1000;
-    private static final int DEFAULT_SESSION_THRESHOLD = 100;
-
-    
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl(WSEndpoint endpoint, boolean isSC) {
         if (isSC){
@@ -122,12 +116,6 @@ public class SessionManagerImpl extends SessionManager {
         } else{
             sctBs = null;
         }
-    }
-    
-    /** Creates a new instance of SessionManagerImpl */
-    public SessionManagerImpl(WSEndpoint endpoint, boolean isSC, Properties config) {
-        this(endpoint,isSC);
-        this.setConfig(config);
     }
     
     /**
@@ -183,7 +171,6 @@ public class SessionManagerImpl extends SessionManager {
      * 
      */ 
     public  Session createSession(String key, Class clasz) {
-        
         Session sess;
         try {
             sess = new Session(this, key, clasz.newInstance());
@@ -216,39 +203,6 @@ public class SessionManagerImpl extends SessionManager {
     }
     
     public Session createSession(String key, SecurityContextTokenInfo sctInfo) {  
-        //Issue 17328 - clear expired sessions after timeout
-        Properties props = getConfig();
-        String timeout = (String)props.get(TIMEOUT_INTERVAL);
-        long timeOut = DEFAULT_TIMEOUT;
-        if (timeout != null) {
-            timeOut = Long.parseLong(timeout);
-        }
-        for(Session session:sessionMap.values()) {
-            SecurityContextTokenInfo securityInfo =  session.getSecurityInfo();
-           
-            Date expDate = securityInfo.getExpirationTime();
-            Calendar expCal = Calendar.getInstance(Locale.getDefault());
-            expCal.setTimeInMillis(expDate.getTime());
-           
-            
-            Calendar currentTime = Calendar.getInstance(Locale.getDefault());
-            
-            long currentTimeMilli = currentTime.getTimeInMillis();
-            long expTimeMilli = expCal.getTimeInMillis();
-            
-            if((currentTimeMilli - expTimeMilli )> (timeOut)) {
-               terminateSession(session.getSessionKey()); 
-               //System.out.println("Session terminated");
-            }
-        }
-        int sessionThreshold = DEFAULT_SESSION_THRESHOLD;
-        String sessionT = (String)props.getProperty(SESSION_THRESHOLD);
-        if(sessionT != null) {
-            sessionThreshold = Integer.parseInt(sessionT);
-        }
-        if(sessionMap.size() >= sessionThreshold) {
-            throw new WSSecureConversationRuntimeException(new QName("RenewNeeded"), "The total number of sessions has exceeded the threshold");
-        }
         Session session = new Session(this, key, Collections.synchronizedMap(new HashMap<String, String>()));
         session.setSecurityInfo(sctInfo);
         sessionMap.put(key, session);
