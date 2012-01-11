@@ -374,7 +374,7 @@
         <module>ws-sx</module>
         <module>ws-tx</module>
         <module>xmlfilter</module>
-        <module>metro-guide</module>
+        <module>docs</module>
         <module>bundles</module>
         <!-- module>contribs</module -->
     </modules>

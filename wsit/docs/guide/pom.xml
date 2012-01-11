@@ -47,12 +47,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>metro-project</artifactId>
+        <artifactId>docs</artifactId>
         <groupId>org.glassfish.metro</groupId>
         <version>2.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>metro-guide</artifactId>
+    <artifactId>guide</artifactId>
     <packaging>pom</packaging>
     <name>Metro User Guide</name>
 
@@ -109,10 +109,11 @@
                 <artifactId>docbkx-maven-plugin</artifactId>
                 <dependencies>
                     <dependency>
-                        <groupId>org.docbook</groupId>
+                        <groupId>net.sf.docbook</groupId>
                         <artifactId>docbook-xml</artifactId>
                         <version>5.0-all</version>
                         <type>zip</type>
+                        <classifier>resources</classifier>
                         <scope>runtime</scope>
                     </dependency>
                     <dependency>
@@ -133,8 +134,8 @@
                     <sourceDirectory>${src.dir}</sourceDirectory>
                     <targetDirectory>${project.build.directory}/docbook</targetDirectory>
                     <htmlStylesheet>style/documentation.css</htmlStylesheet>
-                    <htmlCustomization>src/main/docbook/stylesheet/htmlCustomizations.xsl</htmlCustomization>
-                    <foCustomization>src/main/docbook/stylesheet/foCustomizations.xsl</foCustomization>
+                    <htmlCustomization>${basedir}/src/main/docbook/stylesheet/htmlCustomizations.xsl</htmlCustomization>
+                    <foCustomization>${basedir}/src/main/docbook/stylesheet/foCustomizations.xsl</foCustomization>
                     <partAutolabel>true</partAutolabel>
                     <sectionAutolabel>true</sectionAutolabel>
                     <sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
