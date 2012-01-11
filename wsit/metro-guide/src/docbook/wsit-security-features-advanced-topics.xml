@@ -1,0 +1,1493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="ahife" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/                 oasis-200401-wss-wssecurity-utility-1.0.xsd"
+         xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+         xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+         xmlns:wsaws2="http://www.w3.org/2006/05/addressing/wsdl"
+         xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+         xmlns:tns="http://calculator.me.org/"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"
+         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+         xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>WSIT Security Features: Advanced: Topics</title>
+
+    <section xml:id="ahiff">
+        <title>Using Security Mechanisms</title>
+
+        <para>The security mechanism that you need to select reflects the
+        commonly available infrastructure between your organization and
+        another organization with which you will be communicating. The
+        following list provides some common communication issues that need to
+        be addressed using security mechanisms:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Asymmetric binding is used for message protection. This
+                binding has two binding specific token properties: the
+                initiator token and the recipient token. If the message
+                pattern requires multiple messages, this binding defines that
+                the initiator token is used for the message signature from
+                initiator to the recipient, and for encryption from recipient
+                to initiator. The recipient token is used for encryption from
+                initiator to recipient, and for the message signature from
+                recipient to initiator.</para>
+            </listitem>
+
+            <listitem>
+                <para>Some organizations have a Kerberos infrastructure, while
+                other organizations have a PKI infrastructure (asymmetric
+                binding). WS-Trust allows two communicating parties having
+                different security infrastructure to communicate securely with
+                one another. In this scenario, the client authenticates with a
+                third party (STS) using its infrastructure. The STS returns a
+                (digitally-signed) SAML token containing authorization and
+                authentication information regarding the client, along with a
+                key. The client then simply relays the token to the server and
+                uses the STS-supplied key to ensure integrity and
+                confidentiality of the messages sent to the server.</para>
+
+                <note>
+                    <para>Kerberos is supported in Metro since 1.1 release.
+                    Netbeans support is available for Kerberos from Metro 1.3
+                    and Netbeans 6.5 release.</para>
+                </note>
+            </listitem>
+
+            <listitem>
+                <para>Symmetric binding is used for message protection. This
+                binding has two binding specific token properties: encryption
+                token and signature token. If the message pattern requires
+                multiple messages, this binding defines that the encryption
+                token used from initiator to recipient is also used from
+                recipient to initiator. Similarly, the signature token used
+                from initiator to recipient is also used from recipient to
+                initiator.</para>
+
+                <para>In some cases, the client does not have its own
+                certificates. In this case, the client can choose a security
+                mechanism that makes use of symmetric binding and could use a
+                Username token as a signed supporting token for authentication
+                with the server. The symmetric binding in this case serves the
+                purpose of integrity and confidentiality protection.</para>
+            </listitem>
+
+            <listitem>
+                <para>In the absence of a notion of secure session, the client
+                would have to reauthenticate with the server upon every
+                request. In this situation, if the client is sending a
+                Username token, the client will be asked for its username and
+                password on each request, or, if the client is sending a
+                certificate, the validity of the certificate has to be
+                established with every request. This is expensive! Enable
+                Secure Conversation to remove the requirement for
+                re-authentication.</para>
+            </listitem>
+
+            <listitem>
+                <para>The use of the same session key (Secure Conversation)
+                for repeated message exchanges is sometimes considered a risk.
+                To reduce that risk, enable Require Derived Keys.</para>
+            </listitem>
+
+            <listitem>
+                <para>RSA Signatures (signatures with public-private keys) is
+                more expensive than Symmetric Key signatures. Use the Secure
+                Conversation option to enable Symmetric Key signatures.</para>
+            </listitem>
+
+            <listitem>
+                <para>Enabling WSS 1.1 enables an encrypted key generated by
+                the client to be reused by the server in the response to the
+                client. This saves the time otherwise required to create a
+                Symmetric Key, encrypt it with the client public key (which is
+                also an expensive RSA operation), and transmit the encrypted
+                key in the message (it occupies markup and requires Base64
+                operations).</para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
+    <section xml:id="ahifg">
+        <title>Understanding WSIT Configuration Files</title>
+
+        <para>When a web service or a web service client are configured for
+        WSIT features, this information is saved in WSIT Configuration files.
+        The following sections discuss the WSIT configuration files for the
+        service and for the client:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahifh" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahifi" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahifh">
+            <title>Service-Side WSIT Configuration Files</title>
+
+            <para>WSIT features are configured on a web service in the
+            following way:</para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Right-click the web service in NetBeans IDE.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select Edit Web Service Attributes.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select and/or configure the appropriate WSIT
+                    features on the Quality Of Service Configuration tab for
+                    the web service. Many of the WSIT features are discussed
+                    in <xref linkend="ahici"
+                    xrefstyle="select:title" />.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select OK to close the dialog.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Run the web application by right-clicking the
+                    project node and selecting Run Project.</para>
+                </listitem>
+            </orderedlist>
+
+            <para>The service-side WSIT Configuration file that is used when
+            the web service is deployed can be viewed by expanding the Web
+            Pages | WEB-INF elements of the application in the tree, and then
+            double-clicking the <code>wsit-package.service.xml</code> file to
+            open it in the editor.</para>
+
+            <para>For the example application <xref linkend="ahiej"
+            xrefstyle="select:title" />, the WSIT configuration file for the
+            service is named
+            <code>wsit-org.me.calculator.CalculatorWS.xml</code>, and looks
+            like this:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered"><?db-font-size 85%?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        name="CalculatorWSService"
+        targetNamespace="http://calculator.me.org/"
+        xmlns:tns="http://calculator.me.org/"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/
+                oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+        xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"
+        xmlns:sc="http://schemas.sun.com/2006/03/wss/server"
+        xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"&gt;
+   &lt;message name="add"/&gt;
+   &lt;message name="addResponse"/&gt;
+   &lt;portType name="CalculatorWS"&gt;
+      &lt;operation name="add"&gt;
+         &lt;input message="tns:add"/&gt;
+         &lt;output message="tns:addResponse"/&gt;
+      &lt;/operation&gt;
+   &lt;/portType&gt;
+   &lt;binding name="CalculatorWSPortBinding" type="tns:CalculatorWS"&gt;
+      &lt;wsp:PolicyReference URI="#CalculatorWSPortBindingPolicy"/&gt;
+      &lt;operation name="add"&gt;
+         &lt;input&gt;
+            &lt;wsp:PolicyReference
+                    URI="#CalculatorWSPortBinding_add_Input_Policy"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;wsp:PolicyReference
+                    URI="#CalculatorWSPortBinding_add_Output_Policy"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   &lt;service name="CalculatorWSService"&gt;
+      &lt;port name="CalculatorWSPort" binding="tns:CalculatorWSPortBinding"/&gt;
+   &lt;/service&gt;
+   &lt;wsp:Policy wsu:Id="CalculatorWSPortBindingPolicy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+                    xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;sp:SymmetricBinding&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:ProtectionToken&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:X509Token sp:IncludeToken=
+                           "http://schemas.xmlsoap.org/ws/2005/07/
+                           securitypolicy/IncludeToken/Never"&gt;
+                           &lt;wsp:Policy&gt;
+                              &lt;sp:WssX509V3Token10/&gt;
+                           &lt;/wsp:Policy&gt;
+                        &lt;/sp:X509Token&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:ProtectionToken&gt;
+                  &lt;sp:Layout&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Strict/&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:Layout&gt;
+                  &lt;sp:IncludeTimestamp/&gt;
+                  &lt;sp:OnlySignEntireHeadersAndBody/&gt;
+                  &lt;sp:AlgorithmSuite&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Basic128/&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:AlgorithmSuite&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:SymmetricBinding&gt;
+            &lt;sp:Wss11&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:MustSupportRefKeyIdentifier/&gt;
+                  &lt;sp:MustSupportRefIssuerSerial/&gt;
+                  &lt;sp:MustSupportRefThumbprint/&gt;
+                  &lt;sp:MustSupportRefEncryptedKey/&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:Wss11&gt;
+            &lt;sp:SignedSupportingTokens&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:UsernameToken
+                          sp:IncludeToken="http://schemas.xmlsoap.org/
+                                           ws/2005/07/securitypolicy/
+                                           IncludeToken/AlwaysToRecipient"&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:WssUsernameToken10/&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:UsernameToken&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:SignedSupportingTokens&gt;
+            &lt;sc:KeyStore wspp:visibility="private"
+                         alias="xws-security-server"/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+   &lt;wsp:Policy wsu:Id="CalculatorWSPortBinding_add_Input_Policy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;sp:EncryptedParts&gt;
+               &lt;sp:Body/&gt;
+            &lt;/sp:EncryptedParts&gt;
+            &lt;sp:SignedParts&gt;
+               &lt;sp:Body/&gt;
+               &lt;sp:Header Name="To"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="From"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="FaultTo"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="ReplyTo"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header
+                       Name="MessageID" Namespace=
+                       "http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header
+                       Name="RelatesTo" Namespace=
+                       "http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="Action"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="AckRequested"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+               &lt;sp:Header Name="SequenceAcknowledgement"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+               &lt;sp:Header Name="Sequence"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+            &lt;/sp:SignedParts&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+   &lt;wsp:Policy wsu:Id="CalculatorWSPortBinding_add_Output_Policy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;sp:EncryptedParts&gt;
+               &lt;sp:Body/&gt;
+            &lt;/sp:EncryptedParts&gt;
+            &lt;sp:SignedParts&gt;
+               &lt;sp:Body/&gt;
+               &lt;sp:Header Name="To"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="From"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="FaultTo"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="ReplyTo"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="MessageID"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="RelatesTo"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="Action"
+                          Namespace="http://www.w3.org/2005/08/addressing"/&gt;
+               &lt;sp:Header Name="AckRequested"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+               &lt;sp:Header Name="SequenceAcknowledgement"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+               &lt;sp:Header Name="Sequence"
+                          Namespace="http://schemas.xmlsoap.org/ws/2005/02/rm"/&gt;
+            &lt;/sp:SignedParts&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+&lt;/definitions&gt;</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="ahifi">
+            <title>Client-Side WSIT Configuration Files</title>
+
+            <para>WSIT features are configured on the client in the following
+            way:</para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Expand the Web Service Reference node for the web
+                    service client in NetBeans IDE.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select Edit Web Service Attributes.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select and/or configure the appropriate WSIT
+                    features on the Quality Of Service tab for the web service
+                    client. Many of the WSIT features are discussed in <xref
+                    linkend="ahici" xrefstyle="select:title" />.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Select OK to close the dialog.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Run the web service client by right-clicking the
+                    project node and selecting Run Project.</para>
+                </listitem>
+            </orderedlist>
+
+            <para>The WSIT Configuration information can be viewed by
+            expanding Source Packages | META-INF in NetBeans IDE for the
+            client project. This directory contains two files:
+            <code>serviceService.xml</code> and
+            <code>wsit-client.xml</code>.</para>
+
+            <para>The <code>serviceService.xml</code> file is an XML file that
+            must conform to the WSDL specification. The WSIT configuration is
+            written to this file. For the example application <xref
+            linkend="ahiej" xrefstyle="select:title" />, the WSIT
+            configuration file for the client is named
+            <code>CalculatorWSService.xml</code>, and looks like this:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered"><?db-font-size 85%?>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!-- Published by JAX-WS RI at http://jax-ws.java.net. RI's version
+                is JAX-WS RI 2.1.2_01-hudson-189-. --&gt;&lt;!-- Generated by JAX-WS
+                RI at http://jax-ws.java.net. RI's version is JAX-WS RI
+                2.1.2_01-hudson-189-. --&gt;
+&lt;definitions
+        xmlns:wsu=
+             "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-
+             utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://calculator.me.org/"
+        mlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        targetNamespace="http://calculator.me.org/"
+        name="CalculatorWSService"
+        xmlns:sc="http://schemas.sun.com/2006/03/wss/client"
+        xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+        xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client"&gt;
+   
+   &lt;wsp:UsingPolicy&gt;&lt;/wsp:UsingPolicy&gt;
+   &lt;types&gt;
+      &lt;xsd:schema&gt;
+         &lt;xsd:import namespace="http://calculator.me.org/"
+                     schemaLocation="http://localhost:8080/CalculatorApplication/
+                CalculatorWSService?xsd=1"&gt;
+         &lt;/xsd:import&gt;
+      &lt;/xsd:schema&gt;
+   &lt;/types&gt;
+   &lt;message name="add"&gt;
+      &lt;part name="parameters" element="tns:add"&gt;&lt;/part&gt;
+   &lt;/message&gt;
+   &lt;message name="addResponse"&gt;
+      &lt;part name="parameters" element="tns:addResponse"&gt;&lt;/part&gt;
+   &lt;/message&gt;
+   &lt;portType name="CalculatorWS"&gt;
+      &lt;operation name="add"&gt;
+         &lt;input message="tns:add"&gt;&lt;/input&gt;
+         &lt;output message="tns:addResponse"&gt;&lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/portType&gt;
+   &lt;binding name="CalculatorWSPortBinding" type="tns:CalculatorWS"&gt;
+      &lt;wsp:PolicyReference URI="#CalculatorWSPortBindingPolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/
+                soap/http" style="document"&gt;&lt;/soap:binding&gt;
+      &lt;operation name="add"&gt;
+         &lt;soap:operation soapAction=""&gt;&lt;/soap:operation&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"&gt;&lt;/soap:body&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"&gt;&lt;/soap:body&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   &lt;service name="CalculatorWSService"&gt;
+      &lt;port name="CalculatorWSPort" binding="tns:CalculatorWSPortBinding"&gt;
+         &lt;soap:address location="http://localhost:8080/
+                CalculatorApplication/CalculatorWSService"&gt;
+         &lt;/soap:address&gt;
+      &lt;/port&gt;
+   &lt;/service&gt;
+   &lt;wsp:Policy wsu:Id="CalculatorWSPortBindingPolicy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;sc:KeyStore
+                  wspp:visibility="private"
+                  location="c:\Sun\glassfish\domains\domain1\config\keystore.jks"
+                  storepass="changeit" alias="xws-security-client"/&gt;
+            &lt;sc:TrustStore
+                    wspp:visibility="private"
+                    location="c:\Sun\glassfish\domains\domain1\config\cacerts.jks"
+                    storepass="changeit"
+                    peeralias="xws-security-server"/&gt;
+            &lt;tc:PreconfiguredSTS wspp:visibility="private"/&gt;
+            &lt;sc:CallbackHandlerConfiguration wspp:visibility="private"&gt;
+               &lt;sc:CallbackHandler default="wsitUser"
+                                   name="usernameHandler"/&gt;
+               &lt;sc:CallbackHandler default="changeit"
+                                   name="passwordHandler"/&gt;
+            &lt;/sc:CallbackHandlerConfiguration&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+&lt;/definitions&gt;</programlisting>
+            </example>
+
+            <para>The <code>wsit-client.xml</code> file imports the
+            <code>serviceService.xml</code> file. For the example shown about,
+            the <code>wsit-client.xml</code> file looks like this:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        name="mainclientconfig"&gt;
+    &lt;import location="CalculatorWSService.xml"
+            namespace="http://calculator.me.org/"/&gt;
+&lt;/definitions&gt;</programlisting>
+            </example>
+
+            <para>When running the client, these two files will need to be in
+            the classpath, either at the classpath root (i.e., build/classes)
+            or in a META-INF directory under the classpath root.</para>
+        </section>
+    </section>
+
+    <section xml:id="ahifj">
+        <title>Security Mechanism Configuration Options</title>
+
+        <para>The following fields shown in <xref linkend="ahifk"
+        xrefstyle="select:title" /> are used to configure different security
+        policies. Not every option is available for every mechanism, but many
+        of the policies include the same configuration options, so they are
+        grouped here for the purposes of defining them in one central
+        location.</para>
+
+        <table frame="all" xml:id="ahifk">
+            <title>Security Mechanism Configuration Options</title>
+
+            <tgroup cols="2" colsep="1" rowsep="1">
+                <colspec />
+
+                <colspec colwidth="2*" />
+
+                <thead>
+                    <row>
+                        <entry><para>Option</para></entry>
+
+                        <entry><para>Description</para></entry>
+                    </row>
+                </thead>
+
+                <tbody>
+                    <row>
+                        <entry><para>Algorithm Suite</para></entry>
+
+                        <entry><para>This attribute specifies the algorithm
+                        suite required for performing cryptographic operations
+                        with symmetric or asymmetric key-based security
+                        tokens. An algorithm suite specifies actual algorithms
+                        and allowed key lengths. A mechanism alternative will
+                        define what algorithms are used and how they are used.
+                        The value of this attribute is typically referenced by
+                        a security binding and is used to specify the
+                        algorithms used for all cryptographic operations
+                        performed under the security binding. The default
+                        value is Basic 128 bit.</para> <para>Some of the
+                        algorithm suite settings require that Unlimited
+                        StrengthEncryption be configured in the Java Runtime
+                        Environment (JRE), particularly the algorithm suites
+                        that use 256 bit encryption. Instructions for
+                        downloading and configuring unlimited strength
+                        encryption can be found at the following URLS:</para>
+                        <para>
+                                 
+
+                                <link
+                                xlink:href="http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136007.html">http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136007.html</link>
+
+                                 
+                            </para> <para>
+                                 
+
+                                <link
+                                xlink:href="http://java.sun.com/javase/downloads/index_jdk5.jsp#docs">http://java.sun.com/javase/downloads/index_jdk5.jsp#docs</link>
+
+                                 
+                            </para> <para>Read the OASIS specification
+                        WS-Security Policy section on Security Binding
+                        Properties for more description of the components for
+                        each of these algorithm suites. A link to this
+                        document can be found at <link
+                        xlink:href="http://wsit.java.net/">http://wsit.java.net/</link>.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Encrypt Before Signing</para></entry>
+
+                        <entry><para>If selected, specifies that the order of
+                        message protection is to encrypt the SOAP content,
+                        then sign the entire SOAP body. Encryption key and
+                        signing key must be derived from the same source
+                        key.</para> <para>If not selected, the default
+                        behavior is Sign Before Encrypt.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Encrypt Signature</para></entry>
+
+                        <entry><para>Specifies whether the signature must be
+                        encrypted. If selected, the primary signature must be
+                        encrypted and any signature confirmation elements must
+                        also be encrypted. If not selected (the default), the
+                        primary signature must not be encrypted and any
+                        signature confirmation elements must not be
+                        encrypted.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Enable EPR Identity</para></entry>
+
+                        <entry><para>This feature enables the service to
+                        produce its public key in the wsdl.Clients who wants
+                        to consume the service can use this public key to
+                        encrypt messages and hence they do not need to specify
+                        the peerAlias in their configuration, but still
+                        TrustStore configuration is needed to validate the
+                        certificate. Current Netbeans versions do not support
+                        the UI to configure this.So for a detailed description
+                        about this feature and to know how to configure this ,
+                        please visit the blog: <link
+                        xlink:href="http://blogs.sun.com/SureshMandalapu/entry/support_of_endpoint_references_with">
+                        http://blogs.sun.com/SureshMandalapu/entry/support_of_endpoint_references_with
+                        </link> </para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Securing only some of the WS
+                        operations</para></entry>
+
+                        <entry><para>With latest metro we can secure only
+                        required operations in a service unlike in the older
+                        version where we have to secure either all or no
+                        operations.This means the security is at binding level
+                        , but not at operation level.But with latest metro ,
+                        the security policies can be specified for individual
+                        operations,thus we can secure only required operations
+                        in a service</para> <para>For a detailed description
+                        and how to configure this , please go through the
+                        blog: <link
+                        xlink:href="http://blogs.sun.com/SureshMandalapu/entry/support_of_binding_assertions_at">
+                        http://blogs.sun.com/SureshMandalapu/entry/support_of_binding_assertions_at
+                        </link> </para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Establish Secure Session (Secure
+                        Conversation)</para></entry>
+
+                        <entry><para>Secure Conversation enables a consumer
+                        and provider to establish a shared security context
+                        when a multiple-message-exchange sequence is first
+                        initiated. Subsequent messages use (possibly derived)
+                        session keys that increase the overall security while
+                        reducing the security processing overhead for each
+                        message.</para> <para>In the absence of a notion of
+                        secure session, the client would have to
+                        reauthenticate with the server upon every request. In
+                        this situation, if the client is sending a Username
+                        token, it has to authenticate on every request, or, if
+                        the client is sending a certificate, the validity of
+                        the certificate has to be established on every
+                        request. This is expensive. Enable Secure Conversation
+                        to get over this requirement for
+                        re-authentication.</para> <para>When this option and
+                        Require Derived Keys are both enabled, a derived key
+                        will be used. If not, the original session key will be
+                        used.</para> <para>Note on Secure Conversation with
+                        Reliable Message Delivery: Reliable Messaging can be
+                        used independently of the security mechanisms;
+                        however, when Reliable Messaging (RM) is used with a
+                        security mechanism, it requires the use of Secure
+                        Conversation, which will be automatically configured
+                        for a security mechanism when Reliable Messaging is
+                        selected before the security mechanism is selected. If
+                        Secure Conversation is selected for a security
+                        mechanism and the Reliable Messaging option was not
+                        selected before the security mechanism was specified,
+                        Reliable Messaging will need to be manually selected
+                        in order for Secure Conversation to work. Reliable
+                        messaging, as well as the Advanced configuration
+                        options and Deliver Messages in Exact Order feature,
+                        is discussed in <xref linkend="using_rm"
+                        xrefstyle="select:title" />.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Issuer Address</para></entry>
+
+                        <entry><para>This optional element specifies the
+                        address of the issuer (STS) that will accept the
+                        security token that is presented in the message. This
+                        element's type is an endpoint reference. An STS
+                        contains a set of interfaces to be used for the
+                        issuance, exchange, and validation of security tokens.
+                        An example that creates and uses an STS can be found
+                        at <xref linkend="ahiey"
+                        xrefstyle="select:title" />.</para> <para>For example,
+                        a Metro STS Issuer Address might be:</para>
+                        <informalexample>
+                                <programlisting language="java">http://localhost:8080/jaxws-sts/sts</programlisting>
+                            </informalexample> <para>An examle WCF STS Issuer
+                        Address might be:</para> <informalexample>
+                                <programlisting language="java">http://131.107.72.15/ \
+Security_Federation_SecurityTokenService_Indigo/ \
+Symmetric.svc/ \
+Scenario_5_IssuedTokenForCertificate_MutualCertificate11</programlisting>
+                            </informalexample></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Issuer Metadata Address</para></entry>
+
+                        <entry><para>Specifies the address (URLs) from which
+                        to retrieve the issuer metadata. For example, a Metro
+                        STS Issuer Metadata Address might be:</para>
+                        <informalexample>
+                                <programlisting language="java">http://localhost:8080/jaxws-sts/sts</programlisting>
+                            </informalexample> <para>For a WCF STS the Issuer
+                        Metadata Address might be:</para> <informalexample>
+                                <programlisting language="java">http://131.107.72.15/ \
+Security_Federation_SecurityTokenService_Indigo/ \
+Symmetric.svc</programlisting>
+                            </informalexample> <para>For more information,
+                        read <xref linkend="ahieb"
+                        xrefstyle="select:title" />.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Key Type</para></entry>
+
+                        <entry><para>Applicable for Issued Token mechanisms
+                        only. The type of key the service provider desires.
+                        The choices are public key or symmetric key. Symmetric
+                        key cryptography relies on a shared secret and is
+                        usually faster than public key cryptography. Public
+                        key cryptography relies on a key that is made public
+                        to all and is primarily used for encryption but can be
+                        used for verifying signatures.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Key Size</para></entry>
+
+                        <entry><para>Applicable for Issued Token mechanisms
+                        only. The size of the symmetric key requested,
+                        specified in number of bits. This is a request, and,
+                        as such, the requested security token is not obligated
+                        to use the requested key size, nor is the STS
+                        obligated to issue a token with the same key size.
+                        That said, the recipient should try to use a key at
+                        least as strong as the specified value if possible.
+                        The information is provided as an indication of the
+                        desired strength of the security. Valid choices
+                        include 128, 192, and 256.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Require Client Certificate</para></entry>
+
+                        <entry><para>Select this option to require that a
+                        client certificate be provided to the server for
+                        verification.</para> <para>If you are using a security
+                        mechanism with SSL, a client certificate will be
+                        required by the server both during its initial
+                        handshake and again during
+                        verification.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Require Derived Keys</para> <para>Require
+                        Derived Keys for:</para> <para>Issued Token, Secure
+                        Session, X509 Token</para></entry>
+
+                        <entry><para>A derived key is a cryptographic key
+                        created from a password or other user data. Derived
+                        keys allow applications to create session keys as
+                        needed, eliminating the need to store a particular
+                        key. The use of the same session key (for example,
+                        when using Secure Conversation) for repeated message
+                        exchanges is sometimes considered a risk. To reduce
+                        that risk, enable Require Derived Keys.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Require Signature
+                        Confirmation</para></entry>
+
+                        <entry><para>When the WSS Version is 1.1, select this
+                        option to reduce the risk of attacks because signature
+                        confirmation indicates that the responder has
+                        processed the signature in the request. For more
+                        information, read section 8.5, Signature Confirmation,
+                        of the Web Services Security: SOAP Message Security
+                        1.1 specification at <link
+                        xlink:href="http://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">http://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf</link>.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>SAML Version</para></entry>
+
+                        <entry><para>Specifies which version of the SAML token
+                        should be used. The SAML Version is something the
+                        <code>CallbackHandler</code> has to verify, not the
+                        security runtime. SAML tokens are defined in WSS: SAML
+                        Token Profile documents, available from <link
+                        xlink:href="http://www.oasis-open.org/specs/index.php">http://www.oasis-open.org/specs/index.php</link>.</para>
+                        <para>For an example that uses SAML Callbacks, refer
+                        to <xref linkend="ahies"
+                        xrefstyle="select:title" />.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Security Header Layout</para></entry>
+
+                        <entry><para>Specifies which layout rules to apply
+                        when adding items to the security header. The options
+                        are: </para> <itemizedlist>
+                                <listitem>
+                                    <para><emphasis>Strict</emphasis>: Items are added
+                                    to the security header following the general
+                                    principle of "declare before using".</para>
+                                </listitem>
+
+                                <listitem>
+                                    <para><emphasis>Lax</emphasis>: Items are added to
+                                    the security header in any order that conforms to
+                                    WSS: SOAP Message Security. However, WSIT follows
+                                    Strict even when Lax is selected.</para>
+                                </listitem>
+
+                                <listitem>
+                                    <para><emphasis>Lax (Timestamp First or
+                                    Last)</emphasis>: The same as for Lax, except that
+                                    the first or last item in the security header must
+                                    be a <code>wsse:Timestamp</code>.</para>
+                                </listitem>
+                            </itemizedlist> <para>Examples of the layout rules
+                        are described in the OASIS WS-SecurityPolicy
+                        specification, a link to which can be found at <link
+                        xlink:href="http://wsit.java.net/">http://wsit.java.net/</link>.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Supporting Token</para></entry>
+
+                        <entry><para>Specifies the type of supporting token to
+                        be used. Supporting Tokens are included in the
+                        security header and may sign and/or encrypt additional
+                        message parts. Valid options for supporting tokens
+                        include X.509 tokens, Username tokens, SAML tokens, or
+                        an Issued Token from an STS.</para> <para>For more
+                        information on these options, read <xref
+                        linkend="ahiea"
+                        xrefstyle="select:title" />.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>Token Type</para></entry>
+
+                        <entry><para>The type of SAML token the service
+                        provider requires, for example,
+                        <code>urn:oasis:names:tc:SAML1.0:assertion</code>.Choices
+                        are 1.0, 1.1, or 2.0.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><para>WSS Version</para></entry>
+
+                        <entry><para>Specifies which version of the Web
+                        Services Security specification should be followed,
+                        1.0 or 1.1. These specifications can be viewed from
+                        <link
+                        xlink:href="http://www.oasis-open.org/specs/index.php">http://www.oasis-open.org/specs/index.php</link>.</para>
+                        <para>Enabling WSS 1.1 enables an encrypted key
+                        generated by the client to be reused by the Server in
+                        the response to the client. This saves the time
+                        otherwise required to create a Symmetric Key during
+                        the course of response, encrypt it with the client
+                        public key (which is also an expensive RSA operation),
+                        and transmit the encrypted key in the message (it
+                        occupies markup and requires Base64 operations).
+                        Enabling WSS 1.1 also enables encrypted
+                        headers.</para></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </section>
+
+    <section xml:id="custom-sts">
+        <title>Building custom STS</title>
+
+        <para>It is described in section 11.8 (<xref linkend="gfrig"
+        xrefstyle="select:title" />) how to build a WS-Trust Security Token
+        Service (STS). Thus created STS can be configured to authenticate the
+        client with username/passwords, X.509 certificates, etc. and to issue
+        either SAML 1.0 or SAML 2.0 assertions. By default the issued SAML
+        tokens will contain an SAML AttributeStatement with the user
+        authenticated identity to the STS and a dummy attribute.</para>
+
+        <para>In practice, users may have different identities when using
+        different web services. For authorization or privacy purposes,
+        different user identity and/or user attributes (e.g. role or
+        authorization code) are required to be included in the issued SAML
+        assertion for a service.</para>
+
+        <para>WSIT provides an interface
+        com.sun.xml.ws.api.security.trust.STSAttributeProvider for use in
+        plugging user identity/attribute mappings into an STS. The
+        implementation class of the STSAttributeProvider is exposed to the
+        system with the standard ServiceFinder mechanism, i.e. using a file
+        META-INF/services/com.sun.xml.ws.api.security.trust.STSAttributeProvider
+        in the classpath. The file contains the names of STSAttributeProvider
+        implementation classes, one per line. The mapped user
+        identity/attributes will be picked up when creating SAML
+        assertions.</para>
+
+        <para>Here are the steps for creating a custom STSAttributeProvider
+        and plugging it into an STS created from NetBeans:</para>
+
+        <orderedlist>
+            <listitem>
+                <para>Use NetBeans to <xref linkend="gfrig"
+                xrefstyle="select:title" />.</para>
+            </listitem>
+
+            <listitem>
+                <para>Create an MySTSAttributeProvider implementation class in
+                the same package as the STS implementation class which extends
+                the BaseSTSImpl.</para>
+            </listitem>
+
+            <listitem>
+                <para>Create a directory META-INF/services in the src/java
+                directory.</para>
+            </listitem>
+
+            <listitem>
+                <para>Create a file with name
+                com.sun.xml.ws.api.security.trust.STSAttributeProvider with
+                content the path to the class MySTSAttributeProvider (e.g.
+                org.me.sts.MySTSAttributeProvider). Then place this file in
+                the src/java/META-INF/services directory.</para>
+            </listitem>
+
+            <listitem>
+                <para>Run the NetBeans STS project. Your STS will now use your
+                custom attribute provider in creating the SAML
+                assertions.</para>
+            </listitem>
+        </orderedlist>
+
+        <para>As a reference, <link
+        xlink:href="http://java.net/projects/wsit/sources/svn/content/trunk/wsit/samples/ws-trust/basic/src/common/MySTSAttributeProvider.java?rev=6860">
+        here</link> is a sample STSAttributeProvider.</para>
+
+        <section xml:id="sts-claims">
+            <title>Handling Claims with Metro STS</title>
+
+            <para>In WS-SecurityPolicy, an IssuedToken policy assertion may
+            carry an optional wst:Claims element, to specify the actual claims
+            required to access the service. Here is an example of IssuedToken
+            policy assertions with Claims:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">&lt;sp:IssuedToken sp:IncludeToken="..."&gt;
+   &lt;Issuer xmlns="..."&gt;
+      &lt;Address xmlns="http://www.w3.org/2005/08/addressing"&gt;...&lt;/Address&gt;
+   &lt;/Issuer&gt;
+   &lt;sp:RequestSecurityTokenTemplate
+           xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust"&gt;
+      &lt;t:TokenType&gt;urn:oasis:names:tc:SAML:2.0:assertion&lt;/t:TokenType&gt;
+      &lt;t:KeyType&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey
+      &lt;/t:KeyType&gt;
+      &lt;t:KeySize&gt;256&lt;/t:KeySize&gt;
+      &lt;t:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity"
+                xmlns:ic="http://schemas.xmlsoap.org/ws/2005/05/identity"&gt;
+         &lt;ic:ClaimType
+                 Uri="http://.../ws/2005/05/identity/claims/givenname"/&gt;
+         &lt;ic:ClaimType Uri="http://.../ws/2005/05/identity/claims/surname"
+                       Optional="true"/&gt;
+      &lt;/wst:Claims&gt;
+   &lt;/sp:RequestSecurityTokenTemplate&gt;
+&lt;/sp:IssuedToken&gt;</programlisting>
+            </example>
+
+            <para>With Oasis standard versions of WS-SecurityPolicy 1.2 and
+            WS-Trust 1.3, syntax is different for Claims, where it is defined
+            as a top level sub-element of IssuedToken, in stead of a
+            sub-element of RequestSecurityTokenTemplate:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">&lt;sp:IssuedToken sp:IncludeToken="..."&gt;
+   &lt;Issuer xmlns="..."&gt;
+      &lt;Address xmlns="http://www.w3.org/2005/08/addressing"&gt;...&lt;/Address&gt;
+   &lt;/Issuer&gt;
+   &lt;t:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity"
+             xmlns:ic="http://schemas.xmlsoap.org/ws/2005/05/identity"&gt;
+      &lt;ic:ClaimType Uri="http://.../ws/2005/05/identity/claims/givenname"/&gt;
+      &lt;ic:ClaimType Uri="http://.../ws/2005/05/identity/claims/surname"
+                    Optional="true"/&gt;
+   &lt;/wst:Claims&gt;
+   &lt;sp:RequestSecurityTokenTemplate
+           xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust"&gt;
+      &lt;t:TokenType&gt;urn:oasis:names:tc:SAML:2.0:assertion&lt;/t:TokenType&gt;
+      &lt;t:KeyType&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey
+      &lt;/t:KeyType&gt;
+      &lt;t:KeySize&gt;256&lt;/t:KeySize&gt;
+   &lt;/sp:RequestSecurityTokenTemplate&gt;
+&lt;/sp:IssuedToken&gt;</programlisting>
+            </example>
+
+            <para>On the client side, the Claims, together with all the
+            elements in the RequestSecurityTokenTemplate, is copied into the
+            request message RST to the STS.</para>
+
+            <para>With Metro based STS, the Claims will then be available in
+            the STSAttributeProvider, for use to build the user attributes to
+            be included in the issued SAML assertion.</para>
+
+            <para>In your implementation of the method,
+            getClaimedAttributes(Subject subject, String appliesTo, String
+            tokenType, Claims claims), one may parse the Claims to obtain the
+            ClaimTypes with the following codes:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">String dialect = claims.getDialect();
+List&lt;Object&gt; claimTypes = claims.getAny();
+for (Object claimType : claimsTypes){
+    Element ctElement = (Element) claimType;
+    // parsing ctElement according to the dialect to get claim types
+    ...
+}</programlisting>
+            </example>
+
+            <para>Once you parse the Claims, you may create the attributes
+            accordingly. The attributes returned from the STSAttributeProvider
+            is available in the STSTokenProvider through: <example>
+                    <programlisting language="java" linenumbering="unnumbered">(Map&lt;QName, List&lt;String&gt;&gt;) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);</programlisting>
+                </example> for you to build into your issued SAML
+            assertions.</para>
+
+            <para>See also <xref linkend="sts-client-run-time-config"
+            xrefstyle="select:title" /> for how to inject Claims on the client
+            side at run time.</para>
+        </section>
+    </section>
+
+    <section xml:id="sts-client-run-time-config">
+        <title>Handling Token and Key Requirements at Run Time</title>
+
+        <para>In the general model for using STS issued tokens to securing Web
+        services, a service side IssuedToken policy assertion is used to
+        specify the STS information (STS endpoint, STS MEX endpoint, etc) and
+        the token requirements (token type, key type, claims, etc).
+        Alternatively, a client side PreConfiguredSTS assertion can be used to
+        specify the local STS. Only one STS can be specified in
+        PreconfiguredSTS. In this way, the process to go to STS to obtain the
+        issued toke and subsequently use it with the messages to the service
+        was handled by Metro transparently to the users.</para>
+
+        <para>Now with Metro 2.0, one may also inject STS information and
+        issued token requirements programmatically at run time on the client
+        side. This This gives the users more control of the its identity and
+        security information to be used to access a service, hence open up for
+        building more interesting and important applications with
+        Metro.</para>
+
+        <para>General steps for managing run time configuration: <orderedlist>
+                <listitem>
+                    <para>Use existing STSIssuedTokenConfiguration for
+                    run-time configuration, e.g. <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">DefaultSTSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration();
+Claims claims = ...
+config.setClaims(claims);</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>Use Web Service Feature to inject
+                    STSIssuedTokenConfiguration into the system: <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">STSIssuedTokenFeature feature = new STSIssuedTokenFeature(config);</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>STSIssuedTokenFeature is used when creating port
+                    from the Service: <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">CalculatorWS port = service.getCalculatorWSPort(new WebServiceFeature[]{feature});</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>The entries in IssuedToken policy assertion in
+                    services WSDL is available through <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">configure.getOtherOptions().get(STSIssuedTokenConfiguration.ISSUED_TOKEN);</programlisting>
+                        </example> This allows the users to select STS at run
+                    time according to the service requirements.</para>
+                </listitem>
+            </orderedlist></para>
+
+        <para>While it is more or less straight forward with TokenType,
+        KeyType, etc., it requires extra effort for managing Claims
+        requirement at run time:</para>
+
+        <para><orderedlist>
+                <listitem>
+                    <para>Claims are defined as an extensible element in the
+                    WS-SecurityPolicy spec: <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">&lt;wst:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity"
+            xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512"&gt;
+&lt;/wst:Claims&gt;</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>It is up to the applications and profiles of
+                    WS-Trust to define the content of the Claims. So you need
+                    to implement com.sun.xml.ws.api.security.trust.Claims to
+                    manage claims in your environment. Here is a <link
+                    xlink:href="http://java.net/projects/wsit/sources/svn/content/trunk/wsit/samples/ws-trust/runtime/src/common/MyClaims.java?rev=6860">sample</link>
+                    for managing claim types of the following form: <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">&lt;wst:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity"
+            xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512"
+            xmlns:ic="http://schemas.xmlsoap.org/ws/2005/05/identity"&gt;
+   &lt;ic:ClaimType
+      Uri="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality"/&gt;
+   &lt;ic:ClaimType
+      Uri="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"/&gt;
+&lt;/wst:Claims&gt;</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>Make run time requirement for claim types on the
+                    client side: <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">DefaultSTSIssuedTokenConfiguration config = new 
+        DefaultSTSIssuedTokenConfiguration();
+STSIssuedTokenFeature feature = new STSIssuedTokenFeature(config);
+org.me.calculator.client.CalculatorWS port = service
+        .getCalculatorWSPort(new WebServiceFeature[]{feature});
+
+int i = Integer.parseInt(request.getParameter("value1"));
+int j = Integer.parseInt(request.getParameter("value2"));
+
+config.setTokenType("urn:oasis:names:tc:SAML:1.0:assertion");
+MyClaims claims = new MyClaims();
+claims.addClaimType(MyClaims.ROLE);
+config.setClaims(claims);
+int result = port.add(i, j)</programlisting>
+                        </example></para>
+                </listitem>
+            </orderedlist></para>
+
+        <para>In general, you may need to supply your own
+        STSIssuedTokenConfiguration in following cases: <orderedlist>
+                <listitem>
+                    <para>The client has to go through multiple STS in a trust
+                    chain across security domains to access the
+                    service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The client needs to select the STS and/or to provide
+                    token and key parameters to the STS at run time, according
+                    to which service it tries to access and the requirement
+                    from the service.</para>
+                </listitem>
+            </orderedlist></para>
+
+        <para>To create a custom configuration class which extends
+        STSIssuedTokenConfiguration: <orderedlist>
+                <listitem>
+                    <para>You may get the targeted service endpoint at run
+                    time through <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">getOtherOptions().get(STSIssuedTokenCOnfiguration.APPLIES_TO);</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>Similarly, you may get an instance of
+                    STSIssuedTokenConfiguration, which captures entries from
+                    the IssuedToken policy assertion for the targeted service,
+                    through <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">getOtherOptions().get(STSIssuedTokenCOnfiguration.ISSUED_TOKEN);</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>The entries in the IssuedToken policy and in the
+                    client side PreConfiguredSTS take high priorities which
+                    cannot be override at run time.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Different run time entries should be supplied for
+                    different services.</para>
+                </listitem>
+            </orderedlist></para>
+    </section>
+
+    <section xml:id="advanced-sts-usage">
+        <title>Advanced Usages of STS in Security</title>
+
+        <para>The following sections discuss some features for advanced usages
+        of STS in securing Web services with:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="sts-sso"
+                xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="sts-delegation"
+                xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="sts-sso">
+            <title>Token Caching and Sharing</title>
+
+            <para>Here is a description of how this is supported in Metro:
+            <orderedlist>
+                    <listitem>
+                        <para>The services to be accessed with the same token
+                        must share the same certificate.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Only issued tokens from the same STS are
+                        shared.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Caching and sharing issued tokens can be enabled
+                        for each service instance by configuration</para>
+                    </listitem>
+                </orderedlist> To enable this for a service proxy, you need to
+            add attribute shareToken="true" in the wsit-client.xml or the file
+            referenced by it for the proxy: <example>
+                    <programlisting language="java" linenumbering="unnumbered">&lt;t:PreConfiguredSTS
+     xmlns:t="http://schemas.sun.com/ws/2006/05/trust/client"
+     shareToken="true"&gt;
+&lt;/t:PreConfiguredSTS&gt;</programlisting>
+                </example></para>
+
+            <para>To illustrate the usage, you may find a stand alone sample
+            <link
+            xlink:href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust/share?rev=6860">here</link>.
+            This sample contains 4 parts for client, STS, Service, and
+            Service1. Each service is configured to use the STS issued token
+            to access. On the client side, the client instances for Service
+            and Service1 are configured to be in the circle to share the
+            issued tokens from the STS. The client calls Service first, then
+            Service1. You will see that the client goes to the STS to get the
+            token to access Service, and then to call Service1 without going
+            to the STS but use the token obtained in calling Service.</para>
+
+            <para>Here is a description on how to managing the lifetime and
+            renewing of the issued tokens: <orderedlist>
+                    <listitem>
+                        <para>The client can request for the life time of an
+                        issued token through configuration with a subelement
+                        LifeTime of PreConfiguredSTS: <example>
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">&lt;t:PreConfiguredSTS
+      xmlns:t="http://schemas.sun.com/ws/2006/05/trust/client"
+      shareToken="true"&gt;
+
+    &lt;t:LifeTime&gt;3600&lt;/LifeTime&gt;
+&lt;/t:PreConfiguredSTS&gt;</programlisting>
+                            </example> or programmatically with
+                        STSIssuedTokenConfiguration: <example>
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">config.getOtherOptions().put(STSIssuedTokenConfiguration.LIFE_TIME, Integer.valueOf(3600));</programlisting>
+                            </example> The value is used to construct the
+                        Lifetime element in the RST to the STS: <example>
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">&lt;trust:Lifetime&gt;
+    &lt;wsu:Created xmlns:wsu="..."&gt;2007-10-31T18:39:23.548Z&lt;/wsu:Created&gt;
+    &lt;wsu:Expires xmlns:wsu="..."&gt;2007-11-01T02:39:23.548Z&lt;/wsu:Expires&gt;
+&lt;/trust:Lifetime&gt;</programlisting>
+                            </example></para>
+                    </listitem>
+
+                    <listitem>
+                        <para>By default, an exception is thrown if the token
+                        cached to be used on the client side is
+                        expired.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>One can enable to automatically request for a
+                        new token for an expired token by configuration with
+                        attribute renewExpiredToken in PreConfiguredSTS:
+                        <example>
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">&lt;t:PreConfiguredSTS
+      xmlns:t="http://schemas.sun.com/ws/2006/05/trust/client"
+      shareToken="true"
+      renewExpiredToken="true"&gt;
+
+    &lt;t:LifeTime&gt;3600&lt;/LifeTime&gt;
+&lt;/t:PreConfiguredSTS&gt;</programlisting>
+                            </example> or programmatically with
+                        STSIssuedTokenConfiguration: <example>
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">config.getOtherOptions()
+        .put(STSIssuedTokenConfiguration.RENEW_EXPIRED_TOKEN, "true");</programlisting>
+                            </example></para>
+                    </listitem>
+                </orderedlist></para>
+        </section>
+
+        <section xml:id="sts-delegation">
+            <title>ActAs and Identity Delegation</title>
+
+            <para>We provide support for ActAs introduced in WS-Truts 1.4 in
+            Metro 2.0</para>
+
+            <figure xml:id="sts_actas_page">
+                <title>ActAs and Identity Delegation</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/trust_act_as.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Screen shot of ActAs</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>This feature is better illustrated by the sample <link
+            xlink:href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust/delegate?rev=6860">here</link></para>
+
+            <orderedlist>
+                <listitem>
+                    <para>The Client send a request to the STS. The request
+                    message carries the username/password of the user and is
+                    secured with the STS certificate.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The STS issues an SAML assertion containing the
+                    username (e.g. Alice) as subject id and role attribute
+                    (see src\common\SampleSTSAttributeProvider). Then it send
+                    a response message with the issued token to the
+                    Client.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The client send a request to the Service. The
+                    message carries the SAML assertion from the previous step
+                    for authentication and secured with the Service
+                    certificate.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The Service send a request to the STS. The message
+                    contains the username/password (bob/bob) of the Service,
+                    the SAML assertion received from the user in the previous
+                    step in an ActAs element in the body (RST), and is secure
+                    with the STS certificate (see src\fs\
+                    simple\server\FSImpl.java. The ActAs token is injected
+                    into the request using the STSIssuedTokenFeture). It means
+                    to ask for an issued token with it the Service can access
+                    the Service 1, acting as the user.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The STS issues an (act as) SAML assertion which
+                    contains the Service id (bob) in the Subject, and
+                    attribute ActAs with the user name (e.g. Alice), and role
+                    attribute for the user (see
+                    src\common\SampleSTSAttributeProvider). It then send a
+                    response message with the issued token to the
+                    Service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The Service sand a request to the Service 1. The
+                    message carries the act as SAML from the previous step and
+                    is secured with the Service 1 certificate. The Service 1
+                    check the act as SAML assertion (see
+                    src\common\SampleSamlValidator.java) and understands it is
+                    the Service who made the request act as the user.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The Service 1 send a response to the Service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The Service sends a response to the Client.</para>
+                </listitem>
+            </orderedlist>
+
+            <para>Common issues and solutions:</para>
+
+            <orderedlist>
+                <listitem>
+                    <para>When a custom SAML assertion validator is used, the
+                    SAML assertion is not available in the Subject.</para>
+
+                    <para>In this case, you need to use the extended version
+                    com.sun.xml.wss.impl.callback.SamlValidator and to add
+                    explicitly the DOM based saml assertion to the public
+                    credentials of the Subject in your implementation of the
+                    method <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">validate(XMLStreamReader assertion, Map runtimeProps,
+         Subject clientSubject)
+and
+validate(Element assertion, Map runtimeProps, Subject clientSubject)</programlisting>
+                        </example> in the interface.</para>
+                </listitem>
+
+                <listitem>
+                    <para>ActAs is not called in your custom
+                    STSAttributeProvider:</para>
+
+                    <para>You need to use the WSTrustContractImpl for your STS
+                    as specified in the STSConfiguration in the sts wsdl:
+                    <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">&lt;tc:STSConfiguration
+        xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server"
+        sencryptIssuedKey="true" encryptIssuedToken="false"&gt;
+   &lt;tc:LifeTime&gt;36000&lt;/tc:LifeTime&gt;
+   &lt;tc:Contract&gt;com.sun.xml.ws.security.trust.impl.WSTrustContractImpl
+   &lt;/tc:Contract&gt;
+   ...
+&lt;/tc:STSConfiguration&gt;</programlisting>
+                        </example> If you use Netbenas to create STS,
+                    IssueSAMLTokenContractImpl is set by default. You need to
+                    change it to WSTrustContractImpl for "ActAs"
+                    support.</para>
+                </listitem>
+            </orderedlist>
+        </section>
+    </section>
+</chapter>

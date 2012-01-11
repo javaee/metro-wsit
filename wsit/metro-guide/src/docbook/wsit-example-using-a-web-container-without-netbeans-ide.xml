@@ -1,0 +1,1084 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="ahifl" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>WSIT Example Using a Web Container Without NetBeans IDE</title>
+
+    <section xml:id="ahifm">
+        <title>Environment Configuration Settings</title>
+
+        <para>Before you can build and run the samples in this tutorial, you
+        need to complete the following tasks:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahifn" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahifo" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahifn">
+            <title>Setting the Web Container Listener Port</title>
+
+            <para>The Java code and configuration files for the examples used
+            in this tutorial assume that the web container is listening on IP
+            port 8080. Port 8080 is the default listener port for both
+            GlassFish (domain1) and Tomcat. If you have changed the port, you
+            must update the port number in the following files before building
+            and running the examples:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><code>wsit-enabled-fromjava/etc/wsit-fromjava.server.AddNumbersImpl.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>wsit-enabled-fromjava/etc/custom-schema.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>wsit-enabled-fromjava/etc/custom-client.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>wsit-enabled-fromjava/etc/build.properties</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>wsit-enabled-fromwsdl/etc/custom-client.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>wsit-enabled-fromwsdl/etc/build.properties</code></para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="ahifo">
+            <title>Setting the Web Container Home Directory</title>
+
+            <para>Before you build and deploy the web service and its client,
+            set one of the following environment variables:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>If you are using GlassFish, set the
+                    <code>AS_HOME</code> environment variable to the top-level
+                    directory of GlassFish.</para>
+                </listitem>
+
+                <listitem>
+                    <para>If you are using Tomcat, set the
+                    <code>CATALINA_HOME</code> environment variable to the
+                    top-level directory of Tomcat.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+
+    <section xml:id="ahifp">
+        <title>WSIT Configuration and WS-Policy Assertions</title>
+
+        <para>WSIT features are enabled and configured using a mechanism
+        defined by the Web Services Policy Framework (WS-Policy)
+        specification. A web service expresses its requirements and
+        capabilities through policies embedded in the service's WSDL
+        description. A web service consumer, or client, verifies that it can
+        handle the expressed requirements and, optionally, uses server
+        capabilities advertised in policies.</para>
+
+        <para>Each individual WSIT technology, such as Reliable Messaging,
+        Addressing, or Secure Conversation, provides a set of policy
+        assertions it can process. Those assertions provide the necessary
+        configuration details to the WSIT runtime to enable proper operation
+        of the WSIT features used by a given web service. The assertions may
+        specify particular configuration settings or rely on default settings
+        that are predetermined by the specific technology. For instance, in
+        the snippet shown below, the <code>wsrm:InactivityTimeout</code>
+        setting is optional and could be omitted. The following snippet shows
+        WS-Policy assertions for WS-Addressing and WS-Reliable
+        Messaging:</para>
+
+        <example>
+            <title>Sample WS-Policy expression</title>
+
+            <programlisting language="xml" linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;wsaw:UsingAddressing/&gt;
+            &lt;wsrm:RMAssertion&gt;
+                &lt;wsrm:InactivityTimeout Milliseconds="600000"/&gt;
+            &lt;/wsrm:RMAssertion&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+        </example>
+
+        <para>This snippet is valid in either a WSIT configuration file
+        (<code>wsit-package.service.xml</code>) or in a Web Services
+        Description Language (WSDL) file. Java-first web services use the WSIT
+        configuration file, while WSDL-first web services rely exclusively on
+        the policy elements in the WSDL file. This particular snippet is from
+        the WSIT configuration file in the example,
+        <code>wsit-enabled-fromjava/etc/wsit-fromjava.server.AddNumbersImpl.xml</code>.</para>
+    </section>
+
+    <section xml:id="ahifq">
+        <title>Creating a Web Service without NetBeans</title>
+
+        <para>You can create a web service starting from Java code or starting
+        from a WSDL file. The following sections describe each
+        approach:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahifr" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahifu" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahifr">
+            <title>Creating a Web Service From Java</title>
+
+            <para>One way to create a web service application is to start by
+            coding the endpoint in Java. If you are developing your Java web
+            service from scratch or have an existing Java class you wish to
+            expose as a web service, this is the most direct approach.</para>
+
+            <para>The Java API for XML Web Services (JAX-WS) 2.0
+            Specification, JSR-224, relies heavily on the use of annotations
+            as specified in A Metadata Facility for the Java Programming
+            Language (JSR-175) and Web Services Metadata for the Java Platform
+            (JSR-181), as well as additional annotations defined by the JAX-WS
+            2.0 specification.</para>
+
+            <para>The web service is written as a normal Java class. Then the
+            class and its exposed methods are annotated with the web service
+            annotations <code>@WebService</code> and <code>@WebMethod</code>.
+            The following code snippet shows an example:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">@WebService
+public class AddNumbersImpl {
+    @WebMethod(action="addNumbers")
+    public int addNumbers(int number1, int number2)
+            throws AddNumbersException {
+        if (number1 &lt; 0 || number2 &lt; 0) {
+            throw new AddNumbersException(
+                    "Negative number can't be added!",
+                    "Numbers: " + number1 + ", " + number2);
+        }
+        return number1 + number2;
+    }
+}</programlisting>
+            </example>
+
+            <para>When developing a web service from scratch or based on an
+            existing Java class, WSIT features are enabled using a
+            configuration file. That file,
+            <code>wsit-package.service.xml</code>, is written in WSDL format.
+            An example configuration file can be found in the accompanying
+            samples:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">wsit-enabled-fromjava/etc/wsit-fromjava.server.AddNumbersImpl.xml</programlisting>
+            </example>
+
+            <para>The settings in the <code>wsit-package.service.xml</code>
+            file are incorporated dynamically by the WSIT runtime into the
+            WSDL it generates for the web service. So when a client requests
+            the web service’s WSDL, the runtime embeds any publicly visible
+            policy assertions contained in the
+            <code>wsit-package.service.xml</code> file into the WSDL. For the
+            example <code>wsit-fromjava.server.AddNumbersImpl.xml</code> in
+            the sample discussed in this tutorial, the Addressing and Reliable
+            Messaging assertions are part of the WSDL as seen by the
+            client.</para>
+
+            <note>
+                <para>The <code>wsit-package.service.xml</code> file must be
+                in the <code>WEB-INF</code> sub-directory of the application’s
+                WAR file when it is deployed to the web container. Otherwise,
+                the WSIT run-time environment will not find it.</para>
+            </note>
+
+            <para>To create a web service from Java, create the following
+            files:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>These files define the web service and the WSIT
+                    configuration for the service, which are discussed in the
+                    sections below.</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><xref linkend="ahifs"
+                            xrefstyle="select:title" /></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><xref linkend="ahift"
+                            xrefstyle="select:title" /></para>
+                        </listitem>
+                    </itemizedlist>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><code>AddNumbersException.java</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>custom-schema.xml</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>sun-jaxws.xml</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>web.xml</code></para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para>These files are standard files required for JAX-WS.
+                    Examples of these files are provided in the
+                    <code>wsit-enabled-fromjava</code> sample
+                    directory.</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><code>AddNumbersException.java</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>custom-schema.xml</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>sun-jaxws.xml</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>web.xml</code></para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para>These files are standard in any Ant build
+                    environment. Examples of these files are provided in the
+                    <code>wsit-enabled-fromjava</code> sample
+                    directory.</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><code>build.xml</code></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><code>build.properties</code></para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+            </itemizedlist>
+
+            <section xml:id="ahifs">
+                <title>Web Service Implementation Java File</title>
+
+                <para>The sample files define a web service that takes two
+                integers, adds them, and returns the result. If one of the
+                integers is negative, an exception is thrown.</para>
+
+                <para>The starting point for developing a web service that
+                uses the WSIT technologies is a Java class file annotated with
+                the <code>javax.jws.WebService</code> annotation. The
+                <code>@WebService</code> annotation defines the class as a web
+                service endpoint.</para>
+
+                <para>The following file
+                (<code>wsit-enabled-fromjava/src/fromjava/serverAddNumbersImpl.java</code>)
+                implements the web service <code>interface.package
+                fromjava.server;</code></para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">import javax.jws.WebService;
+import javax.jws.WebMethod;
+
+@WebService
+public class AddNumbersImpl {
+    @WebMethod(action="addNumbers")
+    public int addNumbers(int number1, int number2)
+            throws AddNumbersException {
+        if (number1 &lt; 0 || number2 &lt; 0) {
+            throw new AddNumbersException(
+                    "Negative number cannot be added!",
+                    "Numbers: " + number1 + ", " + number2);
+        }
+        return number1 + number2;
+    }
+}</programlisting>
+                </example>
+
+                <note>
+                    <para>To ensure interoperability with Windows
+                    Communication Foundation (WCF) clients, you must specify
+                    the <code>action</code> element of <code>@WebMethod</code>
+                    in your endpoint implementation classes. WCF clients will
+                    incorrectly generate an empty string for the Action header
+                    if you do not specify the <code>action</code>
+                    element.</para>
+                </note>
+            </section>
+
+            <section xml:id="ahift">
+                <title>wsit-package.service.xml File</title>
+
+                <para>This file is the WSIT configuration file. It defines
+                which WSIT technologies are enabled in the web service. The
+                snippet shown below illustrates how to enable the WSIT
+                reliable messaging technology in a
+                <code>wsit-package.service.xml</code> file.</para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;wsaw:UsingAddressing/&gt;
+            &lt;wsrm:RMAssertion&gt;
+                &lt;wsrm:InactivityTimeout Milliseconds="600000"/&gt;
+                &lt;wsrm:AcknowledgementInterval Milliseconds="200"/&gt;
+            &lt;/wsrm:RMAssertion&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                </example>
+
+                <para>For a complete example of a
+                <code>wsit-package.service.xml</code> file, see the
+                <code>wsit-enabled-fromjava</code> example. You can use the
+                <code>wsit-package.service.xml</code> file provided in the
+                example as a reference for creating your own
+                <code>wsit-package.service.xml</code> file.</para>
+            </section>
+        </section>
+
+        <section xml:id="ahifu">
+            <title>Creating a Web Service From WSDL</title>
+
+            <para>Typically, you start from WSDL to build your web service if
+            you want to implement a web service that is already defined either
+            by a standard or an existing instance of the service. In either
+            case, the WSDL already exists. The JAX-WS <code>wsimport</code>
+            tool processes the existing WSDL document, either from a local
+            copy on disk or by retrieving it from a network address or URL.
+            For an example of using a web browser to access a service’s WSDL,
+            see <xref linkend="ahigd" xrefstyle="select:title" />.</para>
+
+            <para>When developing a web service starting from an existing
+            WSDL, the process is actually simpler than starting from Java.
+            This is because the policy assertions needed to enable various
+            WSIT technologies are already embedded in the WSDL file. An
+            example WSDL file is included in the <code>fromwsdl</code> sample
+            provided with this tutorial at:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">tut-install/wsit-enabled-fromwsdl/etc/AddNumbers.wsdl</programlisting>
+            </example>
+
+            <para>To create a web service from WSDL, create the following
+            source files:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><xref linkend="ahifv"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><xref linkend="ahifw"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>custom-server.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>web.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>sun-jaxws.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.properties</code></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>The following files are standard files required for JAX-WS.
+            Examples of these files are provided in the <code>fromwsdl</code>
+            sample directory.</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><code>custom-server.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>sun-jaxws.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>web.xml</code></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>The <code>build.xml</code> and <code>build.properties</code>
+            files are standard in any Ant build environment. Examples of these
+            files are provided in the respective samples directories.</para>
+
+            <para>The sample files provided in this tutorial define a web
+            service that takes two integers, adds them, and returns the
+            result. If one of the integers is negative, an exception is
+            returned.</para>
+
+            <section xml:id="ahifv">
+                <title>WSDL File</title>
+
+                <para>You can create a WSDL file by hand or retrieve it from
+                an existing web service by simply pointing a web browser at
+                the web service’s URL. The snippet shown below illustrates how
+                to enable the WSIT Reliable Messaging technology in a WSDL
+                file.</para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;wsrm:RMAssertion&gt;
+                &lt;wsrm:InactivityTimeout Milliseconds="600000"/&gt;
+                &lt;wsrm:AcknowledgementInterval Milliseconds="200"/&gt;
+            &lt;/wsrm:RMAssertion&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                </example>
+
+                <para>For a complete example of a WSDL file, see the
+                <code>AddNumbers.wsdl</code> file in the <code>fromwsdl</code>
+                example. Another benefit of the <code>AddNumbers.wsdl</code>
+                file is that it shows how a WSIT-enabled WSDL is constructed.
+                Therefore, you can use it as a reference when you create a
+                WSDL file or modify an existing one.</para>
+            </section>
+
+            <section xml:id="ahifw">
+                <title>Web Service Implementation File</title>
+
+                <para>The following file (<code>AddNumbersImpl.java</code>)
+                shows how to implement a web service <code>interface.package
+                fromwsdl.server;</code></para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">import javax.jws.WebService;
+import javax.jws.WebMethod;
+
+@WebService (endpointInterface=
+        "fromwsdl.server.AddNumbersPortType")
+public class AddNumbersImpl{
+    @WebMethod(action="addNumbers")
+    public int addNumbers (int number1, int number2)
+            throws AddNumbersFault_Exception {
+        if (number1 &lt; 0 || number2 &lt; 0) {
+            String message = "Negative number cannot be added!";
+            String detail = "Numbers: " + number1 + ", " + number2;
+            AddNumbersFault fault = new AddNumbersFault ();
+            fault.setMessage (message);
+            fault.setFaultInfo (detail);
+            throw new AddNumbersFault_Exception(message, fault);
+        }
+        return number1 + number2;
+    }
+
+    public void oneWayInt(int number) {
+        System.out.println("Service received: " + number);
+    }
+}</programlisting>
+                </example>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="ahifx">
+        <title>Building and Deploying the Web Service</title>
+
+        <para>Once configured, you can build and deploy a WSIT-enabled web
+        service in the same manner as you would build and deploy a standard
+        JAX-WS web service.</para>
+
+        <para>The following topics describe how to perform this task:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahify" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahifz" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiga" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahigd" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahify">
+            <title>Building and Deploying a Web Service Created From
+            Java</title>
+
+            <para>To build and deploy the web service, open a terminal window,
+            go to the <code>tut-install/wsit-enabled-fromjava/</code>
+            directory and type the following:</para>
+
+            <para>This command calls the <code>server</code> target in
+            <code>build.xml</code>, which builds and packages the application
+            into a WAR file, <code>wsit-enabled-fromjava.war</code>, and
+            places it in the <code>wsit-enabled-fromjava/build/war</code>
+            directory. The <code>ant server</code> command also deploys the
+            WAR file to the web container.</para>
+
+            <para>The <code>ant</code> command calls multiple tools to build
+            and deploy the web service. The JAX-WS annotation processing tool
+            (<code>apt</code>) processes the annotated source code and invokes
+            the compiler itself, resulting in the class files for each of the
+            Java source files. In the <code>wsit-enabled-fromjava</code>
+            example, the Ant target <code>build-server-java</code> in
+            <code>build.xml</code> handles this portion of the process. Next,
+            the individual class files are bundled together along with the web
+            service’s supporting configuration files into the application’s
+            WAR file. It is this file that is deployed to the web container by
+            the deploy target.</para>
+
+            <para>During execution of the <code>server</code> target, you will
+            see a warning message. The message refers to “Annotation types
+            without processors”. The warning is expected and does not indicate
+            an abnormal situation. The text is included here for
+            reference:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">build-server-java:
+   [apt] warning: Annotation types without processors:
+        [javax.xml.bind.annotation.XmlRootElement,
+        javax.xml.bind.annotation.XmlAccessorType,
+        javax.xml.bind.annotation.XmlType,
+         javax.xml.bind.annotation.XmlElement]
+   [apt] 1 warning</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="ahifz">
+            <title>Building and Deploying a Web Service Created From
+            WSDL</title>
+
+            <para>To build and deploy the web service, open a terminal window,
+            go to the <code>tut-install/wsit-enabled-fromwsdl/</code>
+            directory, and type the following:</para>
+
+            <programlisting><emphasis role="bold">ant server</emphasis></programlisting>
+
+            <para>This command calls <code>wsimport</code>, which takes the
+            WSDL description and generates a corresponding Java interface and
+            other supporting classes. Then the Java compiler is called to
+            compile both the user’s code and the generated code. Finally, the
+            class files are bundled together into the WAR file. To see the
+            details of how this is done, see the
+            <code>build-server-wsdl</code> and <code>create-war</code> targets
+            in the <code>wsit-enabled-fromwsdl/build.xml</code> file.</para>
+        </section>
+
+        <section xml:id="ahiga">
+            <title>Deploying the Web Service to a Web Container</title>
+
+            <para>As a convenience, invoking the <code>ant server</code>
+            command builds the web service’s WAR file and immediately deploys
+            it to the web container. However, in some situations, such as
+            after undeploying a web service, it may be useful to deploy the
+            web service without rebuilding it.</para>
+
+            <para>For both scenarios, <code>wsit-enabled-fromjava</code> and
+            <code>fromwsdl</code>, the resulting application is deployed in
+            the same manner.</para>
+
+            <para>The following sections describe how to deploy on the
+            different web containers:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><xref linkend="ahigb"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><xref linkend="ahigc"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+            </itemizedlist>
+
+            <section xml:id="ahigb">
+                <title>Deploying to GlassFish</title>
+
+                <para>For development purposes, the easiest way to deploy is
+                to use the <code>autodeploy</code> facility of the GlassFish
+                application server. To do so, you simply copy your
+                application’s WAR file to the <code>/autodeploy</code>
+                directory for the domain to which you want to deploy. If you
+                are using the default domain, <code>domain1</code>, which is
+                set up by the GlassFish installation process, the appropriate
+                directory path would be
+                <code>as-install/domains/domain1/autodeploy</code>.</para>
+
+                <para>The <code>build.xml</code> file which accompanies this
+                example has a deploy target for GlassFish. To invoke that
+                target, run the following command in the top-level directory
+                of the respective examples, either
+                <code>wsit-enabled-fromjava</code> or
+                <code>wsit-enabled-fromwsdl</code>, as follows.</para>
+
+                <programlisting><emphasis role="bold">ant deploy</emphasis></programlisting>
+            </section>
+
+            <section xml:id="ahigc">
+                <title>Deploying to Apache Tomcat</title>
+
+                <para>Apache Tomcat also has an <code>autoDeploy</code>
+                feature that is enabled by Tomcat’s out-of-the-box
+                configuration settings. If you are not sure whether the
+                autoDeploy is enabled, check
+                <code>tomcat-home/conf/server.xml</code> for the value of
+                <code>autoDeploy</code>, where
+                <emphasis>tomcat-home</emphasis> is the directory where Tomcat
+                is installed. Assuming <code>autoDeploy</code> is enabled, you
+                simply copy your application’s WAR file to the
+                <code>tomcat-home/webapps</code> directory.</para>
+
+                <para>The <code>build.xml</code> file which accompanies this
+                example has a deploy target for Tomcat. To invoke that target,
+                run the following command in the top-level directory of the
+                respective examples, either <code>wsit-enabled-fromjava</code>
+                or <code>wsit-enabled-fromwsdl</code>, as follows. You need to
+                use the <code>-Duse.tomcat=true</code> switch to make sure
+                that the application is deployed to Tomcat, and not to the
+                default server, which is GlassFish.</para>
+
+                <programlisting><emphasis role="bold">ant -Duse.tomcat=true deploy</emphasis></programlisting>
+            </section>
+        </section>
+
+        <section xml:id="ahigd">
+            <title>Verifying Deployment</title>
+
+            <para>A basic test to verify that the application has deployed
+            properly is to use a web browser to retrieve the application’s
+            WSDL from its hosting web container. The following URLs retrieve
+            the WSDL from each of the two example services. If you are running
+            your web browser and web container on different machines, you need
+            to replace <code>localhost</code> with the name of the machine
+            hosting your web service.</para>
+
+            <note>
+                <para>Before testing, make sure your web container is
+                running.</para>
+            </note>
+
+            <itemizedlist>
+                <listitem>
+                    <para><code>http://localhost:8080/wsit-enabled-fromjava/addnumbers?wsdl</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl</code></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>If the browser displays a page of XML tags, the web service
+            has been deployed and is working. If not, check the web container
+            log for any error messages related to the sample WAR you have just
+            deployed. For GlassFish, the log can be found at
+            <code>as-install/domains/domain1/logs/server.log</code>. For
+            Apache Tomcat, the appropriate log file can be found at
+            <code>tomcat-home/logs/catalina.out</code>.</para>
+        </section>
+    </section>
+
+    <section xml:id="ahige">
+        <title>Creating a Web Service Client</title>
+
+        <para>Unlike developing a web service provider, creating a web service
+        client application always starts with an existing WSDL file. This
+        process is similar to the process you use to build a service from an
+        existing WSDL file. The WSDL file that the client consumes already
+        contains the WS–* policy assertions (and, in some cases, any
+        value-added WSIT policy assertions that augment Sun’s implementation,
+        but can safely be ignored by other implementations). Most of the
+        policy assertions are defined in the WS-* specifications. Sun’s
+        implementation processes these standard policy assertions.</para>
+
+        <para>The policy assertions describe any requirements from the server
+        as well as any optional features the client may use. The WSIT build
+        tools and run-time environment detect the WSDL’s policy assertions and
+        configure themselves appropriately, if possible. If an unsupported
+        assertion is found, an error message describing the problem will be
+        displayed.</para>
+
+        <para>Typically, you retrieve the WSDL directly from a web service
+        provider using the <code>wsimport</code> tool. The
+        <code>wsimport</code> tool then generates the corresponding Java
+        source code for the interface described by the WSDL. The Java
+        compiler, <code>javac</code>, is then called to compile the source
+        into class files. The programming code uses the generated classes to
+        access the web service.</para>
+
+        <para>The following sections describe how to create a web service
+        client:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahigf" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahigi" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahigf">
+            <title>Creating a Client from Java</title>
+
+            <para>To create a client from Java, you must create the following
+            files:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><xref linkend="ahigg"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><xref linkend="ahigh"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.properties</code></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>The <code>build.xml</code> and <code>build.properties</code>
+            files are standard in any Ant build environment. Examples of these
+            files are provided in the <code>wsit-enabled-fromjava</code>
+            sample directory.</para>
+
+            <section xml:id="ahigg">
+                <title>Client Java File (fromjava)</title>
+
+                <para>The client Java file defines the functionality of the
+                web service client. The following code shows the
+                <code>AddNumbersClient.java</code> file that is provided in
+                the sample.</para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">package fromjava.client;
+
+import com.sun.xml.ws.Closeable;
+import java.rmi.RemoteException;
+
+public class AddNumbersClient {
+    public static void main (String[] args) {
+        AddNumbersImpl port = null;
+        try {
+            port = new AddNumbersImplService().getAddNumbersImplPort();
+            int number1 = 10;
+            int number2 = 20;
+            System.out.printf ("Invoking addNumbers(%d, %d)\n",
+                    number1, number2);
+            int result = port.addNumbers (number1, number2);
+            System.out.printf (
+                    "The result of adding %d and %d is %d.\n\n",
+                     number1, number2, result);
+
+            number1 = -10;
+            System.out.printf ("Invoking addNumbers(%d, %d)\n",
+                    number1, number2);
+            result = port.addNumbers (number1, number2);
+            System.out.printf (
+                    "The result of adding %d and %d is %d.\n",
+                     number1, number2, result);
+        } catch (AddNumbersException_Exception ex) {
+            System.out.printf (
+                    "Caught AddNumbersException_Exception: %s\n",
+                     ex.getFaultInfo ().getDetail ());
+        } finally {
+            ((Closeable)port).close();
+        }
+    }
+}</programlisting>
+                </example>
+
+                <para>This file specifies two positive integers that are to be
+                added by the web service, passes the integers to the web
+                service and gets the results from the web service by using the
+                <code>port.addNumbers</code> method, and prints the results to
+                the screen. It then specifies a negative number to be added,
+                gets the results (which should be an exception), and prints
+                the results (the exception) to the screen.</para>
+            </section>
+
+            <section xml:id="ahigh">
+                <title>Client Configuration File (fromjava)</title>
+
+                <para>The client configuration file defines the URL of the web
+                service WSDL file. It is used by the web container
+                <code>wsimport</code> tool to access and consume the WSDL and
+                to build the stubs that are used to communicate with the web
+                service.</para>
+
+                <para>The <code>custom-client.xml</code> file provided in the
+                <code>wsit-enabled-fromjava</code> sample is shown below. The
+                <code>wsdlLocation</code> and the package name xml tags are
+                unique to each client and are highlighted in bold text</para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;bindings
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    wsdlLocation="http://localhost:8080/wsit-enabled-fromjava/ 
+        addnumbers?wsdl"
+    xmlns="http://java.sun.com/xml/ns/jaxws"&gt;
+    &lt;bindings node="wsdl:definitions"&gt;
+        &lt;package name="fromjava.client"/&gt;
+    &lt;/bindings&gt;
+&lt;/bindings&gt;</programlisting>
+                </example>
+            </section>
+        </section>
+
+        <section xml:id="ahigi">
+            <title>Creating a Client from WSDL</title>
+
+            <para>To create a client from WSDL, you must create the following
+            files:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><xref linkend="ahigj"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><xref linkend="ahigk"
+                    xrefstyle="select:title" /></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.xml</code></para>
+                </listitem>
+
+                <listitem>
+                    <para><code>build.properties</code></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>The <code>build.xml</code> and <code>build.properties</code>
+            files are standard in any Ant build environment. Examples of these
+            files are provided in the <code>fromwsdl</code> sample
+            directory.</para>
+
+            <section xml:id="ahigj">
+                <title>Client Java File (fromwsdl)</title>
+
+                <para>The client Java file defines the functionality of the
+                web service client. The same client Java file is used with
+                both samples, <code>wsit-enabled-fromjava</code> <code>and
+                wsit-enabled-fromwsdl</code>. For more information on this
+                file, see <xref linkend="ahigg"
+                xrefstyle="select:title" />.</para>
+            </section>
+
+            <section xml:id="ahigk">
+                <title>Client Configuration File (fromwsdl)</title>
+
+                <para>This is a sample <code>custom-client.xml</code> file.
+                The <code>wsdlLocation</code>, package name, and
+                <code>jaxb:package</code> name XML tags are unique to each
+                client and are highlighted in bold text</para>
+
+                <example>
+                    <programlisting language="java" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;bindings
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    wsdlLocation="http://localhost:8080/wsit-enabled-fromwsdl/
+            addnumbers?wsdl"
+    xmlns="http://java.sun.com/xml/ns/jaxws"&gt;
+    &lt;bindings node="ns1:definitions"
+            xmlns:ns1="http://schemas.xmlsoap.org/wsdl/"&gt;
+            &lt;package name="fromwsdl.client"/&gt;
+    &lt;/bindings&gt;
+    &lt;bindings node="ns1:definitions/ns1:types/xsd:schema
+            [@targetNamespace=’http://duke.org’]"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:ns1="http://schemas.xmlsoap.org/wsdl/"&gt;
+        &lt;jaxb:schemaBindings&gt;
+            &lt;jaxb:package name="fromwsdl.client"/&gt;
+        &lt;/jaxb:schemaBindings&gt;
+    &lt;/bindings&gt;
+&lt;/bindings&gt;</programlisting>
+                </example>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="ahigl">
+        <title>Building and Deploying a Client</title>
+
+        <para>To build and deploy a client for either of the examples provided
+        in this tutorial, type one of the following Ant commands in the
+        top-level directory of the respective example, (either
+        <code>wsit-enabled-fromjava</code> or
+        <code>wsit-enabled-fromwsdl</code>) depending on which web container
+        you are using:</para>
+
+        <para>For GlassFish:</para>
+
+        <programlisting><emphasis role="bold">ant client</emphasis></programlisting>
+
+        <para>For Apache Tomcat:</para>
+
+        <programlisting><emphasis role="bold">ant -Duse.tomcat=true client</emphasis></programlisting>
+
+        <para>This command runs <code>wsimport</code>, which retrieves the web
+        service’s WSDL, and then it runs <code>javac</code> to compile the
+        source.</para>
+    </section>
+
+    <section xml:id="ahigm">
+        <title>Running a Web Service Client</title>
+
+        <para>To run a client for either of the examples provided in this
+        tutorial, type one of the following Ant commands in the top-level
+        directory of the respective example, (either
+        <code>wsit-enabled-fromjava</code> or
+        <code>wsit-enabled-fromwsdl</code>) depending on which web container
+        you are using:</para>
+
+        <para>For GlassFish:</para>
+
+        <programlisting><emphasis role="bold">ant run</emphasis></programlisting>
+
+        <para>For the Apache Tomcat:</para>
+
+        <programlisting><emphasis role="bold">ant -Duse.tomcat=true run</emphasis></programlisting>
+
+        <para>This command executes the <code>run</code> target, which simply
+        runs Java with the name of the client’s class, for example,
+        <code>fromwsdl.client.AddNumbersClient</code>.</para>
+    </section>
+
+    <section xml:id="ahign">
+        <title>Undeploying a Web Service</title>
+
+        <para>During the development process, it is often useful to undeploy a
+        web service. Undeploying a web service means to disable and remove it
+        from the web container. Once the web service is removed, clients are
+        no longer able to use the web service. Further, the web service will
+        not restart without explicit redeployment by the user.</para>
+
+        <para>To undeploy from GlassFish, type the following commands:</para>
+
+        <programlisting><emphasis role="bold">asadmin undeploy --user admin wsit-enabled-fromjava</emphasis></programlisting>
+
+        <programlisting><emphasis role="bold">asadmin undeploy --user admin wsit-enabled-fromwsdl</emphasis></programlisting>
+
+        <para>To undeploy from Apache Tomcat, type the following
+        commands:</para>
+
+        <programlisting><emphasis role="bold">rm $CATALINA_HOME/webapps/wsit-enabled-fromjava.war</emphasis></programlisting>
+
+        <programlisting><emphasis role="bold">rm $CATALINA_HOME/webapps/wsit-enabled-fromwsdl.war</emphasis></programlisting>
+    </section>
+</chapter>

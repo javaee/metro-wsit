@@ -1,0 +1,2871 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="using-metro" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:tns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Using Metro</title>
+
+    <section xml:id="metro-tools">
+        <title>Metro Tools</title>
+
+        <para>Metro provides these tools to help develop Web services
+        applications:</para>
+
+        <orderedlist>
+            <listitem>
+                <para>&jax-ws.overview;</para>
+            </listitem>
+
+            <listitem>
+                <para>&jax-ws.wsimport;</para>
+            </listitem>
+
+            <listitem>
+                <para>&jax-ws.wsimportant;</para>
+            </listitem>
+
+            <listitem>
+                <para>&jax-ws.wsgen;</para>
+            </listitem>
+
+            <listitem>
+                <para>&jax-ws.wsgenant;</para>
+            </listitem>
+
+            <listitem>
+                <para>&jax-ws.apt;</para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">Wsimport
+                and Wsgen Maven2 plugin</link></para>
+            </listitem>
+        </orderedlist>
+
+        <para>Note that these tools are located in the
+        <code>webservices-tools.jar</code> file in the <code>lib/</code>
+        subdirectory of either the GlassFish V2 or Metro (standalone)
+        download. In GlassFish 3.x these tools are located in the
+        <code>webservices-osgi.jar</code> under <code>glassfish/modules</code>
+        subdirectory. Shell script versions that of the tools are located
+        under <code>glassfish/bin</code>.</para>
+
+        <section xml:id="useful-tools-for-your-toolbox">
+            <title>Useful tools for your toolbox</title>
+
+            <para>Over the years, the Metro team has found the following tools
+            to be useful for our users when working with web services.</para>
+
+            <orderedlist>
+                <listitem>
+                    <para><link
+                    xlink:href="http://www.soapui.org/">soapUI</link> is a
+                    great tool for manually sending SOAP messages to test your
+                    web services quickly, or even to automate those
+                    testing.</para>
+                </listitem>
+
+                <listitem>
+                    <para><link
+                    xlink:href="http://wsmonitor.java.net/">wsmonitor</link>
+                    and <link
+                    xlink:href="http://tcpmon.java.net/">tcpmon</link> are
+                    great tools to monitor the communication between the
+                    client and the server.</para>
+                </listitem>
+            </orderedlist>
+        </section>
+    </section>
+
+    <section xml:id="using-mavenized-metro-binaries">
+        <title>Using Mavenized Metro Binaries</title>
+
+        <para>Initially, all Metro releases were built using Ant-based
+        infrastructure. As usual, this approach had some advantages as well as
+        some disadvantages. Perhaps the main disadvantage was that it was
+        difficult to manage the set of all the Metro dependencies. As a
+        result, we were not able to provide first class support for our
+        Maven-based users.</para>
+
+        <para>This has changed with <link
+        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link>.
+        Metro 2.1 has brought a significant change to the Metro build process
+        as one of the major tasks in the release was to switch Metro build
+        system from Ant to Maven. The main Metro build as well as the whole
+        <link xlink:href="http://wsit.java.net">WSIT project</link> modules
+        have been fully mavenized and currently Metro is built, assembled and
+        installed using Maven. Metro is deployed to the <link
+        xlink:href="http://download.java.net/maven/2/">Java.Net Maven2
+        Repository</link>. The Metro modules share a new common root
+        <code>groupId</code> with a value of <code>org.glassfish.metro</code>
+        and can be browsed at the following location: <link
+        xlink:href="http://download.java.net/maven/2/org/glassfish/metro/">http://download.java.net/maven/2/org/glassfish/metro/</link>.
+        All Metro binaries, sources as well as javadoc and samples are all
+        available in the Java.Net Maven2 repository. The main Metro maven
+        project is located at <link
+        xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-project/">http://download.java.net/maven/2/org/glassfish/metro/metro-project/</link>.</para>
+
+        <section xml:id="using-metro-in-a-maven-project">
+            <title>Using Metro in a Maven project</title>
+
+            <para>If you want to use Metro in a Maven project, you need to
+            declare a dependency on the Metro runtime bundle:</para>
+
+            <example>
+                <title>Declaring Metro non-OSGi dependencies</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">&lt;project&gt;
+    ...
+    &lt;dependencies&gt;
+        ...
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.glassfish.metro&lt;/groupId&gt;
+            &lt;artifactId&gt;webservices-rt&lt;/artifactId&gt;
+            &lt;version&gt;2.1&lt;/version&gt;
+        &lt;/dependency&gt;
+        ...
+    &lt;/dependencies&gt;
+    ...
+&lt;/project&gt;</programlisting>
+            </example>
+
+            <para>Specifying this dependency, Maven resolves all the
+            transitive dependencies and gets all the jars that
+            <code>webservices-rt</code> module depends on. Should you want to
+            use OSGi-fied Metro bundle, you need to declare the following
+            dependency instead:</para>
+
+            <example>
+                <title>Declaring Metro OSGi dependencies</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">&lt;project&gt;
+    ...
+    &lt;dependencies&gt;
+        ...
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.glassfish.metro&lt;/groupId&gt;
+            &lt;artifactId&gt;webservices-osgi&lt;/artifactId&gt;
+            &lt;version&gt;2.1&lt;/version&gt;
+        &lt;/dependency&gt;
+        ...
+    &lt;/dependencies&gt;
+    ...
+&lt;/project&gt;</programlisting>
+            </example>
+
+            <para>Additionally, the following entries need to be added into
+            your project's <code>pom.xml</code> or into your
+            <code>settings.xml</code> configuration file:</para>
+
+            <example>
+                <title>Maven repository configuration</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">&lt;repositories&gt;
+    ...
+    &lt;repository&gt;
+        &lt;id&gt;maven-repository.java.net&lt;/id&gt;
+        &lt;name&gt;Java.net Repository for Maven 1&lt;/name&gt;
+        &lt;url&gt;http://download.java.net/maven/1/&lt;/url&gt;
+        &lt;layout&gt;legacy&lt;/layout&gt;
+    &lt;/repository&gt;
+    &lt;repository&gt;
+        &lt;id&gt;maven2-repository.java.net&lt;/id&gt;
+        &lt;name&gt;Java.net Repository for Maven 2&lt;/name&gt;
+        &lt;url&gt;http://download.java.net/maven/2/&lt;/url&gt;
+    &lt;/repository&gt;
+    ...
+&lt;/repositories&gt;
+
+&lt;pluginRepositories&gt;
+    ...
+    &lt;pluginRepository&gt;
+        &lt;id&gt;maven2-repository.java.net&lt;/id&gt;
+        &lt;name&gt;Java.net Repository for Maven 2&lt;/name&gt;
+        &lt;url&gt;http://download.java.net/maven/2/&lt;/url&gt;
+        &lt;layout&gt;default&lt;/layout&gt;
+    &lt;/pluginRepository&gt;
+    ...
+&lt;/pluginRepositories&gt;</programlisting>
+            </example>
+
+            <para>Both <code>repository</code> and
+            <code>pluginRepository</code> sections will need to be added. If
+            you're behind a proxy, check the <link
+            xlink:href="http://maven.apache.org/guides/mini/guide-proxies.html">Maven
+            guide to using proxies</link> to learn about configuring proxy
+            settings in Maven.</para>
+
+            <section xml:id="using-metro-tools-from-maven">
+                <title>Using Metro Tools from Maven</title>
+
+                <para>Metro has Maven plugins for standard JAX-WS WSImport and
+                WSGen tools and this <link
+                xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/usage.html">snippet
+                from pom.xml</link> shows the usage of these maven plugins.
+                More information on using these plugins is available at <link
+                xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">JAX-WS
+                Maven Plugin Project</link> site.</para>
+            </section>
+        </section>
+
+        <section xml:id="using-metro-in-a-non-maven-project">
+            <title>Using Metro in a non-Maven project</title>
+
+            <para>Even though Metro is currently Maven-based and fully
+            available from a Maven repository, you can, of course, still use
+            it in a non-Maven project or install it manually to your
+            container. First, you need to go to the <link
+            xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-standalone/">Metro
+            Standalone Bundle</link> root in the Maven repository and download
+            and unzip a version of your choice, e.g. <link
+            xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-standalone/2.1/metro-standalone-2.1.zip">Metro
+            2.1 Standalone Bundle</link>. For further instructions, please
+            consult the <code>readme.html</code> file available under the
+            unzipped <code>metro</code> root directory.</para>
+        </section>
+    </section>
+
+    <section xml:id="using_metro-developing_with_nb">
+        <title>Developing with NetBeans</title>
+
+        <section xml:id="ahibo">
+            <title>Registering GlassFish with the IDE</title>
+
+            <para>Before you create the web service, make sure GlassFish has
+            been registered with the NetBeans IDE. The registered server list
+            can be viewed from the <menuchoice>
+                    <guimenu>Tools</guimenu>
+
+                    <guimenuitem>Servers</guimenuitem>
+                </menuchoice> menu item.</para>
+
+            <task>
+                <title>If necessary, to register GlassFish with the
+                IDE:</title>
+
+                <procedure>
+                    <step>
+                        <para><emphasis role="bold">Start the IDE. Choose
+                        <menuchoice>
+                                <guimenu>Tools</guimenu>
+
+                                <guimenuitem>Servers</guimenuitem>
+                            </menuchoice> from the main menu.
+                        </emphasis></para>
+
+                        <para>The Servers window appears.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Click <guibutton>Add
+                        Server</guibutton>. </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Select <guilabel>GlassFish
+                        V2 or V3</guilabel> or <guilabel>Sun Java System
+                        Application Server</guilabel>, and click
+                        <guibutton>Next</guibutton>. </emphasis></para>
+
+                        <para>The platform folder location window
+                        displays.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Specify the platform
+                        location of the server instance and the domain to
+                        which you want to register, then click
+                        <guilabel>Next</guilabel>. </emphasis></para>
+
+                        <para>The Servers window displays.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">If requested, type the
+                        admin username and password that you supplied when you
+                        installed the web container (the defaults are
+                        <code>admin</code> and <code>adminadmin</code>), then
+                        click <guilabel>Finish</guilabel>.</emphasis></para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="ahibp">
+            <title>Creating a Web Service</title>
+
+            <para>The starting point for developing a web service with Metro
+            is a Java class file annotated with the
+            <code>javax.jws.WebService</code> annotation. The
+            <code>WebService</code> annotation defines the class as a web
+            service endpoint. The following Java code shows a web service. The
+            IDE will create most of this Java code for you.</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">package org.me.calculator;
+
+import javax.jws.WebService;
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+
+@WebService()
+public class Calculator {
+    @WebMethod(action="sample_operation")
+    public String operation(@WebParam(name="param_name")
+            String param) {
+        // implement the web service operation here
+        return param;
+    }
+
+    @WebMethod(action="add")
+    public int add(@WebParam(name = "i") int i,
+           @WebParam(name = "j") int j) {
+        int k = i + j;
+        return k;
+    }
+}</programlisting>
+            </example>
+
+            <para>Notice that this web service performs a very simple
+            operation. It takes two integers, adds them, and returns the
+            result.</para>
+
+            <task>
+                <title>To Create the Web Service</title>
+
+                <tasksummary>
+                    <para>Perform the following steps to use the IDE to create
+                    this web service.</para>
+                </tasksummary>
+
+                <procedure>
+                    <step>
+                        <para><emphasis role="bold">Click the
+                        <guilabel>Services</guilabel> tab in the left pane,
+                        expand the <guilabel>Servers</guilabel> node, and
+                        verify that GlassFish is listed in the left pane. If
+                        it is not listed, register it by following the steps
+                        in <xref linkend="ahibo"
+                        xrefstyle="select:title" />.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Choose <menuchoice>
+                                <guimenu>File</guimenu>
+
+                                <guimenuitem>New Project</guimenuitem>
+                            </menuchoice>, select <guilabel>Java Web from
+                        Category</guilabel>, select <guilabel>Web
+                        Application</guilabel> from
+                        <guilabel>Projects</guilabel>, and click
+                        <guibutton>Next</guibutton>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Assign the project a name
+                        that is representative of services that will be
+                        provided by the web service (for example,
+                        CalculatorApplication), set the <guilabel>Project
+                        Location</guilabel> to the location where you'd like
+                        to create the project, and click
+                        <guibutton>Next</guibutton>. Verify that GlassFish V2
+                        or V3 is the Server and that Java EE Version is Java
+                        EE 5 or above. Click
+                        <guibutton>Finish</guibutton>.</emphasis></para>
+
+                        <note>
+                            <para>When you create the web service project, be
+                            sure to define a <guilabel>Project
+                            Location</guilabel> that does not include spaces in
+                            the directory name. Spaces in the directory might
+                            cause the web service and web service clients to
+                            fail to build and deploy properly. To avoid this
+                            problem, Sun recommends that you create a directory,
+                            for example <code>C:\work</code>, and put your
+                            project there.</para>
+                        </note>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click the
+                        CalculatorApplication node and choose <menuchoice>
+                                <guimenu>New</guimenu>
+
+                                <guimenuitem>Web Service</guimenuitem>
+                            </menuchoice>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Type the web service name
+                        (<code>CalculatorWS</code>) and the package name
+                        (<code>org.me.calculator</code>) in the <guilabel>Web
+                        Service Name</guilabel> and the
+                        <guilabel>Package</guilabel> fields
+                        respectively.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Select <guibutton>Create
+                        Web Service from Scratch</guibutton> and click
+                        <guibutton>Finish</guibutton>.</emphasis></para>
+
+                        <para>The IDE then creates a skeleton
+                        <code>CalculatorWS.java</code> file for the web
+                        service. This file displays in Source mode in the
+                        right pane.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">In the
+                        <guilabel>Operations</guilabel> box of the
+                        <guilabel>Design</guilabel> view of CalculatorWS.java,
+                        click <guibutton>Add Operation</guibutton>.
+                        </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">In the upper part of the
+                        <guilabel>Add Operation</guilabel> dialog box, type
+                        <code>add</code> in <guilabel>Name</guilabel>.
+                        </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Type <code>int</code> into
+                        the <guilabel>Return Type</guilabel>
+                        field.</emphasis></para>
+
+                        <para>In the Return Type field, you can either enter a
+                        primitive data type or select
+                        <guibutton>Browse</guibutton> to select a complex data
+                        type.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">In the lower part of the
+                        <guilabel>Add Operation</guilabel> dialog box, click
+                        <guibutton>Add</guibutton> and create a parameter
+                        named <code>i</code> of type <code>int</code>. Click
+                        <guibutton>Add</guibutton> again and create a
+                        parameter named <code>j</code> of type
+                        <code>int</code>. </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Click OK at the bottom of
+                        the <guilabel>Add Operation</guilabel> dialog
+                        box.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Notice that the
+                        <code>add</code> method has been added in the
+                        <guilabel>Operations</guilabel> design
+                        box.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Click the
+                        <guilabel>Source</guilabel> tab for CalculatorWS.java
+                        in the right pane. Notice that the <code>add</code>
+                        method has been added to the source
+                        code.</emphasis></para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">@WebMethod(operationName="add")
+public int add(@WebParam(name = "i") int i, @WebParam(name = "j") int j) {
+    // TODO write your implementation code here
+    return 0;
+}</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Change the
+                        <code>add</code> method to the following
+                        :</emphasis></para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">@WebMethod(operationName="add")
+public int add(@WebParam(name = "i") int i, @WebParam(name = "j") int j) {
+    int k = i + j;
+    return k;
+}</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Save the
+                        <code>CalculatorWS.java</code> file.</emphasis></para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="ahibq">
+            <title>Configuring Metro's WSIT Features in the Web
+            Service</title>
+
+            <para>Now that you have coded a web service, you can configure the
+            web service to use Metro's WSIT technologies.</para>
+
+            <para>You have a possibility to choose which .NET / METRO version
+            you want your service to be compatible with. There are two
+            choices: <orderedlist>
+                    <listitem>
+                        <para>.NET 3.5 / METRO 1.3</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>.NET 3.0 / METRO 1.0</para>
+                    </listitem>
+                </orderedlist>Choose the version appropriate for your web
+            service development (Note the Metro 2.0 library provided by the
+            latest NetBeans and GlassFish products support either version.)
+            .NET 3.5 / METRO 1.3 is selected by default. There are several
+            differences in between the two versions. For .NET 3.0 / METRO 1.0
+            documentation please follow this link: <link
+            xlink:href="http://wsit-docs.java.net/releases/1-0-FCS/">Metro 1.0
+            documentation</link>.</para>
+
+            <para>This section describes just how to configure the Reliable
+            Messaging. For a discussion of reliable messaging, see <xref
+            linkend="using_rm" xrefstyle="select:title" />. To see how to
+            secure the web service, see <xref linkend="ahici"
+            xrefstyle="select:title" />.</para>
+
+            <task xml:id="gfrbu">
+                <title>To Configure Metro's WSIT Features in the Web
+                Service</title>
+
+                <tasksummary>
+                    <para>To configure a web service to use Reliable
+                    Messaging, perform the following steps:</para>
+                </tasksummary>
+
+                <procedure>
+                    <step>
+                        <para><emphasis role="bold">In the
+                        <guilabel>Projects</guilabel> window, expand the
+                        <guilabel>Web Services</guilabel> node under the
+                        CalculatorApplication node, right-click the
+                        <guilabel>CalculatorWSService</guilabel> node, and
+                        choose <guimenuitem>Edit Web Service
+                        Attributes</guimenuitem>, as shown in <xref
+                        linkend="gfrat"
+                        xrefstyle="select:title" />.</emphasis></para>
+
+                        <figure xml:id="gfrat">
+                            <title>Editing Web Service Attributes</title>
+
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata contentdepth="100%"
+                                               fileref="figures/edit_ws_attribs_screen.png"
+                                               scalefit="1" width="100%"></imagedata>
+                                </imageobject>
+
+                                <textobject>
+                                    <simpara>Screen shot showing how to edit web service
+                                    attributes</simpara>
+                                </textobject>
+                            </mediaobject>
+                        </figure>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Select the
+                        <guilabel>Reliable Message Delivery</guilabel> check
+                        box, as shown in <xref linkend="gfrby"
+                        xrefstyle="select:title" />, and click
+                        <guibutton>OK</guibutton>.</emphasis></para>
+
+                        <figure xml:id="gfrby">
+                            <title>Reliable Messaging Configuration
+                            Window</title>
+
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata contentdepth="100%"
+                                               fileref="figures/rel_mess_screen.png"
+                                               scalefit="1" width="100%"></imagedata>
+                                </imageobject>
+
+                                <textobject>
+                                    <simpara>Screen shot of reliable messaging
+                                    configuration window</simpara>
+                                </textobject>
+                            </mediaobject>
+                        </figure>
+
+                        <para>This setting ensures that the service sends an
+                        acknowledgement to the clients for each message that
+                        is delivered, thus enabling clients to recognize
+                        message delivery failures and to retransmit the
+                        message. This capability makes the web service a
+                        "reliable" web service.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">In the left pane, expand
+                        the <guilabel>Web Pages</guilabel> node and the
+                        <guilabel>WEB-INF</guilabel> node, and double-click
+                        the <code>wsit-endpoint-classname.xml</code>
+                        (<code>wsit-org.me.calculator.CalculatorWS.xml</code>)
+                        file to view this file. Click the
+                        <guilabel>Source</guilabel> tab.</emphasis></para>
+
+                        <para>The following tags enable reliable
+                        messaging:</para>
+
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="CalculatorWSPortBindingPolicy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;wsam:Addressing wsp:Optional="false"/&gt;
+            &lt;wsrm:RMAssertion/&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="ahibr">
+            <title>Deploying and Testing a Web Service</title>
+
+            <para>Now that you have configured the web service to use Metro's
+            WSIT technologies, you can deploy and test it.</para>
+
+            <task>
+                <title>To Deploy and Test a Web Service</title>
+
+                <procedure>
+                    <step>
+                        <para><emphasis role="bold">Right-click
+                        <guilabel>CalculatorApplication</guilabel> in the
+                        <guilabel>Project</guilabel> node, and select
+                        <guimenuitem>Properties</guimenuitem>, then select
+                        <guilabel>Run</guilabel>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Type
+                        <code>/CalculatorWSService?wsdl</code> in the
+                        <guilabel>Relative URL</guilabel> field and click
+                        <guibutton>OK</guibutton>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click the
+                        <guilabel>Project</guilabel> node and choose
+                        <guimenuitem>Run</guimenuitem>. The first time
+                        GlassFish is started, you will be prompted for the
+                        admin password. </emphasis></para>
+
+                        <para>The IDE starts the web container, builds the
+                        application, and displays the WSDL file page in your
+                        browser. You have now successfully deployed a
+                        Metro-based web service.</para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="wsit_example_with_nb-creating_wsit_client">
+            <title>Creating a Client to Consume a WSIT-Enabled Web
+            Service</title>
+
+            <para>Now that you have built and tested a web service that uses
+            Metro's WSIT technologies, you can create a client that accesses
+            and consumes that web service. The client will use the web
+            service's WSDL to create the functionality necessary to satisfy
+            the interoperability requirements of the web service.</para>
+
+            <task xml:id="gfrcf">
+                <title>To Create a Client to Consume a WSIT-Enabled Web
+                Service</title>
+
+                <tasksummary>
+                    <para>To create a client to access and consume the web
+                    service, perform the following steps.</para>
+                </tasksummary>
+
+                <procedure>
+                    <step>
+                        <para><emphasis role="bold">Choose <menuchoice>
+                                <guimenu>File</guimenu>
+
+                                <guimenuitem>New Project</guimenuitem>
+                            </menuchoice>, select <guilabel>Web
+                        Application</guilabel> from the <guilabel>Java
+                        Web</guilabel> category and click
+                        <guibutton>Next</guibutton>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Name the project, for
+                        example, CalculatorWSServletClient, and click
+                        <guibutton>Next</guibutton>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Verify that GlassFish V2
+                        or V3 is the <guilabel>Server</guilabel> and that
+                        <guilabel>Java EE Version</guilabel> is Java EE 5 or
+                        above. Click <guibutton>Finish</guibutton>.
+                        </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click the
+                        <guilabel>CalculatorWSServletClient</guilabel> node
+                        and select <menuchoice>
+                                <guimenu>New</guimenu>
+
+                                <guimenuitem>Web Service Client</guimenuitem>
+                            </menuchoice>. </emphasis></para>
+
+                        <para>The <menuchoice>
+                                <guimenu>New</guimenu>
+
+                                <guimenuitem>Web Service Client</guimenuitem>
+                            </menuchoice> window displays.</para>
+
+                        <note>
+                            <para>NetBeans submenus are dynamic, so the
+                            <guilabel>Web Service Client</guilabel> option may
+                            not appear. If you do not see the <guilabel>Web
+                            Service Client</guilabel> option, select <menuchoice>
+                                    <guimenu>New</guimenu>
+
+                                    <guisubmenu>File\Folder</guisubmenu>
+
+                                    <guisubmenu>Webservices</guisubmenu>
+
+                                    <guimenuitem>Web Service Client</guimenuitem>
+                                </menuchoice>.</para>
+                        </note>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Select the <guilabel>WSDL
+                        URL</guilabel> option.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Cut and paste the URL of
+                        the web service that you want the client to consume
+                        into the <guilabel>WSDL URL</guilabel> field.
+                        </emphasis></para>
+
+                        <para>For example, here is the URL for the
+                        <code>CalculatorWS</code> web service:</para>
+
+                        <example>
+                            <programlisting language="java">http://localhost:8080/CalculatorApplication/CalculatorWSService?wsdl</programlisting>
+                        </example>
+
+                        <para>When JAX-WS generates the web service, it
+                        appends <code>Service</code> to the class name by
+                        default.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Click
+                        <guibutton>Finish</guibutton>. </emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click the
+                        <guilabel>CalculatorWSServletClient</guilabel> project
+                        node and choose <menuchoice>
+                                <guimenu>New</guimenu>
+
+                                <guimenuitem>Servlet</guimenuitem>
+                            </menuchoice>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Name the servlet
+                        <code>ClientServlet</code>, specify the package name,
+                        for example, <code>org.me.calculator.client</code> and
+                        click <guilabel>Finish</guilabel>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">To make the servlet the
+                        entry point to your application, right-click the
+                        <guilabel>CalculatorWSServletClient</guilabel> project
+                        node, choose <guimenuitem>Properties</guimenuitem>,
+                        click <guilabel>Run</guilabel>, type
+                        <code>/ClientServlet</code> in the <guilabel>Relative
+                        URL</guilabel> field, and click
+                        <guibutton>OK</guibutton>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">If
+                        <code>ClientServlet.java</code> is not already open in
+                        the <guilabel>Source Editor</guilabel>, open
+                        it.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">In the <guilabel>Source
+                        Editor</guilabel>, remove the line that comments out
+                        the body of the <code>processRequest</code> method.
+                        </emphasis></para>
+
+                        <para>This is the start-comment line that starts the
+                        section that comments out the code:</para>
+
+                        <example>
+                            <programlisting language="java">/* TODO output your page here</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Delete the end-comment
+                        line that ends the section of commented out
+                        code:</emphasis></para>
+
+                        <example>
+                            <programlisting language="java">*/</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Add some empty lines after
+                        the following line:</emphasis></para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">out.println("&lt;h1&gt;Servlet ClientServlet at " +
+        request.getContextPath () + "&lt;/h1&gt;");</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click in one of the
+                        empty lines that you added, then choose
+                        <guimenuitem>Insert Code...</guimenuitem> action and
+                        select <guibutton>Call Web Service
+                        Operation</guibutton>. Note that for older NetBeans
+                        releases, this action was present under "<menuchoice>
+                                <guisubmenu>Web Service Client
+                                Resources</guisubmenu>
+
+                                <guimenuitem>Call Web Service
+                                Operation</guimenuitem>
+                            </menuchoice>".</emphasis></para>
+
+                        <para>Then <guilabel>Select Operation to
+                        Invoke</guilabel> dialog box appears.</para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Browse to the
+                        <guilabel>Add operation</guilabel> and click
+                        <guibutton>OK</guibutton>. </emphasis></para>
+
+                        <para>The <code>processRequest</code> method is as
+                        follows, with bold indicating code added by the
+                        IDE:</para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">protected void processRequest(HttpServletRequest request,
+        HttpServletResponse response) 
+        throws ServletException, IOException {
+    response.setContentType("text/html;charset=UTF-8");
+    PrintWriter out = response.getWriter();
+    out.println("&lt;html&gt;");
+    out.println("&lt;head&gt;");
+    out.println("&lt;title&gt;Servlet ClientServlet&lt;/title&gt;");
+    out.println("&lt;/head&gt;");
+    out.println("&lt;body&gt;");
+    out.println("&lt;h1&gt;Servlet ClientServlet at " + request
+            .getContextPath() + "&lt;/h1&gt;");
+    try { // Call Web Service Operation
+        org.me.calculator.client.CalculatorWS port = service
+                .getCalculatorWSPort();
+        // TODO initialize WS operation arguments here
+        int i = 0;
+        int j = 0;
+        // TODO process result here
+        int result = port.add(i, j);
+        out.println("Result = " + result);
+    } catch (Exception ex) {
+        // TODO handle custom exceptions here
+    }
+    out.println("&lt;/body&gt;");
+    out.println("&lt;/html&gt;");
+    out.close();
+}</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Change the values for
+                        <code>int i</code> and <code>int j</code> to other
+                        numbers, such as 3 and 4.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Add a line that prints out
+                        an exception, if an exception is thrown.
+                        </emphasis></para>
+
+                        <para>The <code>try/catch</code> block is as follows
+                        (new and changed lines from this step and the previous
+                        step are highlighted in bold text):</para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">try { // Call Web Service Operation
+    org.me.calculator.client.CalculatorWS port =
+            service.getCalculatorWSPort();
+    // TODO initialize WS operation arguments here
+    int i = 3;
+    int j = 4;
+    // TODO process result here
+    int result = port.add(i, j);
+    out.println("&lt;p&gt;Result: " + result);
+} catch (Exception ex) {
+    out.println("&lt;p&gt;Exception: " + ex);
+}</programlisting>
+                        </example>
+                    </step>
+
+                    <step xml:id="nb-create-client-to-consume-19">
+                        <para><emphasis role="bold">If Reliable Messaging is
+                        enabled, the client needs to close the port when done
+                        or the server log will be overwhelmed with messages.
+                        To close the port, first add the following line to the
+                        import statements at the top of the
+                        file:</emphasis></para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">import com.sun.xml.ws.Closeable;</programlisting>
+                        </example>
+
+                        <para>Then add the line in bold at the end of the
+                        <code>try</code> block, as shown below.</para>
+
+                        <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">try { // Call Web Service Operation
+    org.me.calculator.client.CalculatorWS port =
+            service.getCalculatorWSPort();
+    // TODO initialize WS operation arguments here
+    int i = 3;
+    int j = 4;
+    // TODO process result here
+    int result = port.add(i, j);
+    out.println("&lt;p&gt;Result: " + result);
+    ((Closeable)port).close();
+} catch (Exception ex) {
+    out.println("&lt;p&gt;Exception: " + ex);
+}</programlisting>
+                        </example>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Save
+                        <code>ClientServlet.java</code>.</emphasis></para>
+                    </step>
+
+                    <step>
+                        <para><emphasis role="bold">Right-click the project
+                        node and choose <guimenuitem>Run</guimenuitem>.
+                        </emphasis></para>
+
+                        <para>The server starts (if it was not running
+                        already), the application is built, deployed, and run.
+                        The browser opens and displays the calculation
+                        result.</para>
+
+                        <note>
+                            <para>For NetBeans 6.x and GlassFish v3, if you are
+                            getting GlassFish errors with a
+                            "<code>java.lang.IllegalStateException: Servlet
+                            [CompletionInitiatorPortTypeImpl] and Servlet
+                            [ParticipantPortTypeImpl] have the same url
+                            pattern</code>" message, make sure the Metro 2.0
+                            JARs were excluded from the client servlet WAR file
+                            as explained in <xref
+                            linkend="nb-create-client-to-consume-19" />.</para>
+                        </note>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+    </section>
+
+    <section xml:id="developing-with-eclipse">
+        <title>Developing with Eclipse</title>
+
+        <para>This document describes developing Metro WebServices on Eclipse.
+        The instructions below are for <emphasis role="bold">Eclipse for
+        JavaEE</emphasis></para>
+
+        <section xml:id="setup">
+            <title>Setup</title>
+
+            <para>This is one time setup.</para>
+
+            <task>
+                <title>To setup the environment in Eclipse</title>
+
+                <procedure>
+                    <step>
+                        <para>After starting Eclipse, select the J2EE
+                        perspective: <menuchoice>
+                                <guimenu>Windows</guimenu>
+
+                                <guisubmenu>Open Perspective</guisubmenu>
+
+                                <guisubmenu>Others</guisubmenu>
+
+                                <guimenuitem>J2EE</guimenuitem>
+                            </menuchoice></para>
+                    </step>
+
+                    <step>
+                        <para>In the lower window you should see a tab with
+                        label <guilabel>Servers</guilabel>. Select the tab and
+                        right click in the window and select <menuchoice>
+                                <guisubmenu>new</guisubmenu>
+
+                                <guimenuitem>Server</guimenuitem>
+                            </menuchoice>.</para>
+                    </step>
+
+                    <step>
+                        <para>To download the GlassFish server, select
+                        <guilabel>Download additional server
+                        adapters</guilabel>. Accept the license and wait for
+                        Eclipse to restart.</para>
+                    </step>
+
+                    <step>
+                        <para>After Eclipse has restarted, you can create a
+                        new GlassFish V2 Java EE5 server.</para>
+                    </step>
+
+                    <step>
+                        <para>In the creation dialog select
+                        <guilabel>Installed Runtimes</guilabel> and select the
+                        directory where your GlassFish installation
+                        resides.</para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="create-a-metro-web-services-endpoint">
+            <title>Create a Metro Web Services Endpoint</title>
+
+            <task>
+                <title>To create a Metro Web Services Endpoint</title>
+
+                <procedure>
+                    <step>
+                        <para>To create the HelloWorld service, create a new
+                        dynamic Web project. Give it a name (e.g. helloworld)
+                        and select as target runtime GlassFish</para>
+                    </step>
+
+                    <step>
+                        <para><example>
+                                <title>HelloWorld.java</title>
+
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">package sample;
+
+import javax.jws.WebService;
+
+@WebService
+public class HelloWorld {
+    public String hello(String param){
+    return param + ", World";
+    }
+}              </programlisting>
+                            </example></para>
+                    </step>
+
+                    <step>
+                        <para>Deploy the service by selecting the project and
+                        select <menuchoice>
+                                <guisubmenu>Run as</guisubmenu>
+
+                                <guimenuitem>Run on server</guimenuitem>
+                            </menuchoice>.</para>
+                    </step>
+
+                    <step>
+                        <para>Check in the server Window that the helloworld
+                        project has a status of
+                        <guilabel>Synchronized</guilabel>. If this is not the
+                        case, right-click in the server window and select
+                        publish.</para>
+                    </step>
+
+                    <step>
+                        <para>You can check that the GlassFish server is
+                        started and contains the Web service by going to the
+                        GlassFish admin console (<link
+                        xlink:href="http://localhost:4848/">localhost:4848</link>)</para>
+                    </step>
+                </procedure>
+            </task>
+
+            <para>See Arun's <link
+            xlink:href="http://download.java.net/javaee5/screencasts/glassfish-in-europa/ id=zlo8">screen
+            cast</link>, it talks about the above steps.</para>
+        </section>
+
+        <section xml:id="creating-web-service-client-using-wsimport-cli">
+            <title>Creating Web Service Client using Wsimport CLI</title>
+
+            <task>
+                <title>To create a Web Service Client using Wsimport
+                CLI</title>
+
+                <procedure>
+                    <step>
+                        <para>Create a new project for the HelloWorld client
+                        (an ordinary Java project suffices).</para>
+                    </step>
+
+                    <step>
+                        <para>Select Add Glassfish v2 as Server Runtime in
+                        Build Path.</para>
+                    </step>
+
+                    <step>
+                        <para>Open a command window and go into the source
+                        directory of that project in Eclipse. For example, if
+                        the Eclipse workspace is in path <example>
+                                <programlisting>c:\home\vivekp\workspace</programlisting>
+                            </example> and the name of the project is
+                        HelloWorldClient, then you need to go to <example>
+                                <programlisting>c:\home\vivekp\workspace\helloworld\src</programlisting>
+                            </example>In this directory execute <example>
+                                <programlisting>wsimport -keep http://localhost:8080/helloworld/HelloWorldService?wsdl</programlisting>
+                            </example>On Linux or with Cygwin on Windows, you
+                        need to escape the ? by using \? instead.</para>
+                    </step>
+
+                    <step>
+                        <para>Select refresh in the project view to see the
+                        generated files.</para>
+                    </step>
+
+                    <step>
+                        <para>Now you can create the client class
+                        HelloWorldClient</para>
+                    </step>
+
+                    <step>
+                        <para>You can execute the client, by selecting the
+                        HelloWorldClient in the package explorer of Eclipse
+                        and selecting <menuchoice>
+                                <guisubmenu>Run</guisubmenu>
+
+                                <guimenuitem>Java Application</guimenuitem>
+                            </menuchoice>. In the console window of Eclipse,
+                        you should see "Hello World".</para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="creating-web-service-client-using-wsimport-ant-task">
+            <title>Creating Web Service Client using Wsimport Ant Task</title>
+
+            <para>You can pretty much avoid steps 3 - 5 above by using an Ant
+            build.xml file.</para>
+
+            <task>
+                <title>To create Web Service Client using Wsimport Ant
+                Task</title>
+
+                <procedure>
+                    <step>
+                        <para>Select helloworldclient in Package Exp and
+                        create a new file build.xml</para>
+                    </step>
+
+                    <step>
+                        <para>In this file (build.xml) copy the <link
+                        xlink:href="http://weblogs.java.net/blog/vivekp/archive/tools/build.xml">sample</link>
+                        ant build script</para>
+                    </step>
+
+                    <step>
+                        <para>Then select build.xml in the package explorer,
+                        then right click <menuchoice>
+                                <guisubmenu>Run As</guisubmenu>
+
+                                <guimenuitem>Ant Build...</guimenuitem>
+                            </menuchoice></para>
+                    </step>
+
+                    <step>
+                        <para>Invoke client target, it will run wsimport ant
+                        task and generate the client side stubs</para>
+                    </step>
+
+                    <step>
+                        <para>Invoke run to invoke the endpoint and run the
+                        client or you can execute the client, by selecting the
+                        HelloWorldClient in the package explorer of Eclipse
+                        and selecting <menuchoice>
+                                <guisubmenu>Run</guisubmenu>
+
+                                <guimenuitem>Java Application</guimenuitem>
+                            </menuchoice>. In the console window of Eclipse,
+                        you should see "Hello World".</para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <section xml:id="creating-web-service-client-using-soap-ui-plugin">
+            <title>Creating Web Service Client using SOAP UI Plugin</title>
+
+            <task>
+                <title>To create Web Service Client using SOAP UI
+                Plugin</title>
+
+                <procedure>
+                    <step>
+                        <para>Inside Eclipse, install SOAP UI Plugin</para>
+                    </step>
+
+                    <step>
+                        <para>Select <menuchoice>
+                                <guimenu>Help</guimenu>
+
+                                <guisubmenu>Software Updates</guisubmenu>
+
+                                <guisubmenu>Find and Install...</guisubmenu>
+                            </menuchoice></para>
+                    </step>
+
+                    <step>
+                        <para>Press the <guibutton>New Remote Site</guibutton>
+                        button and add
+                        http://www.soapui.org/eclipse/update/site.xml as the
+                        plugin URL</para>
+                    </step>
+
+                    <step>
+                        <para>Select <guibutton>Finish</guibutton> and the
+                        follow the dialogs to install the soapUI
+                        feature</para>
+                    </step>
+
+                    <step>
+                        <para>Create a new project for the HelloWorld client
+                        (an ordinary Java project suffices).</para>
+                    </step>
+
+                    <step>
+                        <para>Select Add Glassfish v2 as Server Runtime in
+                        Build Path.</para>
+                    </step>
+
+                    <step>
+                        <para>right click <menuchoice>
+                                <guilabel>BuildPath</guilabel>
+
+                                <guilabel>Add Library</guilabel>
+
+                                <guilabel>ServerRuntime</guilabel>
+
+                                <guilabel>Glassfish v2</guilabel>
+                            </menuchoice></para>
+                    </step>
+
+                    <step>
+                        <para>Select the project and right click <menuchoice>
+                                <guisubmenu>Soap UI</guisubmenu>
+
+                                <guimenuitem>Add SOAPUI Nature</guimenuitem>
+                            </menuchoice>, SOAP UI WebService item will be
+                        added in <guilabel>Project Explorer</guilabel></para>
+                    </step>
+
+                    <step>
+                        <para>Select
+                        <guilabel>HelloWorldPortBinding</guilabel> and right
+                        click <menuchoice>
+                                <guisubmenu>GenerateCode</guisubmenu>
+
+                                <guimenuitem>JAX-WS Artifacts</guimenuitem>
+                            </menuchoice></para>
+                    </step>
+
+                    <step>
+                        <para>Enter the appropriate info in the JAX-WS
+                        Artifacts window <figure xml:id="f0.44313571959891807">
+                                <title>SOAP UI - JAX-WS Artifacts</title>
+
+                                <mediaobject>
+                                    <imageobject>
+                                        <imagedata contentdepth="100%"
+                                                   fileref="figures/soapui1.png"
+                                                   scalefit="1" width="100%"></imagedata>
+                                    </imageobject>
+                                </mediaobject>
+                            </figure></para>
+                    </step>
+
+                    <step>
+                        <para>Click Tools and enter the location of JAX-WS
+                        Wsimport, for example <code>c:\glassfish\bin</code>
+                        <figure xml:id="f0.7200744608386892">
+                                <title>SOAP UI - Preferences</title>
+
+                                <mediaobject>
+                                    <imageobject>
+                                        <imagedata contentdepth="100%"
+                                                   fileref="figures/soapui2.png"
+                                                   scalefit="1" width="100%"></imagedata>
+                                    </imageobject>
+                                </mediaobject>
+                            </figure></para>
+                    </step>
+
+                    <step>
+                        <para>Click OK</para>
+                    </step>
+
+                    <step>
+                        <para>Then click <guilabel>Generate</guilabel> on
+                        JAX-WS Artifacts window, it will display a dialog box
+                        that the operation was successful. Switch back to
+                        <guilabel>Java Perspective</guilabel>, then refresh
+                        the src folder and you can see the wsimport generated
+                        classes</para>
+                    </step>
+
+                    <step>
+                        <para>Now implement your client code <example>
+                                <title>HelloWorldClient.java</title>
+
+                                <programlisting language="java"
+                                                linenumbering="unnumbered">package sample;
+
+public class HelloWorldClient {
+
+   /**
+    * @param args
+    */
+    public static void main(String[] args) {
+        //Create Service
+        HelloWorldService service = new HelloWorldService();
+
+        //create proxy
+        HelloWorld proxy = service.getHelloWorldPort();
+
+        //invoke
+        System.out.println(proxy.hello("hello"));
+    }
+}          </programlisting>
+                            </example></para>
+                    </step>
+
+                    <step>
+                        <para>You can execute the client by selecting the
+                        HelloWorldClient in the package explorer of Eclipse
+                        and selecting <menuchoice>
+                                <guisubmenu>Run</guisubmenu>
+
+                                <guimenuitem>Java Application</guimenuitem>
+                            </menuchoice>. In the console window of Eclipse,
+                        you should see "Hello World".</para>
+                    </step>
+                </procedure>
+            </task>
+        </section>
+
+        <simplesect>
+            <para>You can also use Wsimport and Wsgen Maven2 tools. For
+            details see <link
+            xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">here</link>.
+            Netbeans offers an easy to use a comprehensive Metro tooling
+            choice. On Eclipse you can use SOAP UI or ant build script or CLI
+            or even Maven based tools, which does not look bad. There is <link
+            xlink:href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=163334">RFE
+            on Eclipse</link> and looks like it is being looked at. For the
+            Quality Of Service features (WS-* features) it is little difficult
+            as manually creating/modifying WSIT configuration is hard, so we
+            will need an equivalent of the <link
+            xlink:href="http://websvc.netbeans.org/wsit/">WSIT Plugin</link>
+            in NetBeans for Eclipse. Please let <link
+            xlink:href="mailto:users@metro.java.net">us</link> know if you are
+            willing to write a WSIT plugin for Eclipse.</para>
+        </simplesect>
+    </section>
+
+    <section xml:id="logging">
+        <title>Logging</title>
+
+        <section xml:id="dynamic_tube-based_message_logging">
+            <title>Dynamic tube-based message logging</title>
+
+            <para>As you may know, Metro creates a tubeline for each WS
+            endpoint and endoint client to process SOAP messages flowing from
+            and to the endpoint and or its client. Each tubeline consist of a
+            set of tube instances chained together. A tube is a basic SOAP
+            message processing unit. Standard Metro tubes are used to
+            implement processing logic for different SOAP processing aspects
+            (validation, Java-XML mapping etc.) and higher-level QoS domains
+            (security, reliable messaging etc.) As an experimental feature,
+            custom tubes are supported as well.</para>
+
+            <para>When developing an advanced web service that requires
+            Quality of Service features or adding a custom tube into the
+            default Metro tubeline, the ability to see the SOAP message
+            content at different processing stages as the message flows
+            through the tubeline may be very useful. As Metro tubeline get's
+            dynamically created for each endpoint or client, Metro (since
+            version 2.0) provides a new message logging facility that copes
+            with the dynamics of a tubeline creation by defining a set of
+            templating rules that provide a generic way for constructing
+            system-level properties able to control message content logging
+            before and/or after each tube's processing.</para>
+
+            <para>To turn on the logging for any particular tube (or a set of
+            tubes) created by a specific tube factory, the developer needs to
+            set one or more of the following system properties, depending on
+            the target scope: <itemizedlist>
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging before and after tube's
+                        processing</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.before</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging before tube's processing
+                        <itemizedlist>
+                                <listitem>
+                                    <para>overrides anything set by
+                                    <code>&lt;tube_factory_class_name&gt;.dump</code></para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.after</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging after tube's processing
+                        <itemizedlist>
+                                <listitem>
+                                    <para>overrides anything set by
+                                    <code>&lt;tube_factory_class_name&gt;.dump</code></para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.level</code>
+                        - expects string representing
+                        <code>java.util.logging.Level</code> , if set,
+                        overrides the default message dumping level for the
+                        class, which is
+                        <code>java.util.logging.Level.INFO</code></para>
+                    </listitem>
+                </itemizedlist></para>
+
+            <para>There is a set of common system properties that control
+            logging for all tubes and take the lowest precedence so that they
+            can be overriden by a tube-specific properties: <itemizedlist>
+                    <listitem>
+                        <para><code>com.sun.metro.soap.dump</code> - expects a
+                        boolean string, if set to <code>true</code> turns on
+                        the message dumping before and after each tube's
+                        processing on both sides client and endpoint</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>com.sun.metro.soap.dump.before/after</code>
+                        - expects a boolean string, if set to
+                        <code>true</code> turns on the message dumping
+                        before/after each tube's processing on both sides
+                        client and endpoint.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>com.sun.metro.soap.dump.client/endpoint</code>
+                        - expects a boolean string, if set to
+                        <code>true</code> turns on the message dumping before
+                        and after each tube's processing on the respective
+                        side (client or endpoint).</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>com.sun.metro.soap.dump.client/endpoint.before/after</code>
+                        - expects a boolean string, if set to
+                        <code>true</code> turns on the message dumping
+                        before/after each tube's processing on the respective
+                        side (client or endpoint).</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>com.sun.metro.soap.dump.level</code> and
+                        <code>com.sun.metro.soap.dump.client/endpoint.level</code>
+                        - controls the logging level for the whole
+                        tubeline</para>
+                    </listitem>
+                </itemizedlist> The logger root used for message dumping is
+            <code>&lt;tube_factory_class_name&gt;</code>.</para>
+
+            <para>Most of the factories create tubes on both client and
+            endpoint side. To narrow down the message dumping scope, following
+            system properties can be used: <itemizedlist>
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.client/endpoint</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging before and after tube's
+                        processing <itemizedlist>
+                                <listitem>
+                                    <para>overrides anything set by
+                                    <code>&lt;tube_factory_class_name&gt;.dump</code></para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.client/endpoint.before</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging before tube's processing
+                        <itemizedlist>
+                                <listitem>
+                                    <para>overrides anything set by
+                                    <code>&lt;tube_factory_class_name&gt;.dump</code>
+                                    and/or
+                                    <code>&lt;tube_factory_class_name&gt;.dump.client/endpoint</code></para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.client/endpoint.after</code>
+                        - expects boolean string, if set to <code>true</code>
+                        turns on the logging after tube's processing
+                        <itemizedlist>
+                                <listitem>
+                                    <para>overrides anything set by
+                                    <code>&lt;tube_factory_class_name&gt;.dump</code>
+                                    and/or
+                                    <code>&lt;tube_factory_class_name&gt;.dump.client/endpoint</code></para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>&lt;tube_factory_class_name&gt;.dump.client/endpoint.level</code>
+                        - expects string representing
+                        <code>java.util.logging.Level</code> , if set,
+                        overrides anything set by
+                        <code>&lt;tube_factory_class_name&gt;.level</code> and
+                        or the default message dumping level for the class,
+                        which is
+                        <code>java.util.logging.Level.INFO</code></para>
+                    </listitem>
+                </itemizedlist></para>
+
+            <section xml:id="examples">
+                <title>Examples</title>
+
+                <para>In the following examples we will be working with the
+                <code>metro-default.xml</code> file that defines the default
+                Metro tubeline and looks like this:</para>
+
+                <example>
+                    <programlisting language="xml" linenumbering="unnumbered"><?db-font-size 75% ?>&lt;metro xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xmlns='http://java.sun.com/xml/ns/metro/config'
+       version="1.0"&gt;
+   &lt;tubelines default="#default-metro-tubeline"&gt;
+      &lt;tubeline name="default-metro-tubeline"&gt;
+         &lt;client-side&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.TerminalTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.HandlerTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.ValidationTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.MustUnderstandTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.MonitoringTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.AddressingTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.tx.runtime.TxTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.mc.runtime.McTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.dump.ActionDumpTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.testing.PacketFilteringTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.dump.MessageDumpingTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory"/&gt;
+         &lt;/client-side&gt;
+         &lt;endpoint-side&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.dump.MessageDumpingTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.testing.PacketFilteringTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.dump.ActionDumpTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.mc.runtime.McTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.AddressingTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.tx.runtime.TxTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.MonitoringTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.MustUnderstandTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.HandlerTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.ValidationTubeFactory"/&gt;
+            &lt;tube-factory
+                    className="com.sun.xml.ws.assembler.jaxws.TerminalTubeFactory"/&gt;
+         &lt;/endpoint-side&gt;
+      &lt;/tubeline&gt;
+   &lt;/tubelines&gt;
+&lt;/metro&gt;</programlisting>
+                </example>
+
+                <bridgehead>Example 1</bridgehead>
+
+                <para>To turn on the the message dumping before and after
+                security tube's processing on both, client and endpoint side,
+                following system property needs to be set to true:
+                <programlisting>com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump=true
+com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump=true</programlisting></para>
+
+                <bridgehead>Example 2</bridgehead>
+
+                <para>To turn on the the message dumping only after security
+                tube's processing on both, client and server side, following
+                system property needs to be set to true: <programlisting>com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.after=true
+com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.after=true</programlisting></para>
+
+                <bridgehead>Example 3</bridgehead>
+
+                <para>To turn on the the message dumping only after security
+                tube's processing only on the client side, following system
+                property needs to be set to true: <programlisting>com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.client.after=true
+com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.client.after=true</programlisting></para>
+
+                <bridgehead>Example 4</bridgehead>
+
+                <para>This example sets message dumping before and after
+                security processing, except for before security processing on
+                the endpoint side. The logging level for message dumps is set
+                to <code>FINE</code> on both sides: <programlisting>com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump=true
+com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.endpoint.before=false
+com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.level=FINE</programlisting></para>
+            </section>
+        </section>
+
+        <section xml:id="dumping-soap-messages-on-client">
+            <title>Dumping SOAP messages on client</title>
+
+            <section xml:id="transport-level-dump">
+                <title>Transport level dump</title>
+
+                <para>One of the things people want to do while developing Web
+                Services is to look at what the client is sending and
+                receiving. To monitor soap traffic, there are some GUI tools
+                like <link xlink:href="http://tcpmon.java.net/">TCP
+                Monitor</link> and <link
+                xlink:href="http://wsmonitor.java.net/">WSMonitor</link>.
+                These monitors are implemented with a 'man in the middle'
+                approach where-in, the monitor listens to a port (Client send
+                requests to this port) and forwards it to another port (Server
+                listens to this port). Since these tools use port forwarding,
+                you need to change your Web Service client to send request to
+                the port where the monitor listens (Especially, if you are
+                using static clients generated by wsimport, the default
+                endpoint address taken from the wsdl needs to be overidden by
+                setting <code>ENDPOINT_ADDRESS_PROPERTY</code> on the
+                proxy).</para>
+
+                <para>In JAX-WS, you can monitor the request and response
+                messages without changing the client. When you invoke the Web
+                Service, just pass the system property <emphasis
+                role="bold">com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=true</emphasis>,
+                it prints out the request and response message.</para>
+
+                <para>If you are using an Apache Ant script to run your
+                client, this system property can be set as a
+                <code>&lt;jvmarg/&gt;</code> element:</para>
+
+                <example>
+                    <title>Setting system properties via Ant</title>
+
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;project name="metro client" basedir="."&gt;
+   &lt;property environment="env"/&gt;
+   &lt;property name="build.dir" location="$${basedir}/build"/&gt;
+   &lt;property name="build.classes.dir" location="$${build.dir}/classes"/&gt;
+
+   &lt;target name="run"&gt;
+      &lt;java classname="client.MyClient" fork="yes"&gt;
+         &lt;arg value="xxx"/&gt;
+         &lt;!-- optional args[0] sent to MyClient.main() --&gt;
+         &lt;arg value="xxx"/&gt;
+         &lt;!-- optional args[1], etc. --&gt;
+         &lt;classpath&gt;
+            &lt;pathelement location="$${build.classes.dir}"/&gt;
+            &lt;pathelement location="$${env.AS_HOME}/lib/javaee.jar"/&gt;
+            &lt;pathelement location="$${env.AS_HOME}/lib/webservices-rt.jar"/&gt;
+            &lt;pathelement location="$${env.AS_HOME}/lib/activation.jar"/&gt;
+         &lt;/classpath&gt;
+         &lt;jvmarg value="-Dcom
+         .sun.xml.ws.transport.http.client.HttpTransportPipe.dump=true"/&gt;
+      &lt;/java&gt;
+   &lt;/target&gt;
+&lt;/project&gt;</programlisting>
+                </example>
+
+                <para>Alternatively you can execute
+                <code>com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=true;</code>
+                from your Java program to programatically enable/disable
+                logging. Since you often run JAX-WS in a container where
+                setting system properties can be tedious, you might find this
+                easier.</para>
+
+                <para>With this switch enabled, you'll see message dumps like
+                the following in <code>System.out</code>.</para>
+
+                <example>
+                    <title>Sample dump</title>
+
+                    <programlisting language="xml" linenumbering="unnumbered">---[HTTP request]---
+SOAPAction: 
+Content-Type: text/xml
+Accept: text/xml, multipart/related, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+&lt;?xml version="1.0" ?&gt;&lt;S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;S:Body&gt;&lt;addNumbers xmlns="http://duke.example.org"&gt;&lt;arg0&gt;10&lt;/arg0&gt;&lt;arg1&gt;20&lt;/arg1&gt;&lt;/addNumbers&gt;&lt;/S:Body&gt;&lt;/S:Envelope&gt;--------------------
+
+---[HTTP response 200]---
+Date: Thu, 17 Aug 2006 00:35:42 GMT
+Content-type: text/xml
+Transfer-encoding: chunked
+Server: Apache-Coyote/1.1
+null: HTTP/1.1 200 OK
+
+&lt;?xml version="1.0" ?&gt;&lt;S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;S:Body&gt;&lt;addNumbersResponse xmlns="http://duke.example.org"&gt;&lt;return&gt;30&lt;/return&gt;&lt;/addNumbersResponse&gt;&lt;/S:Body&gt;&lt;/S:Envelope&gt;--------------------
+</programlisting>
+                </example>
+
+                <para>A similar property <emphasis
+                role="bold">com.sun.xml.ws.transport.local.LocalTransportPipe.dump=true</emphasis>
+                is available for the local transport.</para>
+            </section>
+
+            <section xml:id="transport-agnostic-dump">
+                <title>Transport-agnostic dump</title>
+
+                <para>The dump mechanism explained above allows you to get the
+                actual bytes that are sent over the wire, as well as any
+                transport specific information (such as HTTP headers), but the
+                mechanism is different from transports to transports. JAX-WS
+                also defines a transport-agnostic dump, which works regardless
+                of what transport you use.</para>
+
+                <para>This dump happens after JAX-WS parses the incoming
+                message into XML infoset. So you will not be able to
+                investigate a well-formedness error with this dump.</para>
+
+                <para>To enable such dump, set the system property <emphasis
+                role="bold">com.sun.xml.ws.util.pipe.StandaloneTubeAssembler.dump=true</emphasis>
+                or execute that as a Java program.</para>
+            </section>
+        </section>
+
+        <section xml:id="dumping-soap-messages-on-server">
+            <title>Dumping SOAP messages on server</title>
+
+            <para>You can dump incoming HTTP requests and responses to
+            <code>System.out</code> on the server side by using the system
+            property <emphasis
+            role="bold">com.sun.xml.ws.transport.http.HttpAdapter.dump=true</emphasis>.
+            This works exactly like above (except that this works on server,
+            not client.) You can also set this property programatically by
+            executing <emphasis
+            role="bold">com.sun.xml.ws.transport.http.HttpAdapter.dump=true;</emphasis>
+            as Java progrma.</para>
+
+            <para>The transport agnostic dump as explained above also works on
+            the server for incoming messages and responses.</para>
+        </section>
+    </section>
+
+    <section xml:id="using-jax-ws-2.x---metro-1.x-2.0-with-java-se-6">
+        <title>Using JAX-WS 2.x / Metro 1.x/2.0 with Java SE 6</title>
+
+        <section xml:id="mustanga1">
+            <title>Using JAX-WS 2.x with Java SE 6</title>
+
+            <para>Java SE 6 up to Update Release 3 ships with the JAX-WS 2.0
+            API, and release 4 and later contains the JAX-WS 2.1 API. (At the
+            time of writing Update Release 3 has long been obsolete and
+            multiple Update Releases have been published with security fixes.
+            It is strongly recommended to upgrade to the latest Update Release
+            of Java SE 6.) Unless you are taking precautions, applications
+            that use the JAX-WS API will run with the JAX-WS API version built
+            into Java SE 6 and not a newer version of JAX-WS on the
+            application classpath. Applications that use new functions of the
+            JAX-WS 2.2 API will therefore fail to run. This section discusses
+            how to work around this issue by using the <link
+            xlink:href="http://download.oracle.com/javase/6/docs/technotes/guides/standards/">endorsed
+            standards override mechanism</link>.</para>
+
+            <para>Java SE 5 does not include the JAX-WS API at all and does
+            not suffer from the issues discussed in this chapter.</para>
+
+            <section xml:id="mustanga1b">
+                <title>Endorsed directory</title>
+
+                <para>You can upgrade to JAX-WS 2.2 by copying
+                <code>jaxws-api.jar</code> and <code>jaxb-api.jar</code> into
+                the JRE endorsed directory, which is
+                <code>$JRE_HOME/lib/endorsed</code> (or
+                <code>$JDK_HOME/jre/lib/endorsed</code>). (Both of these JARs
+                are available in the <link
+                xlink:href="http://jax-ws.java.net/">JAX-WS RI 2.2.x
+                download</link>.) The directory might not exist yet and in
+                that case you will have to create it yourself.</para>
+
+                <para>Some application containers, such as Glassfish V2.x,
+                modify the location of the endorsed directory to a different
+                place. From inside the JVM, you can check the current location
+                by doing
+                <code>System.out.println(System.getProperty("java.endorsed.dirs"));</code></para>
+
+                <para>Obviously you still need all the other JAX-WS jars in
+                your classpath.</para>
+
+                <para>Please do not put all JAX-WS jars into the endorsed
+                directory. This makes it impossible for JAX-WS RI to see other
+                classes that it needs for its operation, such as Servlet
+                classes on the server-side, or Ant classes in the tool time.
+                As those are not loaded by the bootstrap classloader, you will
+                get <code>NoClassDefError</code> on Servlet/Ant
+                classes.</para>
+
+                <para>Also consider that by putting the JAX-WS libraries into
+                <code>$JRE_HOME/lib/endorsed</code>, all applications running
+                under this Java installation will run with the endorsed JAX-WS
+                libraries.</para>
+            </section>
+        </section>
+
+        <section xml:id="mustanga2">
+            <title>Using Metro 1.x with Java SE 6</title>
+
+            <para>All 1.x releases of WSIT and Metro contain JAX-WS 2.1 and
+            most what has been said in <xref linkend="mustanga1"
+            xrefstyle="select:title" /> applies to Metro 1.x. The only
+            difference are the jar files that need to be copied into the
+            endorsed directory. The one file that needs to be copied to
+            <code>$JRE_HOME/lib/endorsed</code> is
+            <code>webservices-api.jar</code>.</para>
+
+            <para>Do not install <code>jaxws-api.jar</code> and
+            <code>jaxb-api.jar</code> into the endorsed directory at the same
+            time. There is a good chance that the versions of these files
+            differ and that may yield very difficult to track application
+            errors. Do not install any other Metro libraries into the endorsed
+            directory, otherwise Metro code may not be able to load classes
+            from the application classpath.</para>
+
+            <para>If you are using the <code>metro-on-glassfish.xml</code> or
+            <code>metro-on-tomcat.xml</code> scripts to install Metro, they
+            will take care of installing <code>webservices-api.jar</code> into
+            the Java SE endorsed directory. Note that only with Metro 1.4 or
+            1.5 will the installation scripts check the Java SE 6 Update
+            Release version.</para>
+
+            <para>If you are deploying an application using Metro to GlassFish
+            or Tomcat, it is essential that you are installing Metro with the
+            <code>metro-on-glassfish.xml</code> or
+            <code>metro-on-tomcat.xml</code> scripts. That makes sure that the
+            Metro libraries are getting copied into the GlassFish/Tomcat
+            specific endorsed directories. Without that step, web applications
+            and EJBs will not be able to pick up the JAX-WS 2.1 API. In other
+            words, including the Metro libraries in the WEB-INF/lib of a web
+            application does not make use of the endorsed mechanism and the
+            JAX-WS 2.1 API cannot be used by the web application. Keep in mind
+            that all of the above is only relevant for Java SE 6 Update
+            Release 3 and older.</para>
+        </section>
+
+        <section xml:id="mustanga3">
+            <title>Using Metro 2.0 with Java SE 6</title>
+
+            <para>Metro 2.0 ships with the JAX-WS 2.2 API while Java SE 6
+            Update Release 4 and later contain the JAX-WS 2.1 API and older
+            Java SE 6 releases contain JAX-WS 2.0. Unless you are taking
+            precautions, applications that use the JAX-WS API will run with
+            the JAX-WS API version built into Java SE 6 and not with the
+            JAX-WS 2.2 API built into Metro on the application classpath.
+            Applications that use new functions of the JAX-WS 2.2 API or other
+            Metro 2.0 functionality will therefore fail to run.</para>
+
+            <para>Do not install any other JAX-WS or Metro libraries than the
+            ones discussed below into an endorsed directory at the same time,
+            otherwise Metro code may not be able to load classes from the
+            application classpath.</para>
+
+            <section xml:id="tomcat-and-glassfish-v2.x">
+                <title>Tomcat and GlassFish V2.x</title>
+
+                <para>If you are running an application in Tomcat or GlassFish
+                V2.x, make sure you are using the
+                <code>metro-on-glassfish.xml</code> or
+                <code>metro-on-tomcat.xml</code> installation scripts. They
+                will copy all files into the Tomcat/GlassFish specific
+                endorsed directories. Without that step, web applications and
+                EJBs will not be able to pick up the JAX-WS 2.2 API. In other
+                words, including the Metro libraries in the WEB-INF/lib of a
+                web application does not make use of the endorsed mechanism
+                and the JAX-WS 2.2 API cannot be used by the web
+                application.</para>
+            </section>
+
+            <section xml:id="glassfish-v3">
+                <title>GlassFish V3</title>
+
+                <para>If you are running an application in GlassFish V3, you
+                need to install Metro through the <link
+                xlink:href="http://www.oracle.com/technetwork/java/javaee/downloads/index.html">GlassFish
+                Update Center</link>. This is the only way of ensuring that
+                Metro is properly installed in GlassFish V3 and will take care
+                of copying the Metro libraries into the right GlassFish
+                specific endorsed directories.</para>
+
+                <para>After the initial installation through the update
+                center, you may install updates with the
+                <code>metro-on-glassfish-v3.xml</code> Ant script.</para>
+            </section>
+
+            <section xml:id="stand-alone-applications">
+                <title>Stand-alone applications</title>
+
+                <para>If you want to run an application or Web Service client
+                outside the Tomcat or GlassFish containers, you have to
+                install the file <code>webservices-api.jar</code> into the JRE
+                endorsed directory, <code>$JRE_HOME/lib/endorsed</code> (or
+                <code>$JDK_HOME/jre/lib/endorsed</code>). The directory might
+                not exist yet and in that case you will have to create it
+                yourself.</para>
+
+                <para>Alternatively, you can set the Java system property
+                <code>java.endorsed.dirs</code> to an application specific
+                directory and copy the files there. See <link
+                xlink:href="http://download.oracle.com/javase/6/docs/technotes/guides/standards/">endorsed
+                standards override mechanism</link> for more details on how to
+                set an application specific endorsed directory.</para>
+
+                <para>You may also use the <code>metro-on-glassfish.xml</code>
+                or <code>metro-on-tomcat.xml</code> Ant scripts to do the
+                installation of webservices-api.jar into the JRE endorsed
+                directory for you. Simply invoke <code>ant -f
+                metro-on-glassfish.xml install-api</code>. The
+                <code>install-api</code> target will only install
+                <code>webservices-api.jar</code> and will not install Metro
+                into Tomcat or GlassFish. Note that you need to run this
+                command as a user that has write permissions to the JRE
+                endorsed directory.</para>
+            </section>
+        </section>
+    </section>
+
+    <section xml:id="deploying-metro-endpoint">
+        <title>Deploying Metro endpoint</title>
+
+        <para>Before you deploy or publish your endpoint, you will need to
+        package your endpoint application into a WAR file. The requirements
+        when building a WAR:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>All WSDLs, Schema files should be packaged under
+                WEB-INF/wsdl dir. It is recommended not to package the WSDL if
+                you are doing Java-first development.</para>
+            </listitem>
+
+            <listitem>
+                <para>WebService implementation class should contain
+                <code>@WebService</code> annotation. Provider based endpoints
+                should have <code>@WebServiceProvider</code>
+                annotation.</para>
+            </listitem>
+
+            <listitem>
+                <para>wsdl, service, port attributes are mandatory for
+                Provider based endpoints and can be specified in
+                <code>@WebServiceProvider</code> annotation or deployment
+                descriptor (sun-jaxws.xml).</para>
+            </listitem>
+
+            <listitem>
+                <para>Deployment descriptors, web.xml, web services deployment
+                descriptor (sun-jaxws.xml or 109 or spring)</para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="the-war-contents">
+            <title>The WAR Contents</title>
+
+            <para>Typically, one creates the WAR file with a GUI development
+            tool or with the <code>ant</code> <code>war</code> task from the
+            generated artifacts from <code>wsimport</code>,
+            <code>wsgen</code>, or <code>apt</code> tools.</para>
+
+            <para>For example, a sample WAR file starting from a WSDL
+            file:</para>
+
+            <example>
+                <title>Sample WAR contents (WSDL First)</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">WEB-INF/classes/hello/HelloIF.class SEI
+WEB-INF/classes/hello/HelloImpl.class Endpoint
+WEB-INF/sun-jaxws.xml JAX-WS RI deployment descriptor
+WEB-INF/web.xml Web deployment descriptor
+WEB-INF/wsdl/HelloService.wsdl WSDL
+WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="using-sun-jaxws.xml">
+            <title>Using sun-jaxws.xml</title>
+
+            <para>Metro defines its own deployment descriptor, which is also
+            known as JAX-WS RI deployment descriptor - sun-jaxws.xml.</para>
+
+            <para>Here is the schema for sun-jaxws.xml:</para>
+
+            <example>
+                <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;!--
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+  Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
+
+  The contents of this file are subject to the terms of either the GNU
+  General Public License Version 2 only ("GPL") or the Common Development
+  and Distribution License("CDDL") (collectively, the "License").  You
+  may not use this file except in compliance with the License.  You can
+  obtain a copy of the License at
+  http://glassfish.java.net/public/CDDL+GPL_1_1.html
+  or packager/legal/LICENSE.txt.  See the License for the specific
+  language governing permissions and limitations under the License.
+
+  When distributing the software, include this License Header Notice in each
+  file and include the License file at packager/legal/LICENSE.txt.
+
+  GPL Classpath Exception:
+  Oracle designates this particular file as subject to the "Classpath"
+  exception as provided by Oracle in the GPL Version 2 section of the License
+  file that accompanied this code.
+
+  Modifications:
+  If applicable, add the following below the License Header, with the fields
+  enclosed by brackets [] replaced by your own identifying information:
+  "Portions Copyright [year] [name of copyright owner]"
+
+  Contributor(s):
+  If you wish your version of this file to be governed by only the CDDL or
+  only the GPL Version 2, indicate your decision by adding "[Contributor]
+  elects to include this software in this distribution under the [CDDL or GPL
+  Version 2] license."  If you don't indicate a single choice of license, a
+  recipient has the option to distribute your version of this file under
+  either the CDDL, the GPL Version 2 or to extend the choice of license to
+  its licensees as provided above.  However, if you add GPL Version 2 code
+  and therefore, elected the GPL Version 2 license, then the option applies
+  only if the new code is made subject to such option by the copyright
+  holder.
+
+--&gt;
+
+&lt;xsd:schema
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+        xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+        targetNamespace="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="1.0"&gt;
+
+   &lt;xsd:import
+       namespace="http://java.sun.com/xml/ns/javaee"
+       schemaLocation="http://java.sun.com/xml/ns/javaee/javaee_web_services_1_2.xsd"/&gt;
+
+   &lt;xsd:element name="endpoints"&gt;
+      &lt;xsd:complexType&gt;
+         &lt;xsd:sequence&gt;
+            &lt;xsd:element name="endpoint" type="tns:endpointType"
+                         minOccurs="0" maxOccurs="unbounded"/&gt;
+         &lt;/xsd:sequence&gt;
+         &lt;xsd:attribute name="version" type="xsd:string" use="required"/&gt;
+      &lt;/xsd:complexType&gt;
+   &lt;/xsd:element&gt;
+
+   &lt;xsd:complexType name="endpointType"&gt;
+      &lt;xsd:annotation&gt;
+         &lt;xsd:documentation&gt;
+            An endpoint definition has several attributes:
+            "name" - the endpoint name
+            "implementation" - the name of the endpoint implementation class
+            "wsdl" - the name of a resource corresponding to the WSDL
+            document for the endpoint
+            "service" - the QName of the WSDL service that owns this
+            endpoint;
+            "port" - the QName of the WSDL port for this endpoint;
+            "url-pattern" - the URL pattern this endpoint is mapped to.
+            "binding" - specify binding id for SOAP1.1 or SOAP1.2
+            "enable-mtom" - Enables MTOM optimization
+            "wsdl", "service", "port" attributes are required for provider
+            based endpoints
+         &lt;/xsd:documentation&gt;
+      &lt;/xsd:annotation&gt;
+
+      &lt;xsd:sequence&gt;
+         &lt;xsd:element ref="handler-chains" minOccurs="0"/&gt;
+      &lt;/xsd:sequence&gt;
+      &lt;xsd:attribute name="name" type="xsd:string" use="required"/&gt;
+      &lt;xsd:attribute name="implementation" type="xsd:string"
+                     use="required"/&gt;
+      &lt;xsd:attribute name="wsdl" type="xsd:anyURI"/&gt;
+      &lt;xsd:attribute name="service" type="xsd:anyURI"/&gt;
+      &lt;xsd:attribute name="port" type="xsd:anyURI"/&gt;
+      &lt;xsd:attribute name="url-pattern" type="xsd:anyURI" use="required"/&gt;
+      &lt;xsd:attribute name="binding" type="xsd:string"/&gt;
+      &lt;xsd:attribute name="enable-mtom" type="xsd:boolean"/&gt;
+   &lt;/xsd:complexType&gt;
+
+&lt;/xsd:schema&gt;</programlisting>
+            </example>
+
+            <para>The <code>&lt;endpoints&gt;</code> element contain one or
+            more <code>&lt;endpoint&gt;</code> elements. Each endpoint
+            represents a port in the WSDL and it contains all information
+            about implementation class, servlet url-pattern, binding, WSDL,
+            service, port QNames. The following shows a
+            <code>sun-jaxws.xml</code> file for a simple
+            <code>HelloWorld</code> service. sun-jaxws.xml is the schema
+            instance of <link
+            xlink:href="sun-jaxws.html">sun-jaxws.xml</link>.</para>
+
+            <example>
+                <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;endpoints
+        xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+        version="2.0"&gt;
+    &lt;endpoint
+            name="MyHello"
+            implementation="hello.HelloImpl"
+            url-pattern="/hello"/&gt;
+&lt;/endpoints&gt;</programlisting>
+            </example>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Endpoint attribute <table frame="all">
+                            <title>Endpoint attributes</title>
+
+                            <tgroup cols="3" colsep="1" rowsep="1">
+                                <colspec />
+
+                                <colspec align="center" />
+
+                                <colspec colwidth="3*" />
+
+                                <thead>
+                                    <row>
+                                        <entry>Attribute</entry>
+
+                                        <entry>Optional</entry>
+
+                                        <entry>Use</entry>
+                                    </row>
+                                </thead>
+
+                                <tbody>
+                                    <row>
+                                        <entry><code>name</code></entry>
+
+                                        <entry>N</entry>
+
+                                        <entry>Name of the endpoint</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>wsdl</code></entry>
+
+                                        <entry>Y</entry>
+
+                                        <entry>Primary wsdl file location in the WAR file.
+                                        E.g. WEB-INF/wsdl/HelloService.wsdl. If this isn't
+                                        specified, JAX-WS will generate and publish a new
+                                        WSDL. When the service is developed from Java, it is
+                                        recommended to omit this attribute.</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>service</code></entry>
+
+                                        <entry>Y</entry>
+
+                                        <entry>QName of WSDL service. For e.g.
+                                        {http://example.org/}HelloService. When the service
+                                        is developed from java, it is recommended to omit
+                                        this attribute.</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>port</code></entry>
+
+                                        <entry>Y</entry>
+
+                                        <entry>QName of WSDL port. For e.g.
+                                        {http://example.org/}HelloPort. When the service is
+                                        developed from Java, it is recommended to omit this
+                                        attribute.</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>implementation</code></entry>
+
+                                        <entry>N</entry>
+
+                                        <entry>Endpoint implementation class name. For e.g:
+                                        hello.HelloImpl. The class should have
+                                        <code>@WebService</code> annotation. Provider based
+                                        implementation class should have
+                                        <code>@WebServiceProvider</code> annotation.</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>url-pattern</code></entry>
+
+                                        <entry>N</entry>
+
+                                        <entry>Should match &lt;url-pattern&gt; in
+                                        web.xml</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>binding</code></entry>
+
+                                        <entry>Y</entry>
+
+                                        <entry>Binding id defined in the JAX-WS API. The
+                                        possible values are:
+                                        <code>"http://schemas.xmlsoap.org/wsdl/soap/http","http://www.w3.org/2003/05/soap/bindings/HTTP/"</code>
+                                        If omitted, it is considered SOAP1.1
+                                        binding.</entry>
+                                    </row>
+
+                                    <row>
+                                        <entry><code>enable-mtom</code></entry>
+
+                                        <entry>Y</entry>
+
+                                        <entry>Enables MTOM optimization. true or false.
+                                        Default is false.</entry>
+                                    </row>
+                                </tbody>
+                            </tgroup>
+                        </table></para>
+                </listitem>
+
+                <listitem>
+                    <para>Specifying Handler Chains <example>
+                            <programlisting language="xml"
+                                            linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+           version="2.0"&gt;
+    &lt;endpoint name="MyHello"&gt;
+        &lt;handler-chain xmlns="http://java.sun.com/xml/ns/javaee"&gt;
+            &lt;handler-chain-name&gt;somename&lt;/handler-chain-name&gt;
+            &lt;handler&gt;
+                &lt;handler-name&gt;MyHandler&lt;/handler-name&gt;
+                &lt;handler-class&gt;hello.MyHandler&lt;/handler-class&gt;
+            &lt;/handler&gt;
+        &lt;/handler-chain&gt;
+    &lt;/endpoint&gt;
+&lt;/endpoints&gt;    </programlisting>
+                        </example></para>
+                </listitem>
+            </itemizedlist>
+
+            <section xml:id="the-web.xml-file">
+                <title>The web.xml File</title>
+
+                <para>The following shows a web.xml file for a simple
+                HelloWorld service. It shows the listener and servlet classes
+                that need to be used when deploying Metro-based web
+                services.</para>
+
+                <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd"&gt;
+
+&lt;web-app&gt;
+   &lt;listener&gt;
+      &lt;listener-class&gt;
+         com.sun.xml.ws.transport.http.servlet.WSServletContextListener
+      &lt;/listener-class&gt;
+   &lt;/listener&gt;
+   &lt;servlet&gt;
+      &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+      &lt;servlet-class&gt;com.sun.xml.ws.transport.http.servlet.WSServlet
+      &lt;/servlet-class&gt;
+      &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+   &lt;/servlet&gt;
+   &lt;servlet-mapping&gt;
+      &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+      &lt;url-pattern&gt;/hello&lt;/url-pattern&gt;
+   &lt;/servlet-mapping&gt;
+   &lt;session-config&gt;
+      &lt;session-timeout&gt;60&lt;/session-timeout&gt;
+   &lt;/session-config&gt;
+&lt;/web-app&gt;</programlisting>
+                </example>
+            </section>
+        </section>
+
+        <section xml:id="using-109-deployment-descriptor">
+            <title>Using 109 Deployment Descriptor</title>
+
+            <para>TODO</para>
+        </section>
+
+        <section xml:id="using-spring">
+            <title>Using Spring</title>
+
+            <para>See <xref linkend="springa"
+            xrefstyle="select:title" />.</para>
+        </section>
+    </section>
+
+    <section xml:id="handlers-and-messagecontext">
+        <title>Handlers and MessageContext</title>
+
+        <section xml:id="messagecontext-in-jax-ws">
+            <title>MessageContext in JAX-WS</title>
+
+            <para><link
+            xlink:href="http://jax-ws.java.net/articles/MessageContext.html">
+            A little bit about Message Context in JAX-WS </link>:This article
+            explains about the context that is available to Client
+            application, Handlers and Service that can be used to
+            access/propagate additional contextual information.</para>
+        </section>
+
+        <section xml:id="handlers-in-jax-ws">
+            <title>Handlers in JAX-WS</title>
+
+            <para><link
+            xlink:href="http://jax-ws.java.net/articles/handlers_introduction.html">
+            Introduction to Handlers in JAX-WS</link>: This article introduces
+            to Handler framework in JAX-WS.</para>
+        </section>
+
+        <section xml:id="efficient-handlers-in-jax-ws-ri">
+            <title>Efficient Handlers in JAX-WS RI</title>
+
+            <para><link
+            xlink:href="http://weblogs.java.net/blog/ramapulavarthi/archive/2007/12/extend_your_web.html">
+            Extend your Web Service applications with the new efficient
+            Handlers in JAX-WS RI </link>: Use this RI extension to take
+            advantage of the JAX-WS RI Message API for efficient access to
+            message and other contextual information.</para>
+        </section>
+    </section>
+
+    <section xml:id="deploying-jax-ws-with-...">
+        <title>Deploying JAX-WS with ...</title>
+
+        <section xml:id="weblogic-10">
+            <title>WebLogic 10</title>
+
+            <para>See <link
+            xlink:href="http://forums.java.net/jive/thread.jspa?threadID=29349&amp;tstart=105">this
+            thread</link> for information. If anyone can confirm/deny that
+            this works, that would be great.</para>
+        </section>
+    </section>
+
+    <section xml:id="developing-client-application-with-locally-packaged-wsdl">
+        <title>Developing client application with locally packaged
+        WSDL</title>
+
+        <para>In the JAX-WS programming model, to develop a web services
+        client you compile the deployed WSDL using wsimport and then at
+        runtime the same WSDL is used to determine binding information. The
+        default WSDL used can be determined by looking in the
+        javax.xml.ws.Service subclass generated by wsimport. You can choose
+        another location (network or local file directory) for the WSDL other
+        than the one you used wsimport with, for example if you do not want
+        runtime accesses of the WSDL to go over the network or if you want to
+        edit a copy of the WSDL to work around some bug (dangerous but we do
+        it sometimes).</para>
+
+        <para>There are the different ways in which you can provide the local
+        WSDL information to the JAX-WS runtime:</para>
+
+        <section xml:id="service-api-to-pass-the-wsdl-information">
+            <title>Service API to pass the WSDL information</title>
+
+            <example>
+                <title>Sample service creation using local WSDL</title>
+
+                <programlisting language="java" linenumbering="unnumbered">URL baseUrl = client.MtomService.class.getResource(".");
+URL url = new URL(baseUrl, "../Soap11MtomUtf8.svc.xml");
+MtomService service = new MtomService(url, new QName("http://tempuri.org/", "MtomService"));
+IMtomTest proxy = service.getBasicHttpBindingIMtomTest();
+String input="Hello World";
+byte[] response = proxy.echoStringAsBinary(input);</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="xml-catalog">
+            <title>Xml Catalog</title>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Create a catalog file</para>
+                </listitem>
+
+                <listitem>
+                    <para>META-INF/jax-ws-catalog.xml <example>
+                            <title>jax-ws-catalog.xml</title>
+
+                            <programlisting language="xml"
+                                            linenumbering="unnumbered">&lt;catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system"&gt;
+    &lt;system systemId="http://131.107.72.15/MTOM_Service_Indigo/Soap11MtomUtf8.svc?wsdl"
+            uri="Soap11MtomUtf8.svc.xml"/&gt;
+&lt;/catalog&gt;</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>For details see the details on <link
+                    xlink:href="http://jax-ws.java.net/nonav/2.2.1/docs/catalog-support.html">using
+                    catalog scheme</link></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>This works well but requires some work, such as composing
+            the right catalog file then package it appropriately.</para>
+        </section>
+
+        <section xml:id="using--wsdllocation-switch">
+            <title>Using -wsdlLocation switch</title>
+
+            <para>There is another easy way to do it - just run wsimport with
+            -wsdlLocation switch and provide the WSDL location value which is
+            relative to the generated Service class and provide the WSDL
+            location value which is relative to the generated Service class
+            and you need to put this WSDL file at this relative
+            location.</para>
+
+            <para>Let us try to create a client for the <link
+            xlink:href="http://131.107.72.15/MTOM_Service_Indigo/Soap11MtomUtf8.svc">NET
+            3.0 MTOM endpoint</link>. I am using <link
+            xlink:href="http://metro.java.net/1.0/">Metro 1.0</link>.</para>
+
+            <para>First I save the .NET 3.0 MTOM <link
+            xlink:href="http://131.107.72.15/MTOM_Service_Indigo/Soap11MtomUtf8.svc?wsdl">WSDL</link>
+            locally then run wsimport giving the relative location to where
+            you will package the wsdl with your application</para>
+
+            <example>
+                <title>Sample wsimport command</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">wsimport -keep -d build/classes -p client etc/Soap11MtomUtf8.svc.xml -wsdlLocation ../Soap11MtomUtf8.svc.xml</programlisting>
+            </example>
+
+            <note>
+                <para>Why is the relative location is
+                ../Soap11MtomUtf8.svc.xml? Basically the generated Service
+                will be at build/classes/client location and I would copy this
+                WSDL at build/classes, see option -d and -p.</para>
+            </note>
+
+            <para>Here is excerpt from the generated MtomService class. You
+            can see how the wsdlLocation value is generated inside it and is
+            used internally to create the Service.</para>
+
+            <example>
+                <title>MtomService.java</title>
+
+                <programlisting language="java" linenumbering="unnumbered">/**
+ * This class was generated by the JAX-WS RI.
+ * JAX-WS RI 2.1.2-hudson-53-SNAPSHOT
+ * Generated source version: 2.1
+ */
+@WebServiceClient(name = "MtomService",
+        targetNamespace = "http://tempuri.org/",
+        "../Soap11MtomUtf8.svc.xml")
+public class MtomService extends Service {
+
+    private final static URL MTOMSERVICE_WSDL_LOCATION;
+    private final static Logger logger = Logger.getLogger(client
+            .MtomService.class.getName());
+
+    static {
+        URLurl = null;
+        try {
+            URLbaseUrl;
+
+            baseUrl = client.MtomService.class.getResource(".");
+            url = new URL(baseUrl, "../Soap11MtomUtf8.svc.xml");
+        } catch (MalformedURLException e) {
+            logger.warning("Failed to create URL for the wsdl Location: ." +
+                    "./Soap11MtomUtf8.svc.xml");
+            logger.warning(e.getMessage());
+        }
+        MTOMSERVICE_WSDL_LOCATION = url;
+    }
+
+    public MtomService() {
+        super(MTOMSERVICE_WSDL_LOCATION,
+                new QName("http://tempuri.org/", "MtomService"));
+    }
+
+    ...
+    </programlisting>
+            </example>
+
+            <para>See <code>Client.java</code> below it invokes the .NET 3.0
+            service. You may notice here that you dont need to enable MTOM
+            explicitly. Metro bring in .NET 3.0 interop thru WSIT and due to
+            this the MTOM policy assertions in the .NET 3.0 WSDL, it correctly
+            interpreted and the IMtomTest port is configured with MTOM
+            enabled.</para>
+
+            <example>
+                <title>MtomService.java</title>
+
+                <programlisting language="java" linenumbering="unnumbered">package client;
+
+import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
+
+/**
+ * Client that invokes .NET 3.0 MTOM endpoint using a local wsdl
+ */
+public class Client {
+
+    public static void main(String[] args) {
+
+        //enble SOAP Message logging
+        HttpTransportPipe.dump = true;
+
+        //Create IMtomTest proxy to invoke .NET 3.0 MTOM service
+        IMtomTest proxy = new MtomService().getBasicHttpBindingIMtomTest();
+        String input = "Hello World";
+        byte[] response = proxy.echoStringAsBinary(input);
+        System.out.println("Sent: " + input + ", Received: " + new String
+                (response));
+    }
+}</programlisting>
+            </example>
+
+            <para>Get the complete client bundle from <link
+            xlink:href="download/portable-client-withwsdl.zip"> here</link>
+            and see the enclosed <code>Readme.txt</code> for instructions on
+            how to run it.</para>
+        </section>
+    </section>
+
+    <section xml:id="how-to-invoke-and-endpoint-by-overriding-endpoint-address-in-the-wsdl">
+        <title>How to invoke and endpoint by overriding endpoint address in
+        the WSDL</title>
+
+        <para>Often times there is need to override the endpoint address that
+        is obtained from the WSDL referenced by the generated Service class.
+        This is how you can do this:</para>
+
+        <section xml:id="bindingprovider.endpoint_address_property">
+            <title>BindingProvider.ENDPOINT_ADDRESS_PROPERTY</title>
+
+            <para>You can use
+            <code>BindingProvider.ENDPOINT_ADDRESS_PROPERTY</code> to set the
+            endpoint address in your client application code.</para>
+
+            <example>
+                <title>Sample</title>
+
+                <programlisting language="java" linenumbering="unnumbered">//Create service and proxy from the generated Service class.
+HelloService service = new HelloService();
+HelloPort proxy = service.getHelloPort();
+
+((BindingProvider) proxy).getRequestContext().put(BindingProvider
+        .ENDPOINT_ADDRESS_PROPERTY, "http://new/endpointaddress");
+
+proxy.sayHello("Hello World!");           </programlisting>
+            </example>
+        </section>
+
+        <section xml:id="create-service-using-updated-wsdl">
+            <title>Create Service using updated WSDL</title>
+
+            <para>In case you have access to the updated WSDL which has the
+            right endpoint address, you can simply create the Service using
+            this WSDL and there will be no need to set the
+            <code>BindingProvider.ENDPOINT_ADDRESS</code> property.</para>
+
+            <note>
+                <para>This updated WSDL must have the same wsdl:service and
+                wsdl:port as in the original wsdl. Otherwise you may get an
+                error while creating the Service or Port.</para>
+            </note>
+
+            <example>
+                <title>Sample</title>
+
+                <programlisting language="java" linenumbering="unnumbered">//Create service and proxy from the generated Service class.
+HelloService service = new HelloService(serviceName,
+        "http://new/endpointaddress?wsdl");
+HelloPort proxy = service.getHelloPort();
+
+proxy.sayHello("Hello World!");</programlisting>
+            </example>
+        </section>
+    </section>
+
+    <section xml:id="maintaining-state-in-web-services">
+        <title>Maintaining State in Web Services</title>
+
+        <para>These articles provide details on maintaing state with JAX-WS
+        Web Services. <itemizedlist>
+                <listitem>
+                    <para><link
+                    xlink:href="http://weblogs.java.net/blog/ramapulavarthi/archive/2006/06/maintaining_ses.html">Maintaining
+                    Session With JAX-WS</link></para>
+                </listitem>
+
+                <listitem>
+                    <para><link
+                    xlink:href="http://jax-ws-commons.java.net/http-session-scope/">Making
+                    it easier with @HttpSessionScope.</link></para>
+                </listitem>
+
+                <listitem>
+                    <para><link
+                    xlink:href="http://jax-ws.java.net/nonav/2.2.1/docs/statefulWebservice.html">Transport
+                    neutral mechanism to maintain state</link></para>
+                </listitem>
+            </itemizedlist></para>
+    </section>
+
+    <section xml:id="fastinfoset">
+        <title>FastInfoset</title>
+
+        <para>The Fast Infoset specification (ITU-T Rec. X.891 | ISO/IEC
+        24824-1) describes an open, standards-based "binary XML" format that
+        is based on the<link
+        xlink:href="http://www.w3.org/TR/xml-infoset/">XML Information
+        Set</link>. Metro supports this optimized encoding JAX-WS
+        implementation. For ease of deployment, JAX-WS also support a form of
+        HTTP content negotiation that can be used to turn on Fast Infoset
+        during message exchanges. By default, the Fast Infoset encoding is
+        turned off. For more information on how to use this feature see the
+        following section.</para>
+
+        <para>The XML Information Set specifies the result of parsing an XML
+        document, referred to as an XML infoset (or simply an infoset), and a
+        glossary of terms to identify infoset components, referred to as
+        information items and properties. An XML infoset is an abstract model
+        of the information stored in an XML document; it establishes a
+        separation between data and information in a way that suits most
+        common uses of XML. In fact, several of the concrete XML data models
+        are defined by referring to XML infoset items and their properties.
+        For example, <link
+        xlink:href="http://www.w3.org/TR/soap12-part1/">SOAP Version
+        1.2</link> makes use of this abstraction to define the information in
+        a SOAP message without ever referring to XML 1.X, and the SOAP HTTP
+        binding specifically allows for alternative media types that "provide
+        for at least the transfer of the SOAP XML Infoset".</para>
+
+        <para>The Fast Infoset specification is jointly standardized at the
+        ITU-T and ISO. The specification is available to all ITU-T sector
+        members and can also be obtained via the corresponding ISO national
+        body in your location. These specifications recommend the use of the
+        MIME type application/fastinfoset, which has been approved by the
+        Internet Engineering Steering Group (IESG) for documents serialized
+        using this format.</para>
+
+        <para><link xlink:href="http://fi.java.net/">FI</link> is an
+        open-source project initiated by Sun Microsystems to provide access to
+        a fast, fully-featured and robust implementation of the Fast Infoset
+        specification. Metro employs the basic Fast Infoset parsers and
+        serializers available from that project.</para>
+
+        <section xml:id="using-fastinfoset">
+            <title>Using FastInfoset</title>
+
+            <para>Content negotiation is completely driven by the client and
+            uses the standard HTTP headers <code>Accept</code> and
+            <code>Content-Type</code>. The initial request is always encoded
+            in XML, but the client has the option of including the MIME type
+            application/fastinfoset as part of the HTTP Accept header list. If
+            the request is received by a Fast Infoset-enabled service, the
+            reply will be encoded in Fast Infoset. The remainder of the
+            conversation between the client and the service will also be
+            encoded in Fast Infoset as long as the client continues to use the
+            same client object (e.g., the same stub instance) to converse with
+            the server. We call this form of negotiation pessimistic, in
+            contrast to the optimistic case in which a client directly
+            initiates a message exchange using the more efficient
+            encoding.</para>
+
+            <para>Content negotiation can be enabled in two different ways:
+            (i) by setting a system property on the VM used to run the client,
+            and (ii) by setting a property on the proxy object. In either
+            case, both the property name and its value are identical. For
+            JAX-WS, the name of the property is
+            <code>com.sun.xml.ws.client.ContentNegotiation</code>. In either
+            case, the accepted property values are none (the default) and
+            pessimistic, optimistic.</para>
+
+            <example>
+                <title>Enabling FastInfoset by configuring proxy</title>
+
+                <programlisting language="java" linenumbering="unnumbered">// Enabling FI in pessimistic mode
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put(JAXWSProperties.CONTENT_NEGOTIATION_PROPERTY, "pessimistic");</programlisting>
+            </example>
+
+            <programlisting>java -Dcom.sun.xml.ws.client.ContentNegotiation=pessimistic ...</programlisting>
+        </section>
+    </section>
+
+    <section xml:id="using_metro-ha_support">
+        <title>High Availability Support in Metro</title>
+
+        <para>Starting with the <link
+        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link> Metro
+        officially supports deployment in clustered environment configurations
+        including the support for stateful Metro features, namely Reliable
+        Messaging (see <xref linkend="using_rm-ha_support"
+        xrefstyle="select:title" /> for limitations), Secure Conversation,
+        Security NONCE Manager and Stateful Web Services. Currently this
+        support is tested with and limited to the <link
+        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        Server 3.1 and higher.</para>
+
+        <para>Clustering support in Metro is automatic, which means that once
+        configured and enabled in the container, there is no extra
+        configuration required on the Metro side to enable Metro High
+        Availability support. The <code>GlassFish Metro Glue Module</code>
+        that is responsible for Metro - GlassFish integration does all the
+        necessary configuration automatically during the Metro module
+        initialization by injecting the required configuration information
+        into the Metro runtime using a private API contract.</para>
+
+        <para>For more information on configuring Clustering environment in
+        GlassFish, please consult the <link
+        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        Server User Guide or watch this <link
+        xlink:href="http://www.youtube.com/user/GlassFishVideos#p/c/1808040BD1409BF0/3/LDjXjm9_Q5A">very
+        comprehensible basic screencast</link> or another a <link
+        xlink:href="http://www.youtube.com/user/GlassFishVideos#p/f/0/xSiZHKJLOh4">more
+        recent screen cast</link> available at <link
+        xlink:href="http://www.youtube.com/user/GlassFishVideos">The GlassFish
+        YouTube Channel</link>.</para>
+    </section>
+</chapter>

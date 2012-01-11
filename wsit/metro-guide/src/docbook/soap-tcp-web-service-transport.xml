@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="soaptcpa" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>SOAP/TCP Web Service transport</title>
+
+    <section xml:id="soaptcpb">
+        <title>What is SOAP/TCP?</title>
+
+        <para>SOAP/TCP is TCP transport for Web Services. By default SOAP/TCP
+        uses FastInfoset encoding in stateful mode, which lets SOAP/TCP to
+        index XML elements optimal way, taking into account specifics of each
+        concrete Web Service.</para>
+    </section>
+
+    <section xml:id="soaptcpc">
+        <title>Creating a SOAP/TCP enabled Web Service</title>
+
+        <para>For detailed instructions for how to use NetBeans IDE to create
+        a web service, see <xref linkend="ahibp"
+        xrefstyle="select:title" />.</para>
+    </section>
+
+    <section xml:id="soaptcpd">
+        <title>Configuring Web Service to be able to operate over SOAP/TCP
+        transport</title>
+
+        <para>To use the IDE to configure a web service transport, perform the
+        following steps.</para>
+
+        <task>
+            <title>To Configure SOAP/TCP transport in a Web Service</title>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">In the IDE Projects window,
+                    expand the <guilabel>Web Services</guilabel> node,
+                    right-click the <guilabel>CalculatorWSService</guilabel>
+                    node, and choose <guimenuitem>Edit Web Service
+                    Attributes</guimenuitem>. </emphasis></para>
+
+                    <para>The <guilabel>Web Service Attributes</guilabel>
+                    editor appears.</para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Select the <guilabel>Allow TCP
+                    Transport</guilabel> check box, as shown in <xref
+                    linkend="soaptcpsrvimg" xrefstyle="select:title" />, and
+                    click <guibutton>OK</guibutton>.</emphasis></para>
+
+                    <para>This setting configures the web service to be able
+                    to operate over SOAP/TCP transport additionally to the
+                    default HTTP.</para>
+
+                    <figure xml:id="soaptcpsrvimg">
+                        <title>Enabling SOAP/TCP</title>
+
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata contentdepth="100%"
+                                           fileref="figures/soaptcp-enable.png"
+                                           scalefit="1" width="100%"></imagedata>
+                            </imageobject>
+
+                            <textobject>
+                                <simpara>Screen shot of SOAP/TCP checkbox</simpara>
+                            </textobject>
+                        </mediaobject>
+                    </figure>
+                </step>
+            </procedure>
+        </task>
+    </section>
+
+    <section xml:id="soaptcpe">
+        <title>Deploying and Testing a Web Service with SOAP/TCP Transport
+        Enabled</title>
+
+        <para>Now that you have configured the web service to be able to
+        operate over SOAP/TCP, you can deploy and test it.</para>
+
+        <task>
+            <title>To Deploy and Test a Web Service with SOAP/TCP
+            Enabled</title>
+
+            <tasksummary>
+                <para>To deploy and test the web service, perform the
+                following steps.</para>
+            </tasksummary>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">Right-click the project node
+                    and select <guimenuitem>Properties</guimenuitem>, then
+                    select <guilabel>Run</guilabel>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Type
+                    <code>/CalculatorWSService?wsdl</code> in the
+                    <guilabel>Relative URL</guilabel> field and click
+                    <guibutton>OK</guibutton>. </emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click the project node
+                    and choose
+                    <guimenuitem>Run</guimenuitem>.</emphasis></para>
+
+                    <para>The IDE starts the web container, builds the
+                    application, and displays the WSDL file page in your
+                    browser.</para>
+
+                    <para>The following WSIT tags related to SOAP/TCP display
+                    in the WSDL file:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="CalculatorWSPortBindingPolicy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;ns2:OptimizedTCPTransport enabled="true"/&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                    </example>
+                </step>
+            </procedure>
+        </task>
+    </section>
+
+    <section xml:id="soaptcpf">
+        <title>Creating a Client to Consume a SOAP/TCP-enabled Web
+        Service</title>
+
+        <para>For detailed instructions for how to use NetBeans IDE to create
+        a web service client, see <xref
+        linkend="wsit_example_with_nb-creating_wsit_client"
+        xrefstyle="select:title" />.</para>
+    </section>
+
+    <section xml:id="soaptcpg">
+        <title>Configuring Web Service client to operate over SOAP/TCP
+        transport</title>
+
+        <para>To use the IDE to configure a web service client transport,
+        perform the following steps.</para>
+
+        <task>
+            <title>To Configure SOAP/TCP transport in a Web Service
+            client</title>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">In the IDE
+                    <guilabel>Projects</guilabel> window, expand the
+                    <guilabel>Web Service References</guilabel> node,
+                    right-click the <guilabel>CalculatorWSService</guilabel>
+                    node, and choose <guilabel>Edit Web Service
+                    Attributes</guilabel>.</emphasis></para>
+
+                    <para>The <guilabel>Web Service Attributes</guilabel>
+                    editor appears.</para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Select the
+                    <guilabel>Automatically Select Optimal Transport
+                    (HTTP/TCP)</guilabel> check box, as shown in <xref
+                    linkend="soaptcpclntimg" xrefstyle="select:title" />, and
+                    click <guibutton>OK</guibutton>. </emphasis></para>
+
+                    <para>This setting configures the web service client to
+                    choose SOAP/TCP transport as prefferable, when working
+                    with a Web Service.</para>
+
+                    <figure xml:id="soaptcpclntimg">
+                        <title>Enabling SOAP/TCP for a Web Service
+                        client</title>
+
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata contentdepth="100%"
+                                           fileref="figures/soaptcp-client-enable.png"
+                                           scalefit="1" width="100%"></imagedata>
+                            </imageobject>
+
+                            <textobject>
+                                <simpara>Screen shot of SOAP/TCP checkbox</simpara>
+                            </textobject>
+                        </mediaobject>
+                    </figure>
+
+                    <para>After checking the SOAP/TCP check box, new policy
+                    assertions will be added to the Web Service client policy
+                    configuration file. Open
+                    <code>CalculatorWSService.xml</code> file, which is
+                    situated under the project's <code>Source
+                    Packages/META-INF</code> folder.</para>
+
+                    <para>The following WSIT tags related to SOAP/TCP display
+                    in the Web Service client configuration file:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="CalculatorWSPortBindingPolicy"&gt;
+    &lt;wsp:ExactlyOne&gt;
+        &lt;wsp:All&gt;
+            &lt;tcp:AutomaticallySelectOptimalTransport/&gt;
+        &lt;/wsp:All&gt;
+    &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                    </example>
+                </step>
+            </procedure>
+        </task>
+    </section>
+</chapter>

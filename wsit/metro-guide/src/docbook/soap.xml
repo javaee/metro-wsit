@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="soap" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>SOAP</title>
+
+    <section xml:id="soap-headers">
+        <title>SOAP headers</title>
+
+        <para>When the WSDL you are compiling specifies that some parts of a
+        message are bound to SOAP headers, <code>wsimport</code> generates the
+        right stuff (<code>@WebParam</code> <code>(header=true)</code>), so
+        you can pass headers as arguments to the method invocation. When
+        starting from Java, you can use this same annotation to indicate that
+        some parameters be sent as headers.</para>
+
+        <para>That said, there are many WSDLs out there that do not specify
+        SOAP headers explicitly, yet the protocol still requires such headers
+        to be sent, so the JAX-WS RI offers convenient ways for you to
+        send/receive additional headers at runtime.</para>
+
+        <section xml:id="adding-soap-headers-when-sending-requests">
+            <title>Adding SOAP headers when sending requests</title>
+
+            <para>The portable way of doing this is that you creaate a
+            <code>SOAPHandler</code> and mess with SAAJ, but the RI provides a
+            better way of doing this.</para>
+
+            <para>When you create a proxy or dispatch object, they implement
+            <code>BindingProvider</code> interface. When you use the JAX-WS
+            RI, you can downcast to <code>WSBindingProvider</code> which
+            defines a few more methods provided only by the JAX-WS RI.</para>
+
+            <para>This interface lets you set an arbitrary number of
+            <code>Header</code> object, each representing a SOAP header. You
+            can implement it on your own if you want, but most likely you'd
+            use one of the factory methods defined on <code>Headers</code>
+            class to create one.</para>
+
+            <example>
+                <title>Adding custom headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">import com.sun.xml.ws.developer.WSBindingProvider;
+
+HelloPort port = helloService.getHelloPort();  // or something like that...
+WSBindingProvider bp = (WSBindingProvider) port;
+
+bp.setOutboundHeader(
+        // simple string value as a header, 
+        // like &lt;simpleHeader&gt;stringValue&lt;/simpleHeader&gt;
+        Headers.create(new QName("simpleHeader"), "stringValue"),
+        // create a header from JAXB object
+        Headers.create(jaxbContext, myJaxbObject)
+);</programlisting>
+            </example>
+
+            <para>Once set, it will take effect on all the successive methods.
+            If you'd like to see more factory methods on Headers, please let
+            us know.</para>
+        </section>
+
+        <section xml:id="accessing-soap-headers-for-incoming-messages">
+            <title>Accessing SOAP headers for incoming messages</title>
+
+            <para>Server can access all the SOAP headers of the incoming
+            messages by using the
+            <code>JAXWSProperties#INBOUND_HEADER_LIST_PROPERTY</code> property
+            like this:</para>
+
+            <example>
+                <title>Accessing incoming headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">@WebService
+public class FooService {
+    @Resource
+    WebServiceContext context;
+
+    @WebMethod
+    public void sayHelloTo(String name) {
+        HeaderList hl = context.getMessageContext().get(JAXWSProperties
+                .INBOUND_HEADER_LIST_PROPERTY);
+        Header h = hl.get(MYHEADER);
+    }
+
+    private static final QName MYHEADER = new QName("myNsUri", "myHeader");
+}</programlisting>
+            </example>
+
+            <para>Clients can similarly access all the SOAP headers of the
+            incoming messages:</para>
+
+            <example>
+                <title>Accessing incoming headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">HelloPort port = helloService.getHelloPort();  // or something like that...
+port.sayHelloTo("duke");
+HeaderList hl = port.getResponseContext().get(JAXWSProperties
+        .INBOUND_HEADER_LIST_PROPERTY);
+Header h = hl.get(MYHEADER);</programlisting>
+            </example>
+
+            <para>See the <code>Header</code> interface for more details about
+            how to access the header values.</para>
+        </section>
+
+        <section xml:id="adding-soap-headers-when-sending-replies">
+            <title>Adding SOAP headers when sending replies</title>
+
+            <para>Servers tend to be developed "from-Java" style, so we feel
+            the necessity of adding out-of-band headers is smaller (you can
+            just define headers as method
+            <code>@WebParam(mode=OUT,header=true)</code> parameters.)
+            Therefore, currently there's no support for adding out-of-band
+            SOAP headers into response messages.</para>
+
+            <para>If you'd like us to improve on this front, please let us
+            know.</para>
+        </section>
+
+        <section xml:id="mapping-additional-wsdl-headers-to-method-parameters">
+            <title>Mapping additional WSDL headers to method
+            parameters</title>
+
+            <para>Sometimes WSDLs in the binding section reference soap:header
+            messages that are not part of the input or output contract defined
+            in the portType operation. For example:</para>
+
+            <example>
+                <title>Sample WSDL with additional header bindings</title>
+
+                <programlisting language="xml" linenumbering="unnumbered">&lt;message name="additionalHeader"&gt;
+   &lt;part name="additionalHeader" element="types:additionalHeader"/&gt;
+&lt;/message&gt;
+
+&lt;wsdl:portType name="HelloPortType"&gt;
+   &lt;wsdl:operation name="echo"&gt;
+      &lt;wsdl:input message="tns:echoRequest"/&gt;
+      &lt;wsdl:output message="tns:echoResponse"/&gt;
+   &lt;/wsdl:operation&gt;
+&lt;/wsdl:portType&gt;
+
+&lt;wsdl:binding name="HelloBinding" type="tns:HelloPortType"&gt;
+   &lt;soap:binding style="document"
+                 transport="http://schemas.xmlsoap.org/soap/http"/&gt;
+   &lt;wsdl:operation name="echo"&gt;
+      &lt;soap:operation/&gt;
+      &lt;wsdl:input&gt;
+         &lt;soap:body message="tns:echoRequest"/&gt;
+         &lt;soap:header message="tns:additionalHeader"
+                      part="additionalHeader"/&gt;
+      &lt;/wsdl:input&gt;
+      &lt;wsdl:output&gt;
+         &lt;soap:body message="tns:echoResponse"/&gt;
+      &lt;/wsdl:output&gt;
+   &lt;/wsdl:operation&gt;
+&lt;/wsdl:binding&gt;</programlisting>
+            </example>
+
+            <para>In the above schema in the wsdl:binding section
+            tns:additionalHeader is bound but if you see this header is not
+            part of the <emphasis role="bold">echo</emphasis> abstract
+            contract (i.e., the wsdl:portType section). According to JAX-WS
+            2.1 specification only the wsdl:part's from the abstract portion
+            are mapped to Java method parameters.</para>
+
+            <para>Running wsimport on this wsdl will generate this method
+            signature:</para>
+
+            <programlisting>wsimport sample.wsdl</programlisting>
+
+            <example>
+                <title>Default mapping</title>
+
+                <programlisting language="java" linenumbering="unnumbered">public String echo(String request);</programlisting>
+            </example>
+
+            <note>
+                <para>Since JAX-WS RI 2.1.3, wsimport has a new option
+                -XadditionalHeaders, this option will map such additional
+                headers as method parameters.</para>
+            </note>
+
+            <programlisting>wsimport -XadditionalHeaders sample.wsdl</programlisting>
+
+            <example>
+                <title>WSDL to Java mapping with -XadditionalHeaders
+                switch</title>
+
+                <programlisting language="java" linenumbering="unnumbered">public String echo(String request, String additionalHeader);</programlisting>
+            </example>
+        </section>
+    </section>
+
+    <section xml:id="schema-validation">
+        <title>Schema Validation</title>
+
+        <para>SOAP messages are not validated against schemas by default with
+        the JAX-WS RI. However, this can be enabled for doc/lit cases. The
+        JAXWS-RI uses JAXP's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/javax/xml/validation/SchemaFactory.html">SchemaFactory</link>
+        API to do the validation.</para>
+
+        <section xml:id="server-side-schema-validation">
+            <title>Server Side Schema Validation</title>
+
+            <para>The <link
+            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/SchemaValidation.html?raw=true">
+            <code>@SchemaValidation</code> </link> annotation needs to be
+            specified on the endpoint implementation to enable server side
+            validation. Both the incoming SOAP request and outgoing SOAP
+            response will be validated, with exceptions returned to the client
+            for any validation errors that occur.</para>
+
+            <example>
+                <title>Enabling Schema Validation for an Endpoint</title>
+
+                <programlisting language="java" linenumbering="unnumbered">import com.sun.xml.ws.developer.SchemaValidation;
+...
+
+@SchemaValidation
+@WebService
+public class HelloImpl {
+}</programlisting>
+            </example>
+
+            <para>If a application wants to have complete control over
+            validation error handling, it can set up a <link
+            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/ValidationErrorHandler.html?raw=true"><code>ValidationErrorHandler</code></link>
+            to receive notification of errors. The handler has access to the
+            <link
+            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/api/message/Packet.html?raw=true"><code>Packet</code></link>
+            and can store any information in its invocationProperties. These
+            properties are accessible from the endpoint's
+            <code>MessageContext</code>.</para>
+
+            <example>
+                <title>Customizing Schema Validation</title>
+
+                <programlisting language="java" linenumbering="unnumbered">@SchemaValidation(handler = MyErrorHandler.class)
+@WebService
+public class HelloImpl {
+}
+
+import com.sun.xml.ws.developer.ValidationErrorHandler;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXException;
+
+public class MyErrorHandler extends ValidationErrorHandler {
+    public void warning(SAXParseException e) throws SAXException {
+        // Store warnings in the packet so that they can be retrieved 
+        // from the endpoint
+        packet.invocationProperties.put("error", e);
+    }
+
+    public void error(SAXParseException e) throws SAXException {
+        throw e;
+    }
+
+    public void fatalError(SAXParseException e) throws SAXException {
+        ; // noop
+    }
+}</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="client-side-schema-validation">
+            <title>Client Side Schema Validation</title>
+
+            <para>Proxy needs to be created with <link
+            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/SchemaValidationFeature.html?raw=true"><code>SchemaValidationFeature</code></link>
+            to enable client side validation. Both the outgoing SOAP request
+            and incoming SOAP response will be validated.</para>
+
+            <example>
+                <title>Enabling Proxy with Schema Validation</title>
+
+                <programlisting language="java" linenumbering="unnumbered">import com.sun.xml.ws.developer.SchemaValidationFeature;
+...
+
+SchemaValidationFeature feature = new SchemaValidationFeature();
+HelloPort port = new HelloService.getHelloPort(feature);
+// All invocations on this port are validated</programlisting>
+            </example>
+
+            <para>If a client application wants to have complete control over
+            validation error handling, it can set up a
+            <code>ValidationErrorHandler</code> to receive notification of
+            errors. The handler has access to the <code>Packet</code> and can
+            store any information in its invocationProperties. These
+            properties are accessible from proxy's response context.</para>
+
+            <example>
+                <title>Customizing Schema Validation</title>
+
+                <programlisting language="java" linenumbering="unnumbered">SchemaValidationFeature feature =
+        new SchemaValidationFeature(MyErrorHandler.class);
+HelloPort port = new HelloService.getHelloPort(feature);
+// All invocations on this port will be validated</programlisting>
+            </example>
+        </section>
+    </section>
+</chapter>

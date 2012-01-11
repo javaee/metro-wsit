@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="ahibx" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Message Optimization</title>
+
+    <section xml:id="ahiby">
+        <title>Creating a MTOM Web Service</title>
+
+        <para>The starting point for developing a web service to use WSIT is a
+        Java class file annotated with the <code>javax.jws.WebService</code>
+        annotation.</para>
+
+        <para>For detailed instructions for how to use NetBeans IDE to create
+        a web service, see <xref linkend="ahibp"
+        xrefstyle="select:title" />.</para>
+    </section>
+
+    <section xml:id="ahibz">
+        <title>Configuring Message Optimization in a Web Service</title>
+
+        <para>To use the IDE to configure a web service for message
+        optimization, perform the following steps.</para>
+
+        <task>
+            <title>To Configure Message Optimization in a Web Service</title>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">In the IDE
+                    <guilabel>Projects</guilabel> window, expand the
+                    <guilabel>Web Services</guilabel> node, right-click the
+                    <guilabel>CalculatorWSService</guilabel> node, and choose
+                    <guilabel>Edit Web Service Attributes</guilabel>.
+                    </emphasis></para>
+
+                    <para>The <guilabel>Web Service Attributes</guilabel>
+                    editor appears.</para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Select the <guilabel>Optimize
+                    Transfer of Binary Data (MTOM)</guilabel> check box, as
+                    shown in <xref linkend="gfrdw"
+                    xrefstyle="select:title" />, and click
+                    <guibutton>OK</guibutton>.</emphasis></para>
+
+                    <para>This setting configures the web service to optimize
+                    messages that it transmits and to decode optimized
+                    messages that it receives.</para>
+
+                    <figure xml:id="gfrdw">
+                        <title>Enabling MTOM</title>
+
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata contentdepth="100%"
+                                           fileref="figures/MTOM_screen.png"
+                                           scalefit="1" width="100%"></imagedata>
+                            </imageobject>
+
+                            <textobject>
+                                <simpara>Screen shot of MTOM checkbox</simpara>
+                            </textobject>
+                        </mediaobject>
+                    </figure>
+                </step>
+            </procedure>
+        </task>
+    </section>
+
+    <section xml:id="ahica">
+        <title>Deploying and Testing a Web Service with Message Optimization
+        Enabled</title>
+
+        <para>Now that you have configured the web service to use message
+        optimization, you can deploy and test it.</para>
+
+        <task>
+            <title>To Deploy and Test a Web Service with Message Optimization
+            Enabled</title>
+
+            <tasksummary>
+                <para>To deploy and test the web service, perform the
+                following steps.</para>
+            </tasksummary>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">Right-click the project node
+                    and select <guimenuitem>Properties</guimenuitem>, then
+                    select <guimenuitem>Run</guimenuitem>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Type
+                    <code>/CalculatorWSService?wsdl</code> in the
+                    <guilabel>Relative URL</guilabel> field and click
+                    <guibutton>OK</guibutton>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click the project node
+                    and choose <guimenuitem>Run</guimenuitem>.
+                    </emphasis></para>
+
+                    <para>The IDE starts the web container, builds the
+                    application, and displays the WSDL file page in your
+                    browser.</para>
+
+                    <para>The following WSIT tags related to message
+                    optimization display in the WSDL file:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">&lt;ns1:Policy wsu:Id="CalculatorWSPortBindingPolicy"/&gt;
+  &lt;ns1:ExactlyOne&gt;
+    &lt;ns1:All&gt;
+      &lt;ns2:OptimizedMimeSerialization/&gt;
+        &lt;ns3:RMAssertion/&gt;
+          &lt;ns4:UsingAddressing ns1:Optional="true"/&gt;
+    &lt;/ns1:All&gt;
+  &lt;/ns1:ExactlyOne&gt;
+&lt;/ns1:Policy&gt;</programlisting>
+                    </example>
+                </step>
+            </procedure>
+        </task>
+    </section>
+
+    <section xml:id="ahicb">
+        <title>Creating a Client to Consume a Message Optimization-enabled Web
+        Service</title>
+
+        <para>Now that you have built and tested a web service that uses the
+        WSIT Message Optimization technology, you can create a client that
+        accesses and consumes that web service. The client will use the web
+        service's WSDL to create the functionality necessary to satisfy the
+        interoperability requirements of the web service.</para>
+
+        <task xml:id="gfrcw">
+            <title>To Create a Client to Consume a WSIT-enabled Web
+            Service</title>
+
+            <tasksummary>
+                <para>To create a client to access and consume the web
+                service, perform the following steps.</para>
+            </tasksummary>
+
+            <procedure>
+                <step>
+                    <para><emphasis role="bold">Choose <menuchoice>
+                            <guimenu>File</guimenu>
+
+                            <guimenuitem>New Project</guimenuitem>
+                        </menuchoice>, select <guilabel>Java Web</guilabel>
+                    from the <guilabel>Web category</guilabel> and click
+                    <guibutton>Next</guibutton>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Name the project, for example,
+                    CalculatorWSServletClient, and click
+                    <guibutton>Finish</guibutton>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click the
+                    <guilabel>CalculatorWSServletClient</guilabel> node and
+                    select <menuchoice>
+                            <guimenu>New</guimenu>
+
+                            <guimenuitem>Web Service Client</guimenuitem>
+                        </menuchoice>. </emphasis></para>
+
+                    <para>The <guilabel>New Web Service Client</guilabel>
+                    window displays.</para>
+
+                    <note>
+                        <para>NetBeans submenus are dynamic, so the
+                        <guilabel>Web Service Client</guilabel> option may not
+                        appear. If you do not see the <guilabel>Web Service
+                        Client</guilabel> option, select <menuchoice>
+                                <guisubmenu>New</guisubmenu>
+
+                                <guisubmenu>File\Folder</guisubmenu>
+
+                                <guisubmenu>Webservices</guisubmenu>
+
+                                <guimenuitem>Web Service Client</guimenuitem>
+                            </menuchoice>.</para>
+                    </note>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Select the <guilabel>WSDL
+                    URL</guilabel> option.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Cut and paste the URL of the
+                    web service that you want the client to consume into the
+                    <guilabel>WSDL URL</guilabel> field. </emphasis></para>
+
+                    <para>For example, here is the URL for the
+                    <code>CalculatorWS</code> web service:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">http://localhost:8080/CalculatorApplication/CalculatorWSService?wsdl</programlisting>
+                    </example>
+
+                    <para>When JAX-WS generates the web service, it appends
+                    <code>Service</code> to the class name by default.</para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Type
+                    <code>org.me.calculator.client</code> in the
+                    <guilabel>Package</guilabel> field, and click
+                    <guibutton>Finish</guibutton>. </emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click the
+                    <guilabel>CalculatorWSServletClient</guilabel> project
+                    node and choose <menuchoice>
+                            <guisubmenu>New</guisubmenu>
+
+                            <guimenuitem>Servlet</guimenuitem>
+                        </menuchoice>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Name the servlet
+                    <code>ClientServlet</code>, specify the package name, for
+                    example, <code>org.me.calculator.client</code> and click
+                    <guibutton>Finish</guibutton>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">To make the servlet the entry
+                    point to your application, right-click the
+                    <guilabel>CalculatorWSServletClient</guilabel> project
+                    node, choose <guimenuitem>Properties</guimenuitem>, click
+                    <guilabel>Run</guilabel>, type <code>/ClientServlet</code>
+                    in the <guilabel>Relative URL</guilabel> field, and click
+                    <guibutton>OK</guibutton>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">If
+                    <code>ClientServlet.java</code> is not already open in the
+                    <guilabel>Source Editor</guilabel>, open
+                    it.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">In the <guilabel>Source
+                    Editor</guilabel>, remove the line that comments out the
+                    body of the <code>processRequest</code> method.
+                    </emphasis></para>
+
+                    <para>This is the start-comment line that starts the
+                    section that comments out the code:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">/* TODO output your page here</programlisting>
+                    </example>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Delete the end-comment line
+                    that ends the section of commented out code:</emphasis>
+                    <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">*/</programlisting>
+                        </example></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Add some empty lines after the
+                    following line:</emphasis> <example>
+                            <programlisting language="java"
+                                            linenumbering="unnumbered">out.println("&lt;h1&gt;Servlet ClientServlet at " +
+        request.getContextPath () + "&lt;/h1&gt;");</programlisting>
+                        </example></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click in one of the
+                    empty lines that you added, then choose <menuchoice>
+                            <guisubmenu>Web Service Client
+                            Resources</guisubmenu>
+
+                            <guimenuitem>Call Web Service
+                            Operation</guimenuitem>
+                        </menuchoice>. </emphasis></para>
+
+                    <para>The <guilabel>Select Operation to Invoke</guilabel>
+                    dialog box appears.</para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Browse to the <guilabel>Add
+                    operation</guilabel> and click <guibutton>OK</guibutton>.
+                    </emphasis></para>
+
+                    <para>The <code>processRequest</code> method is as
+                    follows, with bold indicating code added by the
+                    IDE:</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">protected void processRequest(HttpServletRequest request, 
+                              HttpServletResponse response) throws 
+        ServletException, IOException {
+    
+    response.setContentType("text/html;charset=UTF-8");
+    PrintWriter out = response.getWriter();
+    out.println("&lt;html&gt;");
+    out.println("&lt;head&gt;");
+    out.println("&lt;title&gt;Servlet ClientServlet&lt;/title&gt;");
+    out.println("&lt;/head&gt;");
+    out.println("&lt;body&gt;");
+    out.println("&lt;h1&gt;Servlet ClientServlet at " + request
+            .getContextPath() + "&lt;/h1&gt;");
+    try { // Call Web Service Operation
+        org.me.calculator.client.CalculatorWS port = service
+                .getCalculatorWSPort();
+        // TODO initialize WS operation arguments here
+        int i = 0;
+        int j = 0;
+        // TODO process result here
+        int result = port.add(i, j);
+        out.println("Result = " + result);
+    } catch (Exception ex) {
+        // TODO handle custom exceptions here
+    }
+    out.println("&lt;/body&gt;");
+    out.println("&lt;/html&gt;");
+    out.close();
+}</programlisting>
+                    </example>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Change the values for
+                    <code>int i</code> and <code>int j</code> to other
+                    numbers, such as 3 and 4.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Add a line that prints out an
+                    exception, if an exception is thrown. </emphasis></para>
+
+                    <para>The <code>try/catch</code> block is as follows (new
+                    and changed lines from this step and the previous step are
+                    highlighted in bold text):</para>
+
+                    <example>
+                        <programlisting language="java"
+                                        linenumbering="unnumbered">try { // Call Web Service Operation
+    org.me.calculator.client.CalculatorWS port = service
+            .getCalculatorWSPort();
+    // TODO initialize WS operation arguments here
+    int i = 3;
+    int j = 4;
+    // TODO process result here
+    int result = port.add(i, j);
+    out.println("&lt;p&gt;Result: " + result);
+} catch (Exception ex) {
+    out.println("&lt;p&gt;Exception: " + ex);
+}</programlisting>
+                    </example>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Save
+                    <code>ClientServlet.java</code>.</emphasis></para>
+                </step>
+
+                <step>
+                    <para><emphasis role="bold">Right-click the project node
+                    and choose <guimenuitem>Run</guimenuitem>.
+                    </emphasis></para>
+
+                    <para>The server starts (if it was not running already),
+                    the application is built, deployed, and run. The browser
+                    opens and displays the calculation result.</para>
+                </step>
+            </procedure>
+        </task>
+    </section>
+
+    <section xml:id="ahicc">
+        <title>Message Optimization and Secure Conversation</title>
+
+        <para>The Web Services Secure Conversation technology has message
+        optimization benefits. While providing better message-level security
+        it also improves the efficiency of multiple-message exchanges. It
+        accomplishes this by providing basic mechanisms on top of which secure
+        messaging semantics can be defined for multiple-message exchanges.
+        This feature allows for contexts to be established so that potentially
+        more efficient keys or new key material can be exchanged. The result
+        is that the overall performance of subsequent message exchanges is
+        improved.</para>
+
+        <para>For more information on how to use Secure Conversation, see
+        <xref linkend="ahici" xrefstyle="select:title" />.</para>
+    </section>
+</chapter>

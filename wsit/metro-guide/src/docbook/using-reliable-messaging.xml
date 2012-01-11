@@ -1,0 +1,1161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="using_rm" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Using Reliable Messaging</title>
+
+    <section xml:id="using_rm-config">
+        <title>Introduction to Reliable Messaging</title>
+
+        <para>In the SOAP messaging world, presence of software, system or
+        network failures is a common issue web service developers need to deal
+        with. This issue is even more obvious in mobile applications which
+        access the corporate network through mobile-enabled channels with
+        limited connectivity and connection quality, such as WiFi, UMTS or
+        GPRS.</para>
+
+        <para>WS-ReliableMessaging specification, an OASIS standard, addresses
+        this issue by defining a modular mechanism for reliable transfer of
+        messages. It defines a messaging protocol to identify, track, and
+        manage the reliable transfer of messages between a source and a
+        destination in an interoperable fashion. The modularity and the
+        extension points defined in the mechanism allows integration of other
+        quality of service features, such as message level security.</para>
+
+        <para>Metro implementation of reliable messaging is based o
+        WS-ReliableMessaging. As other Quality of Service features, Reliable
+        Messaging is configured via WS-Policy expressions stored in the WSDL
+        document of a web service or in the web service's WSIT configuration
+        file. These XML-based expressions are designed for machine processing
+        rather than for human readability. Metro comes with a tooling support
+        in the form of a plug-in for <link
+        xlink:href="http://www.netbeans.org">NetBeans IDE</link> which
+        provides a convenient way to configure reliable messaging feature for
+        your web services. It provides a dialog-based wizard that lets you
+        fine-tune a few reliable messaging configuration properties. In
+        general, the properties you configure on the web service endpoint
+        apply to the web service client as well. On the other hand, the
+        client-side configuration options have only local effect and let you
+        tweak the client-specific behavior.</para>
+
+        <para>In the following sections we will look at enabling reliable
+        messaging with Metro in more detail. These sections also contain
+        tables that describe configuration options in more detail for service
+        endpoint (<xref linkend="using_rm-config_endpoint"
+        xrefstyle="select:title" />) as well as service client (<xref
+        linkend="client_rm_config_options" xrefstyle="select:title" />)
+        side.</para>
+    </section>
+
+    <section xml:id="using_rm-config_endpoint">
+        <title>Configuring Web Service Endpoint</title>
+
+        <para>When creating a reliable web service, you first start by
+        creating a web service using common steps described in section <xref
+        linkend="using_metro-developing_with_nb" xrefstyle="select:title" />.
+        Once the web service is created, a design view of the web service
+        should open in the editor window. If the design view is not opened,
+        locate your web service in the <guilabel>Projects</guilabel><emphasis
+        role="bold"></emphasis> view and double-click the web service to open
+        it in the editor window.</para>
+
+        <para>In the design view, there is a <guilabel>Quality of
+        Service</guilabel> section as show on the picture below: <figure
+                xml:id="f0.21865766008323695">
+                <title>Quality of Service (NetBeans)</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/nb6_5-qos-ws-design-view.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+                </mediaobject>
+            </figure> In this section you may either simply check the
+        <guilabel>Reliable Message Delivery</guilabel> checkbox and accept the
+        Reliable Messaging configuration defaults, which means that your RM
+        configuration for your web service is done, or you may click the
+        <guibutton>Advanced</guibutton> button to display the
+        <guilabel>Quality of Service</guilabel> dialog as shown on the picture
+        below. <figure xml:id="f0.19917454831806913">
+                <title>Quality of Service - Advanced (NetBeans)</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/nb6_5-qos-dialog-main.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+                </mediaobject>
+            </figure> <note>
+                <para>You may alternatively access the <guilabel>Quality of
+                Service</guilabel> dialog by right clicking on a web service
+                in the <guilabel>Projects</guilabel> view and selecting
+                <guilabel>Edit Web Service Attributes</guilabel> from the
+                context pop-up menu.</para>
+            </note> The Quality of Service dialog contains more configuration
+        options for Reliable Messaging. Some of these are accessible direclty
+        while the most advance configuration details are hidden behind the
+        <guilabel>Advanced</guilabel> button in a seprate dialog presented on
+        the next picture. <figure xml:id="f0.006706294753032083">
+                <title>Advanced Reliable Messaging Attributes
+                (NetBeans)</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/nb6_5-qos-dialog-advanced-rm.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+                </mediaobject>
+            </figure></para>
+
+        <para>In order to provide better overview of the RM configuration
+        options, we included the following table that povides a detailed
+        description of all the reliable messaging configuration options
+        available on the service endpoint.</para>
+
+        <table xml:id="endpoint_rm_config_options">
+            <title>Reliable Messaging Configuration Options for Service
+            Endpoint</title>
+
+            <tgroup cols="2" colsep="0" rowsep="0">
+                <colspec />
+
+                <colspec colwidth="2*" />
+
+                <thead>
+                    <row>
+                        <entry>Option</entry>
+
+                        <entry>Description</entry>
+                    </row>
+                </thead>
+
+                <tbody>
+                    <row>
+                        <entry>Reliable Message Delivery</entry>
+
+                        <entry>Enables or disables reliable messaging
+                        feature.</entry>
+                    </row>
+
+                    <row>
+                        <entry>Deliver Messages In Exact Order</entry>
+
+                        <entry><para>Specifies whether the Reliable Messaging
+                        protocol ensures that the application messages for a
+                        given message sequence are delivered to the endpoint
+                        application in the order indicated by the message
+                        numbers.</para><para>This option increases the time to
+                        process application message sequences and may result
+                        in the degradation of web service performance.
+                        Therefore, you should not enable this option unless
+                        ordered delivery is required by the web
+                        service.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry>Message Delivery Assurance</entry>
+
+                        <entry>This option tells our Reliable Messaging
+                        implementation what type of the message delivery
+                        assurance is expected. Currently it can be set to
+                        "Exactly Once" and "At Least Once". <itemizedlist>
+                                <listitem>
+                                    <para><emphasis role="bold">Exactly Once</emphasis>
+                                    delivery assurance, as the name suggests, guarantees
+                                    that each message request from the web service
+                                    client will be delivered to the web service endpoint
+                                    once and only once. By default, this delivery
+                                    assurance strategy is applied.</para>
+                                </listitem>
+
+                                <listitem>
+                                    <para><emphasis role="bold">At Least Once</emphasis>
+                                    delivery assurance guarantees that each message
+                                    request from the web service client will be
+                                    delivered to the web service endpoint, however it is
+                                    possible that duplicate messages may be delivered
+                                    under some circumstances. In general, this type of
+                                    delivery assurance may provide better
+                                    performance.</para>
+                                </listitem>
+                            </itemizedlist></entry>
+                    </row>
+
+                    <row>
+                        <entry>Flow Control</entry>
+
+                        <entry>Enables or disables the flow control feature.
+                        When enabled, this feature works in conjunction with
+                        the Max Buffer Size setting to determine the maximum
+                        number of messages for sequence that can be stored at
+                        the endpoint awaiting delivery to the application.
+                        Messages may have to be withheld from the application
+                        if ordered delivery is required and some of their
+                        predecessors have not arrived. If the number of stored
+                        messages reaches the threshold specified in the Max
+                        Buffer Size setting, incoming messages belonging to
+                        the sequence are ignored.</entry>
+                    </row>
+
+                    <row>
+                        <entry>Maximum Flow Control Buffer Size</entry>
+
+                        <entry>If Flow control is enabled, this value
+                        specifies the number of request messages that will be
+                        buffered in the RM session. The default setting is 32.
+                        For more information, see the description of the Flow
+                        Control option.</entry>
+                    </row>
+
+                    <row>
+                        <entry>Inactivity Timeout</entry>
+
+                        <entry><para>Specifies the time interval beyond which
+                        either source or destination may terminate the RM
+                        session due to inactivity. The default setting is
+                        600,000 milliseconds (10 minutes). A web service
+                        endpoint will always terminate session whose
+                        inactivity timeout has expired.</para><para>This
+                        option may be used to ensure the early removal of
+                        stale RM sequences and thus reduce the memory
+                        footprint of the service endpoint. Note that setting
+                        the value of this option affects also the web service
+                        proxy usage patterns in the client
+                        applications.</para></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </section>
+
+    <section xml:id="using_rm-config_client">
+        <title>Configuring Web Service Client</title>
+
+        <para>While most of the Reliable Messaging options are configured on
+        the web service endpoint, there are some details that may be
+        fine-tuned on the client side as well. To configure the client-side
+        details of Reliable Messaging you first need to create a web service
+        proxy. Section <xref
+        linkend="wsit_example_with_nb-creating_wsit_client"
+        xrefstyle="select:title" /> describes all the necessary steps.</para>
+
+        <para>Once a web service proxy is created, you can find it in the
+        <guilabel>Projects</guilabel> view under <guilabel>Web Service
+        References</guilabel> item. By right-clicking on the we service proxy
+        and selecting <guilabel>Edit Web Service Attributes</guilabel> from
+        the opened context pop-up menu you may open a dialog that let's you
+        specify additional RM details.</para>
+
+        <para>When dialog opens, it may have multiple tabs. The Reliable
+        messaging configuration options are located on the <guilabel>Quality
+        of Service</guilabel> tab in <guilabel>Advanced
+        Configuration</guilabel> section. Following table describes all the
+        reliable messaging configuration options available on the web service
+        client side.</para>
+
+        <table xml:id="client_rm_config_options">
+            <title>Reliable Messaging Configuration Options for Service
+            Client</title>
+
+            <tgroup cols="2" colsep="0" rowsep="0">
+                <colspec />
+
+                <colspec colwidth="2*" />
+
+                <thead>
+                    <row>
+                        <entry>Option</entry>
+
+                        <entry>Description</entry>
+                    </row>
+                </thead>
+
+                <tbody>
+                    <row>
+                        <entry>RM Resend Interval</entry>
+
+                        <entry>The time in milliseconds after which the sender
+                        (RMSource) attempts to redeliver unacknowledged
+                        messages to the Reliable Messaging Destination
+                        (RM-enabled WS endpoint). By default, resend happen
+                        every 2000ms.</entry>
+                    </row>
+
+                    <row>
+                        <entry>RM Close Timeout</entry>
+
+                        <entry>By default, the call to proxy.close() will not
+                        return until all messages have been acknowledged. RM
+                        close timeout is the interval (in milliseconds) that
+                        the client runtime will block waiting for a call to
+                        close() to return. If there are still unacknowledged
+                        messages after this interval is reached, and the call
+                        to close has returned, an error will be logged about
+                        messages being lost.</entry>
+                    </row>
+
+                    <row>
+                        <entry>RM Ack Request Interval</entry>
+
+                        <entry>The suggested minimum time that the sender
+                        (RMSource) should allow to elapse between sending
+                        consecutive Acknowledgement request messages to the
+                        Reliable Messaging Destination (RM-enabled WS
+                        endpoint).</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </section>
+
+    <section xml:id="advanced_rm_configuration">
+        <title>Configurable features summary</title>
+
+        <para>In the previous chapter we focused on configuring Metro reliable
+        messaging using <link xlink:href="http://www.netbeans.org">NetBeans
+        IDE</link>. This section is a summary of all Metro reliable messaging
+        runtime features that can be configured since Metro v2.0 and higher.
+        The summary lists all the features discussed before as well as all
+        other features that can be only configured by manually editing the
+        WSIT config file.</para>
+
+        <para>Please note that this chapter focuses on features configurable
+        with Metro v2.0 and higher.</para>
+
+        <table xml:id="rm_assertion_namespaces">
+            <title>Namespaces used within Metro Reliable Messaging WS-Policy
+            Assertions</title>
+
+            <tgroup cols="2" colsep="0" rowsep="0">
+                <thead>
+                    <row>
+                        <entry>Prefix</entry>
+
+                        <entry>Namespace</entry>
+                    </row>
+                </thead>
+
+                <tbody>
+                    <row>
+                        <entry>wsp</entry>
+
+                        <entry>http://www.w3.org/ns/ws-policy</entry>
+                    </row>
+
+                    <row>
+                        <entry>wsrmp10</entry>
+
+                        <entry>http://schemas.xmlsoap.org/ws/2005/02/rm/policy</entry>
+                    </row>
+
+                    <row>
+                        <entry>wsrmp</entry>
+
+                        <entry>http://docs.oasis-open.org/ws-rx/wsrmp/200702</entry>
+                    </row>
+
+                    <row>
+                        <entry>net30rmp</entry>
+
+                        <entry>http://schemas.microsoft.com/net/2005/02/rm/policy</entry>
+                    </row>
+
+                    <row>
+                        <entry>net35rmp</entry>
+
+                        <entry>http://schemas.microsoft.com/ws-rx/wsrmp/200702</entry>
+                    </row>
+
+                    <row>
+                        <entry>sunrmp</entry>
+
+                        <entry>http://sun.com/2006/03/rm</entry>
+                    </row>
+
+                    <row>
+                        <entry>sunrmcp</entry>
+
+                        <entry>http://sun.com/2006/03/rm/client</entry>
+                    </row>
+
+                    <row>
+                        <entry>metro</entry>
+
+                        <entry>http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table xml:id="rm_feature_summary">
+            <title>Reliable Messaging Configuration Features - Layout</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry><emphasis role="bold">Feature
+                        name</emphasis></entry>
+                    </row>
+
+                    <row>
+                        <entry><emphasis
+                        role="bold">Description</emphasis></entry>
+                    </row>
+
+                    <row>
+                        <entry><emphasis role="bold">WS-RM 1.0 compatible
+                        assertion</emphasis></entry>
+                    </row>
+
+                    <row>
+                        <entry><emphasis role="bold">WS-RM 1.1+ compatible
+                        assertion</emphasis></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Enable Reliable Messaging + version</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Enable Reliable Messaging + version</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies that WS-ReliableMessaging protocol
+                        MUST be used when sending messages. Defines also the
+                        version of the WS-RM protocol to be used.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp10:RMAssertion</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Sequence Inactivity Timeout</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Sequence Inactivity Timeout</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies the time interval beyond which either
+                        RM Source or RM Destination may terminate the RM
+                        sequence due to inactivity. The default setting is
+                        600,000 milliseconds (10 minutes). A web service
+                        endpoint will always terminate session whose
+                        inactivity timeout has expired. Specified in
+                        milliseconds.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp10:RMAssertion/wsrmp10:InactivityTimeout</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net35rmp:InactivityTimeout</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Acknowledgement interval</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Acknowledgement interval</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies the duration after which the RM
+                        Destination will transmit an acknowledgement. If
+                        omitted, there is no implied value. Specified in
+                        milliseconds.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp10:RMAssertion/wsrmp10:AcknowledgementInterval</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net35rmp:AcknowledgementInterval</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Retransmission Interval</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Retransmission Interval</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies how long the RM Source will wait
+                        after transmitting a message and before retransmitting
+                        the message. If omitted, there is no implied value.
+                        Specified in milliseconds.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp10:RMAssertion/wsrmp10:BaseRetransmissionInterval</code><code>/sunrmcp:ResendInterval</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:RetransmissionConfig/metro:Interval</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Retransmission Interval Adjustment Algorithm</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Retransmission Interval Adjustment
+                        Algorithm</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies that the retransmission interval will
+                        be adjusted using a specific (e.g. exponential
+                        back-off) algorithm.</entry>
+                    </row>
+
+                    <row>
+                        <entry><para><code>/wsrmp10:RMAssertion/wsrmp10:ExponentialBackoff</code></para><para>("Exponential
+                        backoff" algorithm only)</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:RetransmissionConfig/metro:Algorithm</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Maximum Retransmission Count</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Maximum Retransmission Count</entry>
+                    </row>
+
+                    <row>
+                        <entry><para>A message is considered to be transferred
+                        if its delivery at the recipient has been acknowledged
+                        by the recipient.</para><para>If an acknowledgment has
+                        not been received within a certain amount of time for
+                        a message that has been transmitted, the
+                        infrastructure automatically retransmits the message.
+                        The infrastructure tries to send the message for at
+                        most a preconfigured number of times. Not receiving an
+                        acknowledgment before this limit is reached is
+                        considered a fatal communication failure, and causes
+                        the RM session to fail.</para></entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:RetransmissionConfig/metro:MaxRetries</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Close sequence timeout</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Close sequence timeout</entry>
+                    </row>
+
+                    <row>
+                        <entry>By default, the call to proxy.close() will not
+                        return until all messages have been acknowledged. RM
+                        close timeout is the interval (in milliseconds) that
+                        the client runtime will block waiting for a call to
+                        close() to return. If there are still unacknowledged
+                        messages after this interval is reached, and the call
+                        to close has returned, an error will be logged about
+                        messages being lost.</entry>
+                    </row>
+
+                    <row>
+                        <entry><para><code>/sunrmcp:CloseTimeout</code></para><para>(client
+                        side only)</para></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:CloseSequenceTimeout</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Acknowledgement request interval</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Acknowledgement request interval</entry>
+                    </row>
+
+                    <row>
+                        <entry>Defines the suggested minimum time that the
+                        sender (RM Source) should allow to elapse between
+                        sending consecutive Acknowledgement request messages
+                        to the RM Destination.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/sunrmcp:AckRequestInterval</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:AckRequestInterval</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Bind RM sequence to security token</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Bind RM sequence to security token</entry>
+                    </row>
+
+                    <row>
+                        <entry>Defines the requirement that an RM Sequence
+                        MUST be bound to an explicit token that is referenced
+                        from a wsse:SecurityTokenReference in the
+                        CreateSequence message.</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:SequenceSTR</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Bind RM sequence to secured transport</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Bind RM sequence to secured transport</entry>
+                    </row>
+
+                    <row>
+                        <entry>Defines the requirement that an RM Sequence
+                        MUST be bound to the session(s) of the underlying
+                        transport-level protocol used to carry the
+                        CreateSequence and CreateSequenceResponse message.
+                        (When present, this assertion MUST be used in
+                        conjunction with the sp:TransportBinding
+                        assertion.)</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:SequenceTransportSecurity</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Exactly once delivery</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Exactly once delivery</entry>
+                    </row>
+
+                    <row>
+                        <entry>Each message is to be delivered exactly once;
+                        if a message cannot be delivered then an error MUST be
+                        raised by the RM Source and/or RM Destination. The
+                        requirement on an RM Source is that it SHOULD retry
+                        transmission of every message sent by the Application
+                        Source until it receives an acknowledgement from the
+                        RM Destination. The requirement on the RM Destination
+                        is that it SHOULD retry the transfer to the
+                        Application Destination of any message that it accepts
+                        from the RM Source until that message has been
+                        successfully delivered, and that it MUST NOT deliver a
+                        duplicate of a message that has already been
+                        delivered.</entry>
+                    </row>
+
+                    <row>
+                        <entry>default</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:DeliveryAssurance/wsp:Policy/wsrmp:ExactlyOnce</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>At Most once delivery</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>At Most once delivery</entry>
+                    </row>
+
+                    <row>
+                        <entry>Each message is to be delivered at most once.
+                        The RM Source MAY retry transmission of unacknowledged
+                        messages, but is NOT REQUIRED to do so. The
+                        requirement on the RM Destination is that it MUST
+                        filter out duplicate messages, i.e. that it MUST NOT
+                        deliver a duplicate of a message that has already been
+                        delivered.</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:DeliveryAssurance/wsp:Policy/wsrmp:AtMostOnce</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>At Least once delivery</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>At Least once delivery</entry>
+                    </row>
+
+                    <row>
+                        <entry>Each message is to be delivered at least once,
+                        or else an error MUST be raised by the RM Source
+                        and/or RM Destination. The requirement on an RM Source
+                        is that it SHOULD retry transmission of every message
+                        sent by the Application Source until it receives an
+                        acknowledgement from the RM Destination. The
+                        requirement on the RM Destination is that it SHOULD
+                        retry the transfer to the Application Destination of
+                        any message that it accepts from the RM Source, until
+                        that message has been successfully delivered. There is
+                        no requirement for the RM Destination to apply
+                        duplicate message filtering.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/sunrmcp:AllowDuplicates</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:DeliveryAssurance/wsp:Policy/wsrmp:AtLeastOnce</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>InOrder delivery</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>InOrder delivery</entry>
+                    </row>
+
+                    <row>
+                        <entry>Messages from each individual Sequence are to
+                        be delivered in the same order they have been sent by
+                        the Application Source. The requirement on an RM
+                        Source is that it MUST ensure that the ordinal
+                        position of each message in the Sequence (as indicated
+                        by a message Sequence number) is consistent with the
+                        order in which the messages have been sent from the
+                        Application Source. The requirement on the RM
+                        Destination is that it MUST deliver received messages
+                        for each Sequence in the order indicated by the
+                        message numbering. This DeliveryAssurance can be used
+                        in combination with any of the AtLeastOnce, AtMostOnce
+                        or ExactlyOnce assertions, and the requirements of
+                        those assertions MUST also be met. In particular if
+                        the AtLeastOnce or ExactlyOnce assertion applies and
+                        the RM Destination detects a gap in the Sequence then
+                        the RM Destination MUST NOT deliver any subsequent
+                        messages from that Sequence until the missing messages
+                        are received or until the Sequence is closed.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/sunrmp:Ordered</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/wsrmp:RMAssertion/wsp:Policy/wsrmp:DeliveryAssurance/wsp:Policy/wsrmp:InOrder</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Flow Control</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Flow Control</entry>
+                    </row>
+
+                    <row>
+                        <entry>Enables or disables the flow control feature.
+                        When enabled, this feature works in conjunction with
+                        the Max Buffer Size setting to determine the maximum
+                        number of messages for sequence that can be stored at
+                        the endpoint awaiting delivery to the application.
+                        Messages may have to be withheld from the application
+                        if ordered delivery is required and some of their
+                        predecessors have not arrived. If the number of stored
+                        messages reaches the threshold specified in the Max
+                        Buffer Size setting, incoming messages belonging to
+                        the sequence are ignored.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net30rmp:RmFlowControl</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net30rmp:RmFlowControl</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Maximum Flow Control Buffer Size</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Maximum Flow Control Buffer Size</entry>
+                    </row>
+
+                    <row>
+                        <entry>If Flow control is enabled, this value
+                        specifies the number of request messages that will be
+                        buffered in the RM session. The default setting is 32.
+                        For more information, see the description of the Flow
+                        Control option.</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net30rmp:RmFlowControl/net30rmp:MaxReceiveBufferSize</code></entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/net30rmp:RmFlowControl/net30rmp:MaxReceiveBufferSize</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Maximum concurrent RM sessions</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Maximum concurrent RM sessions</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies how many concurrently active RM
+                        sessions (measured based on inbound RM sequences) the
+                        SequenceManager dedicated to the WS Endpoint accepts
+                        before starting to refuse new requests for sequence
+                        creation.</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:MaxConcurrentSessions</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Reliable Messaging Persistence</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Reliable Messaging Persistence</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies whether the runtime should use
+                        persistent sequence and message storage or
+                        not.</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:Persistent</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <table>
+            <title>Sequence manager maintenace task execution period</title>
+
+            <tgroup cols="1" colsep="1" rowsep="1">
+                <colspec align="center" />
+
+                <tbody>
+                    <row>
+                        <entry>Sequence manager maintenace task execution
+                        period</entry>
+                    </row>
+
+                    <row>
+                        <entry>Specifies the period (in milliseconds) of a
+                        sequence maintenance task execution. Sequence
+                        maintenance task takes care of terminating inactive
+                        sequences and removing the terminated sequences from
+                        the sequence repository.</entry>
+                    </row>
+
+                    <row>
+                        <entry>N/A</entry>
+                    </row>
+
+                    <row>
+                        <entry><code>/metro:MaintenanceTaskPeriod</code></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </section>
+
+    <section xml:id="using_rm-creating_ws_and_client">
+        <title>Creating Web Service Providers and Clients that use Reliable
+        Messaging</title>
+
+        <para>Examples and detailed instructions on how to create web service
+        providers and clients that use reliable messaging are provided in the
+        following chapters: <itemizedlist>
+                <listitem>
+                    <para>For an example of creating a web service and a
+                    client using a web container and NetBeans IDE, see <xref
+                    linkend="using_metro-developing_with_nb"
+                    xrefstyle="select:title" />.</para>
+                </listitem>
+
+                <listitem>
+                    <para>For an example of creating a web service and a
+                    client using only a web container, see <xref
+                    linkend="ahifl" xrefstyle="select:title" />.</para>
+                </listitem>
+            </itemizedlist></para>
+    </section>
+
+    <section xml:id="using_rm-with_sc">
+        <title>Using Secure Conversation With Reliable Messaging</title>
+
+        <para>If Secure Conversation is enabled for the web service endpoint,
+        the web service acquires a Security Context Token (SCT) for each
+        application message sequence, that is, each message sequence is
+        assigned a different SCT. The web service then uses that token to sign
+        all messages exchanged for that message sequence between the source
+        and destination for the life of the sequence. Hence, there are two
+        benefits in using Secure Conversation with Reliable Messaging:
+        <itemizedlist>
+                <listitem>
+                    <para>The sequence messages are secure while in transit
+                    between the source and destination endpoints.</para>
+                </listitem>
+
+                <listitem>
+                    <para>If there are different users accessing data at the
+                    source and destination endpoints, the SCT prevents users
+                    from seeing someone else's data. <note>
+                            <para>Secure Conversation is a WS-Security option,
+                            not a reliable messaging option. If Secure
+                            Conversation is enabled on the web service endpoint,
+                            Reliable Messaging uses Security Context
+                            Tokens.</para>
+                        </note></para>
+                </listitem>
+            </itemizedlist> For more information on how to use Secure
+        Conversation, see <xref linkend="ahici"
+        xrefstyle="select:title" />.</para>
+    </section>
+
+    <section xml:id="using_rm-ha_support">
+        <title>High Availability Support in Reliable Messaging</title>
+
+        <para>Starting with the <link
+        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link> Metro
+        implementation of reliable messaging supports deployment in clustered
+        environment configurations of the <link
+        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        Server 3.1 and higher. The only untested and thus currently officially
+        unsupported reliable messaging feature in an HA environment is
+        in-order message delivery. For more details see <link
+        xlink:href="http://wsit.java.net/status-notes/status-notes-2-1-FCS.html#rm">RM
+        section of the WSIT 2.1 Release Notes</link>.</para>
+
+        <para>For a general overview of Metro High Availability support,
+        please consult <xref linkend="using_metro-ha_support"
+        xrefstyle="select:title" /> section.</para>
+    </section>
+</chapter>

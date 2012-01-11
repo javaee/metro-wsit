@@ -338,6 +338,11 @@
                         </excludes-->
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.agilejava.docbkx</groupId>
+                    <artifactId>docbkx-maven-plugin</artifactId>
+                    <version>2.0.11</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -369,6 +374,7 @@
         <module>ws-sx</module>
         <module>ws-tx</module>
         <module>xmlfilter</module>
+        <module>metro-guide</module>
         <module>bundles</module>
         <!-- module>contribs</module -->
     </modules>

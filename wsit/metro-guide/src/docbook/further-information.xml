@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="furtherinfo" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Further Information</title>
+
+    <section xml:id="ahifd">
+        <title>Links to more information</title>
+
+        <para>For more information on Metro, visit the Metro web site at <link
+        xlink:href="http://metro.java.net/"> http://metro.java.net/</link> .
+        On that site, you will find information about the specifications
+        implemented in Metro product, source code, support information, links
+        to documentation updates, and much more.</para>
+
+        <para>Some other sources that contain blogs and/or screencasts about
+        using Metro include the following:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Sun Metro Bloggers:</para>
+
+                <para><link xlink:href="http://planets.sun.com/webservices/">
+                http://planets.sun.com/webservices/</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Metro: An Overview: (of the WSIT portion of
+                Metro)</para>
+
+                <para><link
+                xlink:href="http://wsit.java.net/docs/tango-overview.pdf">
+                http://wsit.java.net/docs/tango-overview.pdf</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Web Services blog:</para>
+
+                <para><link
+                xlink:href="http://blogs.sun.com/arungupta/category/webservices">
+                http://blogs.sun.com/arungupta/category/webservices</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Manual Web Service Configuration Starting From Java Case
+                (and others):</para>
+
+                <para><link
+                xlink:href="http://blogs.sun.com/japod/date/20070226">
+                http://blogs.sun.com/japod/date/20070226</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Develop WSTrust Application Using NetBeans (and
+                others):</para>
+
+                <para><link xlink:href="http://blogs.sun.com/shyamrao/">
+                http://blogs.sun.com/shyamrao/</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Security in Metro (and others):</para>
+
+                <para><link xlink:href="http://blogs.sun.com/ashutosh/">
+                http://blogs.sun.com/ashutosh/</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Metro Screencasts:</para>
+
+                <para><link
+                xlink:href="http://metro.java.net/discover/screencasts.html">
+                http://metro.java.net/discover/screencasts.html</link></para>
+            </listitem>
+
+            <listitem>
+                <para>WS-* Specifications Implemented by Metro:</para>
+
+                <para><link
+                xlink:href="http://wsit.java.net/specification-links.html">
+                http://wsit.java.net/specification-links.html</link></para>
+            </listitem>
+        </itemizedlist>
+    </section>
+</chapter>

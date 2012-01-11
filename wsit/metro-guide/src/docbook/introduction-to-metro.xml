@@ -1,0 +1,1390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="ahiaj" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Introduction to Metro</title>
+
+    <section xml:id="ahiae">
+        <title>Required Software</title>
+
+        <para>To use this guide, download and install the following
+        software:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><link
+                xlink:href="http://download.oracle.com/javase/">Oracle JavaSE
+                Runtime or Development Kit</link></para>
+            </listitem>
+
+            <listitem>
+                <para>Container (note: Metro can be run on any Servlet
+                container) <itemizedlist>
+                        <listitem>
+                            <para><link
+                            xlink:href="http://glassfish.java.net/public/downloadsindex.html">GlassFish
+                            Server</link></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><link
+                            xlink:href="http://tomcat.apache.org/">Tomcat
+                            Servlet Container</link></para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+
+            <listitem>
+                <para><link xlink:href="http://metro.java.net/">Metro</link>
+                binary. See the particular release page for instructions about
+                downloading and installing Metro in a servlet
+                container.</para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="http://netbeans.org/downloads/index.html">NetBeans
+                IDE</link> (Java version)</para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
+    <section xml:id="ahiak">
+        <title>What is WSIT?</title>
+
+        <para>For three years (and continuing) Sun has worked closely with
+        Microsoft to ensure interoperability of web services enterprise
+        technologies such as security , reliable messaging, and atomic
+        transactions. That portion of Metro is known as WSIT (Web Service
+        Interoperability Technologies). Metro's WSIT subsystem is an
+        implementation of a number of open web services specifications to
+        support enterprise features. In addition to security, reliable
+        messaging, and atomic transactions, Metro includes a bootstrapping and
+        configuration technology. <xref linkend="ahial"
+        xrefstyle="select:title" /> shows the underlying services that were
+        implemented for each technology.</para>
+
+        <figure xml:id="ahial">
+            <title>Metro's WSIT Web Services Features</title>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata contentdepth="100%"
+                               fileref="figures/WSITwebServicesFeatures.png"
+                               scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <textobject>
+                    <simpara>Diagram showing Metro's WSIT web services
+                    features: Core XML, Core Web Services, Bootstrapping,
+                    Security, and Reliability</simpara>
+                </textobject>
+            </mediaobject>
+        </figure>
+
+        <para>Starting with the core XML support currently built into the Java
+        platform, Metro uses or extends existing features and adds new support
+        for interoperable web services. See the following sections for an
+        overview of each feature:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahiam" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiao" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiap" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiaq" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahiam">
+            <title>Bootstrapping and Configuration</title>
+
+            <para>Bootstrapping and configuration consists of using a URL to
+            access a web service, retrieving its WSDL file, and using the WSDL
+            file to create a web service client that can access and consume a
+            web service. The process consists of the following steps, which
+            are shown in <xref linkend="ahian"
+            xrefstyle="select:title" />.</para>
+
+            <figure xml:id="ahian">
+                <title>Bootstrapping and Configuration</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/bootstrappingConfiguration.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram showing bootstrapping and
+                        configuration</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <orderedlist>
+                <listitem>
+                    <para>Client acquires the URL for a web service that it
+                    wants to access and consume. How you acquire the URL is
+                    outside the scope of this tutorial. For example, you might
+                    look up the URL in a Web Services registry.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The client uses the URL and the
+                    <code>wsimport</code> tool to send a WS-MetadataExchange
+                    Request to access the web service and retrieve the WSDL
+                    file. The WSDL file contains a description of the web
+                    service endpoint, including WS-Policy assertions that
+                    describe the security, reliability, transactional, etc.,
+                    capabilities and requirements of the service. The
+                    description describes the requirements that must be
+                    satisfied to access and consume the web service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The client uses the WSDL file to create the web
+                    service client.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The web service client accesses and consumes the web
+                    service.</para>
+                </listitem>
+            </orderedlist>
+
+            <para><xref linkend="bootstrap_config" xrefstyle="select:title" />
+            explains how to bootstrap and configure a web service client and a
+            web service endpoint that use the Metro's WSIT
+            technologies.</para>
+        </section>
+
+        <section xml:id="ahiao">
+            <title>Message Optimization Technology</title>
+
+            <para>A primary function of web services applications is to share
+            data among applications over the Internet. The data shared can
+            vary in format and include large binary payloads, such as
+            documents, images, music files, and so on. When large binary
+            objects are encoded into XML format for inclusion in SOAP
+            messages, even larger files are produced. When a web service
+            processes and transmits these large files over the network, the
+            performance of the web service application and the network are
+            negatively affected. In the worst case scenario the effects are as
+            follows:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>The performance of the web service application
+                    degrades to a point that it is no longer useful.</para>
+                </listitem>
+
+                <listitem>
+                    <para>The network gets bogged down with more traffic than
+                    the allotted bandwidth can handle.</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>One way to deal with this problem is to encode the binary
+            objects so as to optimize both the SOAP application processing
+            time and the bandwidth required to transmit the SOAP message over
+            the network. In short, XML needs to be optimized for web services.
+            This is the exactly what the Message Optimization technology does.
+            It ensures that web services messages are transmitted over the
+            Internet in the most efficient manner.</para>
+
+            <para>Sun recommends that you use message optimization if your web
+            service client or web service endpoint will be required to process
+            binary encoded XML documents larger than 1KB.</para>
+
+            <para>For instructions on how to use the Message Optimization
+            technology, see <xref linkend="ahibx"
+            xrefstyle="select:title" />.</para>
+        </section>
+
+        <section xml:id="ahiap">
+            <title>Reliable Messaging Technology</title>
+
+            <para>Reliable Messaging is a Quality of Service (QoS) technology
+            for building more reliable web services. Reliability (in terms of
+            what is provided by WS-ReliableMessaging) is measured by a
+            system's ability to deliver messages from point A to point B. The
+            primary purpose of Reliable Messaging is to ensure the delivery of
+            application messages to web service endpoints.</para>
+
+            <para>The reliable messaging technology ensures that messages in a
+            given message sequence are delivered at least once and not more
+            than once and optionally in the correct order. When messages in a
+            given sequence are lost in transit or delivered out of order, this
+            technology enables systems to recover from such failures. If a
+            message is lost in transit, the sending system retransmits the
+            message until its receipt is acknowledged by the receiving system.
+            If messages are received out of order, the receiving system may
+            re-order the messages into the correct order.</para>
+
+            <para>You should consider using reliable messaging if the web
+            service is experiencing the following types of problems:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Communication failures are occurring that result in
+                    the network being unavailable or connections being
+                    dropped</para>
+                </listitem>
+
+                <listitem>
+                    <para>Application messages are being lost in
+                    transit</para>
+                </listitem>
+
+                <listitem>
+                    <para>Application messages are arriving at their
+                    destination out of order and ordered delivery is a
+                    requirement</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>To help decide whether or not to use reliable messaging,
+            weigh the following advantages and disadvantages:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Enabling reliable messaging ensures that messages
+                    are delivered exactly once from the source to the
+                    destination and, if the ordered-delivery option is
+                    enabled, ensures that messages are delivered in
+                    order.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Enabling reliable messaging uses more memory
+                    (especially if the ordered delivery option is enabled)
+                    since messages must be stored (even after they are sent)
+                    until receipt is acknowledged.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Non-reliable messaging clients cannot interoperate
+                    with web services that have reliable messaging
+                    enabled.</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>For instructions on how to use the Reliable Messaging
+            technology, see <xref linkend="using_rm"
+            xrefstyle="select:title" />.</para>
+        </section>
+
+        <section xml:id="ahiaq">
+            <title>Security Technology</title>
+
+            <para>Until now, web services have relied on transport-based
+            security such as SSL to provide point-to-point security. Metro
+            implements WS-Security so as to provide interoperable message
+            content integrity and confidentiality, even when messages pass
+            through intermediary nodes before reaching their destination
+            endpoint. WS-Security as provided by Metro is in addition to
+            existing transport-level security, which may still be used.</para>
+
+            <para>Metro also enhances security by implementing WS-Secure
+            Conversation, which enables a consumer and provider to establish a
+            shared security context when a multiple-message-exchange sequence
+            is first initiated. Subsequent messages use derived session keys
+            that increase the overall security while reducing the security
+            processing overhead for each message.</para>
+
+            <para>Further, Metro implements two additional features to improve
+            security in web services:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis>Web Services Trust</emphasis>: Enables web
+                    service applications to use SOAP messages to request
+                    security tokens that can then be used to establish trusted
+                    communications between a client and a web service.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Security Policy</emphasis>:
+                    Enables web services to use security assertions to clearly
+                    represent security preferences and requirements for web
+                    service endpoints.</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>Metro implements these features in such a way as to ensure
+            that web service binding security requirements, as defined in the
+            WSDL file, can interoperate with and be consumed by Metro and WCF
+            endpoints.</para>
+
+            <para>For instructions on how to use the WS-Security technology,
+            see <xref linkend="ahici" xrefstyle="select:title" />.</para>
+        </section>
+    </section>
+
+    <section xml:id="ahiar">
+        <title>How Metro Relates to .NET Windows Communication Foundation
+        (WCF)</title>
+
+        <para>Web services interoperability is an initiative of Sun and
+        Microsoft. We test and deliver products to market that interoperate
+        across different platforms.</para>
+
+        <para>Metro is the product of Sun's web services interoperability
+        initiative. Windows Communication Foundation (WCF) in .NET is
+        Microsoft's unified programming model for building connected systems.
+        WCF, which is available as part of the .NET Framework 3.x product,
+        includes application programming interfaces (APIs) for building
+        secure, reliable, transacted web services that interoperate with
+        non-Microsoft platforms.</para>
+
+        <para>Sun Microsystems and Microsoft jointly test Metro against WCF to
+        ensure that Sun web service clients (consumers) and web services
+        (producers) do in fact interoperate with WCF web services applications
+        and vice versa. This testing ensures that the following
+        interoperability goals are realized:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>Metro web services clients can access and consume WCF
+                web services.</para>
+            </listitem>
+
+            <listitem>
+                <para>WCF web services clients can access and consume Metro
+                web services.</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>Sun provides Metro on the Java platform and Microsoft provides
+        WCF on the .NET 3.0 and .NET 3.5 platforms. The sections that follow
+        describe the web services specifications implemented by Sun
+        Microsystems in Web Services Interoperability Technologies (WSIT) and
+        provide high-level descriptions of how each WSIT technology
+        works.</para>
+
+        <note>
+            <para>Because Metro-based clients and services are interoperable,
+            you can gain the benefits of Metro without using WCF.</para>
+        </note>
+    </section>
+
+    <section xml:id="ahias">
+        <title>Metro Specifications</title>
+
+        <para>The specifications for bootstrapping and configuration, message
+        optimization, reliable messaging, and security technologies are
+        discussed in the following sections:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahiat" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiav" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiax" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahiaz" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>Metro implements the following WS-* specifications.</para>
+
+        <table frame="all" xml:id="gfrxa">
+            <title>Metro Specification Versions</title>
+
+            <tgroup cols="2" colsep="1" rowsep="1">
+                <thead>
+                    <row>
+                        <entry>Technology</entry>
+
+                        <entry>Metro Version</entry>
+                    </row>
+                </thead>
+
+                <tbody>
+                    <row>
+                        <entry>Bootstrapping</entry>
+
+                        <entry>since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2004/09/mex/WS-MetadataExchange.pdf">WS-MetadataExchange
+                        v1.1</link> <?linebreak ?></entry>
+                    </row>
+
+                    <row>
+                        <entry>Policy (W3C standards)</entry>
+
+                        <entry>since v1.0 : <link
+                        xlink:href="http://www.w3.org/Submission/WS-Policy/">WS-Policy
+                        v1.2</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://www.w3.org/Submission/WS-PolicyAttachment/">WS-PolicyAttachment
+                        v1.2</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://www.w3.org/TR/2007/PR-ws-policy-20070706/">WS-Policy
+                        v1.5</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://www.w3.org/TR/2007/PR-ws-policy-attach-20070706/">WS-PolicyAttachment
+                        v1.5</link> <?linebreak ?></entry>
+                    </row>
+
+                    <row>
+                        <entry>Reliable Messaging (OASIS standards)</entry>
+
+                        <entry>since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2005/02/rm/ws-reliablemessaging.pdf">WS-ReliableMessaging
+                        v1.0</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2005/02/rm/WS-RMPolicy.pdf">WS-ReliableMessaging
+                        Policy v1.0</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://www.oasis-open.org/committees/documents.php?wg_abbrev=ws-rx">WS-ReliableMessaging
+                        v1.1</link> <?linebreak ?> since v1.3 :
+                        WS-ReliableMessaging Policy v1.1<?linebreak ?> since
+                        v2.0 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-rx/wsrm/v1.2/wsrm.html">WS-ReliableMessaging
+                        v1.2</link> <?linebreak ?> since v2.0 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-rx/wsrmp/v1.2/wsrmp.html">WS-ReliableMessaging
+                        Policy v1.2</link> <?linebreak ?> since v2.0 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-rx/wsmc/v1.1/wsmc.html">WS-MakeConnection
+                        v1.1</link> <?linebreak ?></entry>
+                    </row>
+
+                    <row>
+                        <entry>Atomic Transactions (OASIS
+                        submissions)<?linebreak ?> Note: Metro does
+                        <emphasis>not</emphasis> implement the<?linebreak ?>
+                        standard versions of these specifications.</entry>
+
+                        <entry>since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">WS-AtomicTransaction
+                        v1.0</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">WS-Coordination
+                        v1.0</link> <?linebreak ?></entry>
+                    </row>
+
+                    <row>
+                        <entry>Security (OASIS standards)</entry>
+
+                        <entry>since v1.0 : <link
+                        xlink:href="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0.pdf">WS-Security
+                        v1.0</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">WS-Security
+                        v1.1</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2005/07/securitypolicy/ws-securitypolicy.pdf">WS-SecurityPolicy
+                        v1.1</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-cs.html">WS-SecurityPolicy
+                        v1.2</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf">WS-Trust
+                        v1.2</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html">WS-Trust
+                        v1.3</link> <?linebreak ?> since v2.0 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/os/ws-trust-1.4-spec-os.html">WS-Trust
+                        v1.4</link> <?linebreak ?> since v1.0 : <link
+                        xlink:href="http://specs.xmlsoap.org/ws/2005/02/sc/WS-SecureConversation.pdf">WS-SecureConversation
+                        v1.2</link> <?linebreak ?> since v1.3 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/ws-secureconversation-1.3-os.html">WS-SecureConversation
+                        v1.3</link> <?linebreak ?> since v2.0 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-sx/ws-secureconversation/v1.4/os/ws-secureconversation-1.4-spec-os.html">WS-SecureConversation
+                        v1.4</link> <?linebreak ?></entry>
+                    </row>
+
+                    <row>
+                        <entry>Security Profiles (OASIS standards)</entry>
+
+                        <entry>since v1.3 All 1.0 and 1.1 profiles listed
+                        <link
+                        xlink:href="http://www.oasis-open.org/committees/tc_home.php?wg_abbrev=wss">here</link>
+                        except <link
+                        xlink:href="http://docs.oasis-open.org/wss/oasis-wss-rel-token-profile-1.0.pdf">Web
+                        Services Security REL Token Profile V1.0</link>
+                        <?linebreak ?></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+
+        <para>Metro 1.3 + and WCF in .NET 3.5 implement the same
+        specifications.</para>
+
+        <para>Metro 1.0 - 1.2 and WCF in .NET 3.0 implement the same
+        specifications.</para>
+
+        <section xml:id="ahiat">
+            <title>Bootstrapping and Configuration Specifications</title>
+
+            <para>Bootstrapping and configuring involves a client getting a
+            web service URL (perhaps from a service registry) and obtaining
+            the information needed to build a web services client that is
+            capable of accessing and consuming a web service over the
+            Internet. This information is usually obtained from a WSDL file.
+            <xref linkend="ahiau" xrefstyle="select:title" /> shows the
+            specifications that were implemented to support bootstrapping and
+            configuration.</para>
+
+            <figure xml:id="ahiau">
+                <title>Bootstrapping and Configuration Specifications</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/BootstrappingConfigStandards.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of bootstrapping and configuration
+                        specifications</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>In addition to the Core XML specifications, bootstrapping
+            and configuration was implemented using the following
+            specifications:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis>WSDL</emphasis>: WSDL is a standardized
+                    XML format for describing network services. The
+                    description includes the name of the service, the location
+                    of the service, and ways to communicate with the service,
+                    that is, what transport to use. WSDL descriptions can be
+                    stored in service registries, published on the Internet,
+                    or both.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Policy</emphasis>: This
+                    specification provides a flexible and extensible grammar
+                    for expressing the capabilities, requirements, and general
+                    characteristics of a web service. It provides the
+                    mechanisms needed to enable web services applications to
+                    specify policy information in a standardized way. However,
+                    this specification does not provide a protocol that
+                    constitutes a negotiation or message exchange solution for
+                    web Services. Rather, it specifies a building block that
+                    is used in conjunction with the WS-Metadata Exchange
+                    protocol. When applied in the web services model, policy
+                    is used to convey conditions on interactions between two
+                    web service endpoints. Typically, the provider of a web
+                    service exposes a policy to convey conditions under which
+                    it provides the service. A requester might use the policy
+                    to decide whether or not to use the service.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Metadata Exchange</emphasis>:
+                    This specification defines a protocol to enable a consumer
+                    to obtain a web service's metadata, that is, its WSDL and
+                    policies. It can be thought of as a bootstrap mechanism
+                    for communication.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="ahiav">
+            <title>Message Optimization Specifications</title>
+
+            <para>Message optimization is the process of transmitting web
+            services messages in the most efficient manner. It is achieved in
+            web services communication by encoding messages prior to
+            transmission and then de-encoding them when they reach their final
+            destination.</para>
+
+            <para><xref linkend="ahiaw" xrefstyle="select:title" /> shows the
+            specifications that were implemented to optimize communication
+            between two web service endpoints.</para>
+
+            <figure xml:id="ahiaw">
+                <title>Message Optimization Specifications</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/MessageOptimizationStandards.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of message optimization
+                        specifications</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>In addition to the Core XML specifications, optimization was
+            implemented using the following specifications:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis>SOAP</emphasis>: With SOAP
+                    implementations, client requests and web service responses
+                    are most often transmitted as SOAP messages over HTTP to
+                    enable a completely interoperable exchange between clients
+                    and web services, all running on different platforms and
+                    at various locations on the Internet. HTTP is a familiar
+                    request-and response standard for sending messages over
+                    the Internet, and SOAP is an XML-based protocol that
+                    follows the HTTP request-and-response model. In SOAP 1.1,
+                    the SOAP portion of a transported message handles the
+                    following: <itemizedlist>
+                            <listitem>
+                                <para>Defines an XML-based envelope to describe what
+                                is in the message and how to process the
+                                message.</para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Includes XML-based encoding rules to express
+                                instances of application-defined data types within
+                                the message.</para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Defines an XML-based convention for
+                                representing the request to the remote service and
+                                the resulting response.</para>
+
+                                <para>In SOAP 1.2 implementations, web service
+                                endpoint addresses can be included in the XML-based
+                                SOAP envelope, rather than in the transport header
+                                (for example in the HTTP transport header), thus
+                                enabling SOAP messages to be transport
+                                independent.</para>
+                            </listitem>
+                        </itemizedlist></para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Addressing</emphasis>: This
+                    specification defines a endpoint reference representation.
+                    A web service endpoint is an entity, processor, or
+                    resource that can be referenced and to which web services
+                    messages can be addressed. Endpoint references convey the
+                    information needed to address a web service endpoint. The
+                    specification defines two constructs: message addressing
+                    properties and endpoint references, that normalize the
+                    information typically provided by transport protocols and
+                    messaging systems in a way that is independent of any
+                    particular transport or messaging system. This is
+                    accomplished by defining XML tags for including web
+                    service addresses in the SOAP message, instead of the HTTP
+                    header. The implementation of these features enables
+                    messaging systems to support message transmission in a
+                    transport-neutral manner through networks that include
+                    processing nodes such as endpoint managers, firewalls, and
+                    gateways.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Secure
+                    Conversation</emphasis>: This specification provides
+                    better message-level security and efficiency in
+                    multiple-message exchanges in a standardized way. It
+                    defines basic mechanisms on top of which secure messaging
+                    semantics can be defined for multiple-message exchanges
+                    and allows for contexts to be established and potentially
+                    more efficient keys or new key material to be exchanged,
+                    thereby increasing the overall performance and security of
+                    the subsequent exchanges.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>SOAP MTOM</emphasis>: The SOAP Message
+                    Transmission Optimization Mechanism (MTOM), paired with
+                    the XML-binary Optimized Packaging (XOP), provides
+                    standard mechanisms for optimizing the transmission format
+                    of SOAP messages by selectively encoding portions of the
+                    SOAP message, while still presenting an XML Infoset to the
+                    SOAP application. This mechanism enables the definition of
+                    a hop-by-hop contract between a SOAP node and the next
+                    SOAP node in the SOAP message path so as to facilitate the
+                    efficient pass-through of optimized data contained within
+                    headers or bodies of SOAP messages that are relayed by an
+                    intermediary. Further, it enables message optimization to
+                    be done in a binding independent way.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="ahiax">
+            <title>Reliable Messaging Specifications</title>
+
+            <para>Reliability (in terms of WS-ReliableMessaging) is measured
+            by a system's ability to deliver messages from point A to point B
+            regardless of network errors. <xref linkend="ahiay"
+            xrefstyle="select:title" /> shows the specifications that were
+            implemented to ensure reliable delivery of messages between two
+            web services endpoints.</para>
+
+            <figure xml:id="ahiay">
+                <title>Reliable Messaging Specifications</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/reliableMessagingStandards.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of reliable messaging
+                        specifications</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>In addition to the Core XML specifications and supporting
+            standards (Web Services Security and Web Services Policy, which
+            are required building blocks), the reliability feature is
+            implemented using the following specifications:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis>Web Services Reliable
+                    Messaging</emphasis>: This specification defines a
+                    standardized way to identify, track, and manage the
+                    reliable delivery of messages between exactly two parties,
+                    a source and a destination, so as to recover from failures
+                    caused by messages being lost or received out of order.
+                    The specification is also extensible so it allows
+                    additional functionality, such as security, to be tightly
+                    integrated. The implementation of this specification
+                    integrates with and complements the Web Services Security,
+                    and the Web Services Policy implementations.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Coordination</emphasis>: This
+                    specification defines a framework for providing protocols
+                    that coordinate the actions of distributed applications.
+                    This framework is used by Web Services Atomic
+                    Transactions. The implementation of this specification
+                    enables the following capabilities: <itemizedlist>
+                            <listitem>
+                                <para>Enables an application service to create the
+                                context needed to propagate an activity to other
+                                services and to register for coordination
+                                protocols.</para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Enables existing transaction processing,
+                                workflow, and other coordination systems to hide
+                                their proprietary protocols and to operate in a
+                                heterogeneous environment.</para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Defines the structure of context and the
+                                requirements so that context can be propagated
+                                between cooperating services.</para>
+                            </listitem>
+                        </itemizedlist></para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Atomic
+                    Transactions</emphasis>: This specification defines a
+                    standardized way to support two-phase commit semantics
+                    such that either all operations invoked within an atomic
+                    transaction succeed or are all rolled back.
+                    Implementations of this specification require the
+                    implementation of the Web Services Coordination
+                    specification.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="ahiaz">
+            <title>Security Specifications</title>
+
+            <para><xref linkend="ahiba" xrefstyle="select:title" /> shows the
+            specifications implemented to secure communication between two web
+            service endpoints and across intermediate endpoints.</para>
+
+            <figure xml:id="ahiba">
+                <title>Web Services Security Specifications</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/webServicesSecurityStandards.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of web services security
+                        specifications</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>In addition to the Core XML specifications, the security
+            feature is implemented using the following specifications:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><emphasis>Web Services Security</emphasis>: This
+                    specification defines a standard set of SOAP extensions
+                    that can be used when building secure web services to
+                    implement message content integrity and confidentiality.
+                    The implementation provides message content integrity and
+                    confidentiality even when communication traverses
+                    intermediate nodes, thus overcoming a short coming of SSL.
+                    The implementation can be used within a wide variety of
+                    security models including PKI, Kerberos, and SSL and
+                    provides support for multiple security token formats,
+                    multiple trust domains, multiple signature formats, and
+                    multiple encryption technologies.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Policy</emphasis>: This
+                    specification provides a flexible and extensible grammar
+                    for expressing the capabilities, requirements, and general
+                    characteristics of a web service. It provides a framework
+                    and a model for the expression of these properties as
+                    policies and is a building block for Web Services Security
+                    policy.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Trust</emphasis>: This
+                    specification supports the following capabilities in a
+                    standardized way: <itemizedlist>
+                            <listitem>
+                                <para>Defines extensions to Web Services Security
+                                that provide methods for issuing, renewing, and
+                                validating security tokens used by Web services
+                                security.</para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Establishes, assesses the presence of, and
+                                brokers trust relationships.</para>
+                            </listitem>
+                        </itemizedlist></para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Secure
+                    Conversation</emphasis>: This specification defines a
+                    standardized way to provide better message-level security
+                    and efficiency in multiple-message exchanges. The Metro
+                    implementation provides basic mechanisms on top of which
+                    secure messaging semantics can be defined for
+                    multiple-message exchanges and allows for contexts to be
+                    established along with more efficient keys or new key
+                    material. This approach increases the overall performance
+                    and security of the subsequent exchanges. While the Web
+                    Services Security specification, described above, focuses
+                    on the message authentication model, it does leave
+                    openings for several forms of attacks. The Secure
+                    Conversation authentication specification defines a
+                    standardized way to authenticate a series of messages,
+                    thereby addressing the short comings of Web Services
+                    Security. With the Web Services Security Conversation
+                    model, the security context is defined as a new Web
+                    Services security token type that is obtained using a
+                    binding of Web Services Trust.</para>
+                </listitem>
+
+                <listitem>
+                    <para><emphasis>Web Services Security Policy</emphasis>:
+                    This specification defines a standard set of patterns or
+                    sets of assertions that represent common ways to describe
+                    how messages are secured on a communications path. The
+                    Metro implementation allows flexibility in terms of
+                    tokens, cryptography, and mechanisms used, including
+                    leveraging transport security, but is specific enough to
+                    ensure interoperability based on assertion matching by web
+                    service clients and web services providers.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+
+    <section xml:id="ahibb">
+        <title>How the Metro Technologies Work</title>
+
+        <para>The following sections provide a high-level description of how
+        the message optimization, reliable messaging, and security
+        technologies work.</para>
+
+        <section xml:id="ahibc">
+            <title>How Message Optimization Works</title>
+
+            <para>Message optimization ensures that web services messages are
+            transmitted over the Internet in the most efficient manner.
+            Because XML is a textual format, binary files must be represented
+            using character sequences before they can be embedded in an XML
+            document. A popular encoding that permits this embedding is known
+            as base64 encoding, which corresponds to the XML Schema data type
+            xsd:base64Binary. In a web services toolkit that supports a
+            binding framework, a value of this type must be encoded before
+            transmission and decoded before binding. The encoding and decoding
+            process is expensive and the costs increase linearly as the size
+            of the binary object increases.</para>
+
+            <para>Message optimization enables web service endpoints to
+            identify large binary message payloads, remove the message
+            payloads from the body of the SOAP message, encode the message
+            payloads using an efficient encoding mechanism (effectively
+            reducing the size of the payloads), re-insert the message payloads
+            into the SOAP message as attachments (the file is linked to the
+            SOAP message body by means of an Include tag). Thus, message
+            optimization is achieved by encoding binary objects prior to
+            transmission and then de-encoding them when they reach there final
+            destination.</para>
+
+            <para>The optimization process is really quite simple. To effect
+            optimized message transmissions, the sending endpoint checks the
+            body of the SOAP message for XML encoded binary objects that
+            exceed a predetermined size and encodes those objects for
+            efficient transmission over the Internet.</para>
+
+            <para>SOAP MTOM, paired with the XML-binary Optimized Packaging
+            (XOP), addresses the inefficiencies related to the transmission of
+            binary data in SOAP documents. Using MTOM and XOP, XML messages
+            are dissected in order to transmit binary files as MIME
+            attachments in a way that is transparent to the application. This
+            transformation is restricted to base64 content in canonical form
+            as defined in XSD Datatypes as specified in XML Schema Part 2:
+            Datatypes Second Edition, W3C Recommendation 28 October
+            2004.</para>
+
+            <para>Thus, the Metro technology achieves message optimization
+            through an implementation of the MTOM and XOP specifications. With
+            the message optimization feature enabled, small binary objects are
+            sent in-line in the SOAP body. For large binary objects, this
+            becomes quite inefficient, so the binary object is separated from
+            the SOAP body, encoded, sent as an attachment to the SOAP message,
+            and decoded when it reaches its destination endpoint.</para>
+        </section>
+
+        <section xml:id="ahibd">
+            <title>How Reliable Messaging Works</title>
+
+            <para>When reliable messaging is enabled, messages are grouped
+            into sequences, which are defined by the client's proxies. Each
+            proxy corresponds to a message sequence, which consists of all of
+            the request messages for that proxy. Each message contains a
+            sequence header. The header includes a sequence identifier that
+            identifies the sequence and a unique message number that indicates
+            the order of the message in the sequence. The web service endpoint
+            uses the sequence header information to group the messages and, if
+            the Ordered Delivery option is selected, to process them in the
+            proper order. Additionally, if secure conversation is enabled,
+            each message sequence is assigned its own security context token.
+            The security context token is used to sign the handshake messages
+            that initialize communication between two web service endpoints
+            and subsequent application messages.</para>
+
+            <para>Thus, using the Reliable Messaging technology, web service
+            endpoints collaborate to determine which messages in a particular
+            application message sequence arrived at the destination endpoint
+            and which messages require resending. The reliable messaging
+            protocol requires that the destination endpoint return
+            message-receipt acknowledgements that include the sequence
+            identifier and the message number of each message received. If the
+            source determines that a message was not received by the
+            destination, it resends the message and requests an
+            acknowledgement. Once the source has sent all messages for a given
+            sequence and their receipt has been acknowledged by the
+            destination, the source terminates the sequence.</para>
+
+            <para>The web service destination endpoint in turn sends the
+            application messages along to the application. If ordered delivery
+            is configured (optional), the destination endpoint reconstructs a
+            complete stream of messages for each sequence in the exact order
+            in which the messages were sent and sends them along to the
+            destination application. Thus, through the use of the reliable
+            messaging protocol, the destination endpoint is able to provide
+            the following delivery assurances to the web service
+            application:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Each message is delivered to the destination
+                    application at least once.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Each message is delivered to the destination
+                    application at most once.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Sequences of messages are grouped by sequence
+                    identifiers and delivered to the destination application
+                    in the order defined by the message numbers.</para>
+                </listitem>
+            </itemizedlist>
+
+            <para><xref linkend="ahibe" xrefstyle="select:title" /> shows a
+            simplified view of client and web service application message
+            exchanges when the Reliable Messaging protocol is not used.</para>
+
+            <figure xml:id="ahibe">
+                <title>Application Message Exchange Without Reliable
+                Messaging</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/appMessageExWORM.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of application message exchange
+                        without reliable messaging</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>When the Reliable Messaging protocol is not used,
+            application messages flow over the HTTP connection with no
+            delivery assurances. If messages are lost in transit or delivered
+            out of order, the communicating endpoints have no way of
+            knowing.</para>
+
+            <para><xref linkend="ahibf" xrefstyle="select:title" /> shows a
+            simplified view of client and web service application message
+            exchanges when reliable messaging is enabled.</para>
+
+            <figure xml:id="ahibf">
+                <title>Application Message Exchange with Reliable Messaging
+                Enabled</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/appMessageExWRM.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+
+                    <textobject>
+                        <simpara>Diagram of application message exchange with
+                        reliable messaging enabled</simpara>
+                    </textobject>
+                </mediaobject>
+            </figure>
+
+            <para>With reliable messaging enabled, the Reliable Messaging
+            source module is plugged into the Metro web service client. The
+            source module transmits the application messages and keeps copies
+            of the messages until their receipt is acknowledged by the
+            destination module through the exchange of protocol messages. The
+            destination module acknowledges messages and optionally buffers
+            them for ordered-delivery guarantee. After guaranteeing order, if
+            configured, the destination module allows the messages to proceed
+            through the Metro dispatch for delivery to the endpoint or
+            application destination.</para>
+        </section>
+
+        <section xml:id="ahibg">
+            <title>How Security Works</title>
+
+            <para>The following sections describe how the Metro security
+            technologies, security policy, trust, and secure conversation
+            work.</para>
+
+            <section xml:id="ahibh">
+                <title>How Security Policy Works</title>
+
+                <para>The Metro Web Service Security Policy implementation
+                builds on the features provided by the Web Service Policy
+                implementation in Metro. It enables users to use XML elements
+                to specify the security requirements of a web service
+                endpoint, that is, how messages are secured on the
+                communication path between the client and the web service. The
+                web service endpoint specifies the security requirements to
+                the client as assertions (see <xref linkend="ahibi"
+                xrefstyle="select:title" />).</para>
+
+                <figure xml:id="ahibi">
+                    <title>Security Policy Exchange</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/securityPolicyExchange.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+
+                        <textobject>
+                            <simpara>Diagram of security policy
+                            exchange</simpara>
+                        </textobject>
+                    </mediaobject>
+                </figure>
+
+                <para>The security policy model uses the policy specified in
+                the WSDL file for associating policy assertions with web
+                service communication. As a result, whenever possible, the
+                security policy assertions do not use parameters or
+                attributes. This enables first-level, <code>QName</code>-based
+                assertion matching to be done at the framework level without
+                security domain-specific knowledge. The first-level matching
+                provides a narrowed set of policy alternatives that are shared
+                by the client and web service endpoint when they attempt to
+                establish a secure communication path.</para>
+
+                <note>
+                    <para>A <code>QName</code> is a qualified name, as
+                    specified by the <link
+                    xlink:href="http://www.w3.org/TR/xmlschema-2/#QName">XML
+                    Schema Part2: Datatypes specification</link>, <link
+                    xlink:href="http://www.w3.org/TR/REC-xml-names/#ns-qualnames">Namespaces
+                    in XML</link>, and <link
+                    xlink:href="http://www.w3.org/XML/xml-names-19990114-errata">Namespaces
+                    in XML Errata</link>. A qualified name is made up of a
+                    namespace URI, a local part, and a prefix.</para>
+                </note>
+
+                <para>The benefit of representing security requirements as
+                assertions is that <code>QName</code> matching is sufficient
+                to find common security alternatives and that many aspects of
+                security can be factored out and reused. For example, it may
+                be common that the security mechanism is constant for a web
+                service endpoint, but that the message parts that are
+                protected, or secured, may vary by message action.</para>
+
+                <para>The following types of assertions are supported:</para>
+
+                <itemizedlist>
+                    <listitem>
+                        <para><emphasis>Protection assertions</emphasis>:
+                        Define the scope of security protection. These
+                        assertions identify the message parts that are to be
+                        protected and how they are to be protected, that is,
+                        whether data integrity and confidentiality mechanisms
+                        are to be used.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><emphasis>Conditional assertions</emphasis>:
+                        Define general aspects or preconditions of the
+                        security. These assertions define the relationships
+                        within and the characteristics of the environment in
+                        which security is being applied, such as the tokens
+                        that can be used, which tokens are for integrity or
+                        confidentiality protection, applicable algorithms to
+                        use, and so on.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><emphasis>Security binding
+                        assertions</emphasis>: Define the security mechanism
+                        that is used to provide security. These assertions are
+                        a logical grouping that defines how the conditional
+                        assertions are used to protect the indicated message
+                        parts. For example, the assertions might specify that
+                        an asymmetric token is to be used with a digital
+                        signature to provide integrity protection, and that
+                        parts are to be encrypted with a symmetric key, which
+                        is then encrypted using the public key of the
+                        recipient. In their simplest form, the security
+                        binding assertions restrict what can be placed in the
+                        <code>wsse:Security</code> header and the associated
+                        processing rules.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><emphasis>Supporting token
+                        assertions</emphasis>: Define the token types and
+                        usage patterns that can be used to secure individual
+                        operations and/or parts of messages.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><emphasis>Web Services Security and Trust
+                        assertions</emphasis>: Define the token referencing
+                        and trust options that can be used.</para>
+                    </listitem>
+                </itemizedlist>
+            </section>
+
+            <section xml:id="ahibj">
+                <title>How Trust Works</title>
+
+                <para><xref linkend="ahibk" xrefstyle="select:title" /> shows
+                how the Web Services Trust technology establishes
+                trust.</para>
+
+                <figure xml:id="ahibk">
+                    <title>Trust and Secure Conversation</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/trustSecureConversation.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+
+                        <textobject>
+                            <simpara>Diagram of trust and secure
+                            conversation</simpara>
+                        </textobject>
+                    </mediaobject>
+                </figure>
+
+                <para>To establish trust between a client, a Security Token
+                Service, and a web service:</para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>The client establishes an HTTPS connection with
+                        the Secure Token Service using one of the following
+                        methods: <itemizedlist>
+                                <listitem>
+                                    <para><emphasis>Username Authentication and
+                                    Transport Security</emphasis>: The client
+                                    authenticates to the Security Token Service using a
+                                    username token. The Security Token Service uses a
+                                    certificate to authenticate to the Client. Transport
+                                    security is used for message protection.</para>
+                                </listitem>
+
+                                <listitem>
+                                    <para><emphasis>Mutual Authentication</emphasis>:
+                                    Both the client-side and server-side use X509
+                                    certificates to authenticate to each other. The
+                                    client request is signed using Client's X509
+                                    certificate, then signed using ephemeral key. The
+                                    web service signs the response using keys derived
+                                    from the client's key.</para>
+                                </listitem>
+                            </itemizedlist></para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The client sends a RequestSecurityToken message
+                        to the Security Token Service.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The Security Token Service sends a Security
+                        Assertion Markup Language (SAML) token to the
+                        Client.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The client uses the SAML token to authenticate
+                        itself to the web service and trust is
+                        established.</para>
+                    </listitem>
+                </orderedlist>
+
+                <para>All communication uses SOAP messages.</para>
+            </section>
+
+            <section xml:id="ahibl">
+                <title>How Secure Conversation Works</title>
+
+                <para><xref linkend="ahibm" xrefstyle="select:title" /> shows
+                how the Web Services Secure Conversation technology
+                establishes a secure conversation when the Trust technology is
+                not used.</para>
+
+                <figure xml:id="ahibm">
+                    <title>Secure Conversation</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/secureConversation.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+
+                        <textobject>
+                            <simpara>Diagram of secure conversation</simpara>
+                        </textobject>
+                    </mediaobject>
+                </figure>
+
+                <para>To establish a secure conversation between a Client and
+                a web service:</para>
+
+                <orderedlist>
+                    <listitem>
+                        <para>The client sends a X509 Certificate to
+                        authenticate itself to the web service.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The web service sends a X509 Certificate to
+                        authenticate itself to the client.</para>
+                    </listitem>
+                </orderedlist>
+
+                <para>All communication uses SOAP messages.</para>
+            </section>
+        </section>
+    </section>
+</chapter>

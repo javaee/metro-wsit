@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="http" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>HTTP</title>
+
+    <section xml:id="http-headers">
+        <title>HTTP headers</title>
+
+        <section xml:id="sending-http-headers-on-request">
+            <title>Sending HTTP headers on request</title>
+
+            <para>Client can set additional HTTP headers for making a requests
+            by using <code>MessageContext.HTTP_REQUEST_HEADERS</code>. See the
+            following code for an example:</para>
+
+            <example>
+                <title>Sending HTTP headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">import java.util.Collections;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.MessageContext; 
+
+HelloPort port =...;
+((BindingProvider) port).getRequestContext().put(MessageContext
+        .HTTP_REQUEST_HEADERS, Collections.singletonMap
+        ("X-Client-Version", Collections.singletonList("1.0-RC")));
+
+// the header will be sent to all successive invocations
+port.sayHelloTo("duke");
+port.sayHelloTo("duke");</programlisting>
+            </example>
+
+            <para>Note that the property takes
+            <code>Map&lt;String,List&lt;String&gt;&gt;</code> as the
+            type.</para>
+        </section>
+
+        <section xml:id="accessing-http-headers-of-the-response">
+            <title>Accessing HTTP headers of the response</title>
+
+            <para>Clients can access the HTTP headers of the response by using
+            <code>MessageContext.HTTP_RESPONSE_HEADERS</code>. See the
+            following code for example:</para>
+
+            <example>
+                <title>Accessing HTTP headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">HelloPort port = ...;
+port.sayHelloTo("duke");
+
+headers = (Map&lt;String, List&lt;String&gt;&gt;) ((BindingProvider) port)
+        .getResponseContext().get(MessageContext.HTTP_RESPONSE_HEADERS);</programlisting>
+            </example>
+        </section>
+    </section>
+
+    <section xml:id="http-compression">
+        <title>HTTP compression</title>
+
+        <para>HTTP supports compression of data <link
+        xlink:href="http://www.websiteoptimization.com/speed/tweak/compress/">at
+        the transport level</link>, which can substantially reduce the size of
+        the data (at the expense of an additional CPU load.)</para>
+
+        <para>When sending a request to a server, a client can inform the
+        server that it can receive compressed response like this:</para>
+
+        <example>
+            <title>Request HTTP Compression</title>
+
+            <programlisting language="java" linenumbering="unnumbered">Map&lt;String, List&lt;String&gt; httpHeaders = new HashMap&lt;String, List&lt;String&gt;&gt;();
+httpHeaders.put("Accept-Encoding", Collections.singletonList("gzip"));
+Map&lt;String, Object&gt; reqContext = ((bindingProvider)proxy).getRequestContext();
+requestContext.put(MessageContext.HTTP_REQUEST_HEADERS, httpHeaders);</programlisting>
+        </example>
+
+        <para>This works even if the server isn't capable of doing
+        compression; it will simply respond with uncompressed response and it
+        will work transparently.</para>
+
+        <para>If a client knows that the server is capable of receiving a
+        compressed request, it can send a compressed request by adding one
+        more HTTP header as follows:</para>
+
+        <example>
+            <title>Sending Compressed Request</title>
+
+            <programlisting language="java" linenumbering="unnumbered">Map&lt;String, List&lt;String&gt; httpHeaders = new HashMap&lt;String, List&lt;String&gt;&gt;();
+httpHeaders.put("Content-Encoding", Collections.singletonList("gzip"));
+httpHeaders.put("Accept-Encoding", Collections.singletonList("gzip"));
+Map&lt;String, Object&gt; reqContext = ((bindingProvider) proxy)
+        .getRequestContext();
+requestContext.put(MessageContext.HTTP_REQUEST_HEADERS, httpHeaders);</programlisting>
+        </example>
+
+        <para>Note that this will fail if the server is incapable of dealing
+        with compressed HTTP traffic. Most modern HTTP servers understand it,
+        but this is not guaranteed.</para>
+    </section>
+
+    <section xml:id="http-cookies">
+        <title>HTTP cookies</title>
+
+        <section xml:id="enabling-cookie-support">
+            <title>Enabling cookie support</title>
+
+            <para>To enable cookie support, you need to enable the session
+            property. This causes requests sent via the port to use the same
+            cookie jar, so if the server responds with a cookie, the next
+            request will go out with those cookies. This allows the server to
+            use the normal session tracking mechanism like
+            <code>HttpSession</code>.</para>
+
+            <example>
+                <title>Sending HTTP headers</title>
+
+                <programlisting language="java" linenumbering="unnumbered">HelloPort port = ...;
+port.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY,true);</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="accessing-http-cookies-in-the-response">
+            <title>Accessing HTTP cookies in the response</title>
+
+            <para>TODO</para>
+        </section>
+
+        <section xml:id="accessing-http-cookies-on-the-server">
+            <title>Accessing HTTP cookies on the server</title>
+
+            <para>When the web service is using servlets as the transport
+            mechanism, you can use <link
+            xlink:href="http://www.google.com/search?q=servlet+cookie">servlet's
+            native support for cookies</link>. See the following code to how
+            to access <code>javax.servlet.http.HttpServletRequest</code> from
+            your service.</para>
+
+            <example>
+                <title>Accessing cookies</title>
+
+                <programlisting language="java" linenumbering="unnumbered">class MyService {
+    @Resource
+    WebServiceContext context;
+
+    public void foo() {
+        HttpServletRequest rq = (HttpServletRequest) context
+                .getMessageContext().get(MessageContext.SERVLET_REQUEST);
+        HttpServletResponse rs = (HttpServletResponse) context
+                .getMessageContext().get(MessageContext.SERVLET_RESPONSE);
+    }
+}</programlisting>
+            </example>
+        </section>
+    </section>
+
+    <section xml:id="http-client-streaming-support">
+        <title>HTTP client streaming support</title>
+
+        <para>JAX-WS uses Java SE's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/HttpURLConnection.html">HttpURLConnection</link>
+        to send requests to web service. By default, HttpURLConnection buffers
+        the entire request before sending it on the wire. To enable HTTP
+        streaming support, one needs to enable <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/HttpURLConnection.html#setChunkedStreamingMode%28int%29">setChunkedStreamingMode()</link>
+        on the connection. The same thing can be achieved by doing the
+        following in JAX-WS clients.</para>
+
+        <example>
+            <title>HTTP client streaming support</title>
+
+            <programlisting language="java" linenumbering="unnumbered">int chunkSize = ...;
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, chunkSize);</programlisting>
+        </example>
+    </section>
+
+    <section xml:id="access-http-headers-in-a-handler">
+        <title>Access HTTP headers in a Handler</title>
+
+        <para>HTTP headers can be accessed in a Handler. Here is how you can
+        access the Content-Type HTTP header in a Handler:</para>
+
+        <section xml:id="from-client-side-handler">
+            <title>From Client side handler</title>
+
+            <para>HTTP headers can be accessed in a client side Handler in an
+            incoming response. Here is Handler code that demonstrates how to
+            do this:</para>
+
+            <example>
+                <title>ClientHandler.java</title>
+
+                <programlisting language="java" linenumbering="unnumbered">public class ClientHandler implements SOAPHandler&lt;SOAPMessageContext&gt; {
+    public boolean handleMessage(SOAPMessageContext context) {
+        if (!(Boolean) context.get(MessageContext
+                .MESSAGE_OUTBOUND_PROPERTY)) {
+            
+            Map&lt;String, List&lt;String&gt;&gt; map = (Map&lt;String, 
+                    List&lt;String&gt;&gt;) context.get(MessageContext
+                    .HTTP_RESPONSE_HEADERS);
+            
+            List&lt;String&gt; contentType = getHTTPHeader(map, "Content-Type");
+            if (contentType != null) {
+                StringBuffer strBuf = new StringBuffer();
+                for (String type : contentType) {
+                    strBuf.append(type);
+                }
+                System.out.println("Content-Type:" + strBuf.toString());
+            }
+        }
+        return true;
+    }
+
+
+    private
+    @Nullable
+    List&lt;String&gt; getHTTPHeader(Map&lt;String, List&lt;String&gt;&gt; headers, 
+                               String header) {
+        for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : headers.entrySet()) {
+            String name = entry.getKey();
+            if (name.equalsIgnoreCase(header))
+                return entry.getValue();
+        }
+        return null;
+    }
+}</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="from-server-side-handler">
+            <title>From Server side handler</title>
+
+            <para>HTTP headers can be accessed in a server side Handler on an
+            incoming request. Here is Handler code that demonstrates how to do
+            this:</para>
+
+            <example>
+                <title>ServerHandler.java</title>
+
+                <programlisting language="java" linenumbering="unnumbered">public class ServerHandler implements SOAPHandler&lt;SOAPMessageContext&gt; {
+    public boolean handleMessage(SOAPMessageContext context) {
+
+        if (!(Boolean) context.get(MessageContext
+                .MESSAGE_OUTBOUND_PROPERTY)) {
+            
+            Map&lt;String, List&lt;String&gt;&gt; map = (Map&lt;String, 
+                    List&lt;String&gt;&gt;) context.get(MessageContext
+                    .HTTP_REQUEST_HEADERS);
+            
+            List&lt;String&gt; contentType = getHTTPHeader(map, "Content-Type");
+            if (contentType != null) {
+                StringBuffer strBuf = new StringBuffer();
+                for (String type : contentType) {
+                    strBuf.append(type);
+                }
+                System.out.println("Content-Type:" + strBuf.toString());
+            }
+        }
+
+        return true;
+    }
+
+    private
+    @Nullable
+    List&lt;String&gt; getHTTPHeader(@NotNull Map&lt;String, 
+            List&lt;String&gt;&gt; headers, @NotNull String header) {
+        
+        for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : headers.entrySet()) {
+            String name = entry.getKey();
+            if (name.equalsIgnoreCase(header))
+                return entry.getValue();
+        }
+        return null;
+    }
+}</programlisting>
+            </example>
+        </section>
+    </section>
+
+    <section xml:id="http-timeouts">
+        <title>HTTP Timeouts</title>
+
+        <para>JAX-WS uses Java SE's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/HttpURLConnection.html">HttpURLConnection</link>
+        to send requests to web services. URLConnection offers <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/URLConnection.html#setConnectTimeout%28int%29">setConnectTimeout()</link>
+        and <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/URLConnection.html#setReadTimeout%28int%29">setReadTimeout()</link>
+        methods so that clients can control connection timeouts. The same
+        things can be achieved by doing the following in JAX-WS
+        clients:</para>
+
+        <example>
+            <title>HTTP client timeouts</title>
+
+            <programlisting language="java" linenumbering="unnumbered">// setConnectTimeout()
+int timeout = ...;
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put(JAXWSProperties.CONNECT_TIMEOUT, timeout);
+
+// setReadTimeout()
+int timeout = ...;
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put("com.sun.xml.ws.request.timeout", timeout);</programlisting>
+        </example>
+    </section>
+
+    <section xml:id="http-persistent-connections-keep-alive">
+        <title>HTTP Persistent Connections (keep-alive)</title>
+
+        <para>Persistent connections improve performance by allowing the
+        underlying socket connection to be reused for multiple http requests.
+        JAX-WS uses Java SE's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/java/net/HttpURLConnection.html">HttpURLConnection</link>
+        to send requests to web services. HTTP keep-alive behavior can be
+        controlled by the http.keepAlive (default: true) and
+        http.maxConnections (default: 5) system properties. For more
+        information, see <link
+        xlink:href="http://download.oracle.com/javase/6/docs/technotes/guides/net/properties.html">Networking
+        Properties</link></para>
+    </section>
+
+    <section xml:id="https-hostnameverifier">
+        <title>HTTPS HostnameVerifier</title>
+
+        <para>JAX-WS uses Java SE's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/javax/net/ssl/HttpsURLConnection.html">HttpsURLConnection</link>
+        to send requests to web services that use the HTTPS transport.
+        HttpsURLConnection offers a <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/javax/net/ssl/HttpsURLConnection.html#setHostnameVerifier%28javax.net.ssl.HostnameVerifier%29">setHostnameVerifier()</link>
+        method so that the client's verification callback can be called to
+        determine whether a connection is allowed. The same thing can be
+        achieved by doing the following in JAX-WS clients:</para>
+
+        <example>
+            <title>SSL Hostname Verification</title>
+
+            <programlisting language="java" linenumbering="unnumbered">HostNameVerifier hostNameVerifier = ...;
+int timeout = ...;
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put(JAXWSProperties.HOSTNAME_VERIFIER, hostNameVerifier);</programlisting>
+        </example>
+    </section>
+
+    <section xml:id="https-sslsocketfactory">
+        <title>HTTPS SSLSocketFactory</title>
+
+        <para>JAX-WS uses Java SE's <link
+        xlink:href="http://download.oracle.com/javase/6/docs/api/javax/net/ssl/HttpsURLConnection.html">HttpsURLConnection</link>
+        to send requests to web services that use HTTPS transport.
+        HttpsURLConnection offers <link
+        xlink:href="http://java.sun.com/j2se/1.5.0/docs/api/javax/net/ssl/HttpsURLConnection.html#setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)">setSSLSocketFactory()</link>
+        method and that factory is used when creating sockets for secure https
+        URL connections. The same thing can be achieved by doing the following
+        in JAX-WS clients:</para>
+
+        <example>
+            <title>HTTPS SSLSocketFactory</title>
+
+            <programlisting language="java" linenumbering="unnumbered">SSLSocketFactory sslSocketFactory = ...;
+Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
+ctxt.put(JAXWSProperties.SSL_SOCKET_FACTORY, sslSocketFactory);</programlisting>
+        </example>
+    </section>
+
+    <section xml:id="http-address-in-soapaddress-and-import-locations">
+        <title>HTTP address in soap:address and import locations</title>
+
+        <para>A service may be hosted in a servlet container that is behind
+        firewall/load balancer. Then a published WSDL's soap:address,
+        wsdl:import, xsd:import locations may point to the internal
+        address(not to the external firewall/loadbalancer address). Metro uses
+        the HttpServletRequest's getServerName() and getServerPort() to figure
+        out the server's address and port respectively. This works in many
+        cases, but you may need to configure the servlet container's server
+        address in some cases. <itemizedlist>
+                <listitem>
+                    <para>This is supported in GlassFish, by configuring
+                    "server-name" attribute of &lt;http-listener&gt; in
+                    domain.xml. For example, set it to
+                    "http://firewall-host:firewall-port"</para>
+                </listitem>
+
+                <listitem>
+                    <para>This is supported in Tomcat, by using the
+                    "proxyName" and "proxyPort" attributes on
+                    &lt;Connector&gt;. See <link
+                    xlink:href="http://tomcat.apache.org/tomcat-5.5-doc/proxy-howto.html">tomcat
+                    configuration</link></para>
+                </listitem>
+            </itemizedlist></para>
+    </section>
+</chapter>
