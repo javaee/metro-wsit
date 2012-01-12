@@ -56,6 +56,7 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
+import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.parser.PolicyResourceLoader;
 
@@ -96,38 +97,39 @@ public class EndpointFactoryImplTest extends TestCase {
         EndpointFactoryImpl instance = new EndpointFactoryImpl();
         WSEndpoint<String> expResult = endpoint;
         WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-        assertSame(expResult, result);
+        assertTrue(result instanceof ManagedEndpoint);
+        assertTrue(result.getImplementationClass().equals(expResult.getImplementationClass()));
     }
 
     /**
      * Test of createEndpoint method, of class EndpointFactoryImpl.
      * @throws Exception 
      */
-    public void testCreateEndpointNoManagedAssertion() throws Exception {
+//    public void testCreateEndpointNoManagedAssertion() throws Exception {
+//        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/unmanaged.wsdl");
+//        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
+//        final PolicyMap policyMap = wsdlModel.getPolicyMap();
+//        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
+//        EndpointCreationAttributes attributes = null;
+//        EndpointFactoryImpl instance = new EndpointFactoryImpl();
+//        WSEndpoint<String> expResult = endpoint;
+//        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
+//        assertSame(expResult, result);
+//    }
+
+    /**
+     * Test of createEndpoint method, of class EndpointFactoryImpl.
+     */
+    public void testCreateEndpointManagedAssertion() throws Exception {
         final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/unmanaged.wsdl");
         final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
         final PolicyMap policyMap = wsdlModel.getPolicyMap();
         WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
         EndpointCreationAttributes attributes = null;
         EndpointFactoryImpl instance = new EndpointFactoryImpl();
-        WSEndpoint<String> expResult = endpoint;
         WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-        assertSame(expResult, result);
+        assertTrue(result instanceof ManagedEndpoint);
     }
-
-    /**
-     * Test of createEndpoint method, of class EndpointFactoryImpl.
-     */
-//    public void testCreateEndpointManagedAssertion() throws Exception {
-//        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/managed.wsdl");
-//        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
-//        final PolicyMap policyMap = wsdlModel.getPolicyMap();
-//        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
-//        EndpointCreationAttributes attributes = null;
-//        EndpointFactoryImpl instance = new EndpointFactoryImpl();
-//        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-//        assertTrue(result instanceof ManagedEndpoint);
-//    }
 
 
     private static class MockEndpoint extends WSEndpoint<String> {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.Reconfigurable;
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+//import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -63,7 +63,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
+//import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,34 +83,35 @@ import org.glassfish.gmbal.ManagedObjectManager;
  *
  * @param <T> The implementation class of the endpoint.
  * 
- * @author Fabian Ritzmann
+ * @author Fabian Ritzmann, Martin Grebac
  */
-public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter {
+public class ManagedEndpoint<T> extends WSEndpoint<T>/* implements EndpointStarter */{
 
-    public static final String ENDPOINT_ID_PARAMETER_NAME = "ENDPOINT_ID";
-    public static final String ENDPOINT_INSTANCE_PARAMETER_NAME = "ENDPOINT_INSTANCE";
-    public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
-    public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
-    public static final String ENDPOINT_STARTER_PARAMETER_NAME = "ENDPOINT_STARTER";
+//    public static final String ENDPOINT_ID_PARAMETER_NAME = "ENDPOINT_ID";
+//    public static final String ENDPOINT_INSTANCE_PARAMETER_NAME = "ENDPOINT_INSTANCE";
+//    public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
+//    public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
+//    public static final String ENDPOINT_STARTER_PARAMETER_NAME = "ENDPOINT_STARTER";
 
     private static final Logger LOGGER = Logger.getLogger(ManagedEndpoint.class);
 
-    private final String id;
+//    private final String id;
     private WSEndpoint<T> endpointDelegate;
-    // Holds the policy to configure the managed endpoint.
-    private ManagedServiceAssertion assertion;
-
-    private final CountDownLatch startSignal = new CountDownLatch(1);
-
-    private final Collection<CommunicationServer<T>> commInterfaces;
+//    // Holds the policy to configure the managed endpoint.
+//    private ManagedServiceAssertion assertion;
+//
+//    private final CountDownLatch startSignal = new CountDownLatch(1);
+//
+//    private final Collection<CommunicationServer<T>> commInterfaces;
     private final Collection<ReconfigNotifier> reconfigNotifiers = new LinkedList<ReconfigNotifier>();
-    private final Configurator<T> configurator;
+//    private final Configurator<T> configurator;
 
-    // Delay before dispose is called on a replaced endpoint delegate. Defaults to 2 minutes.
+//     Delay before dispose is called on a replaced endpoint delegate. Defaults to 2 minutes.
     private static final long ENDPOINT_DISPOSE_DELAY_DEFAULT = 120000l;
-    private final long endpointDisposeDelay;
+    private long endpointDisposeDelay = ENDPOINT_DISPOSE_DELAY_DEFAULT;
     private final ScheduledExecutorService disposeThreadPool = Executors.newScheduledThreadPool(1);
-
+    private final EndpointCreationAttributes creationAttributes;
+            
     /**
      * Initializes this endpoint.
      *
@@ -120,61 +121,66 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
      *   instance and that cannot be queried from WSEndpoint itself. This is used by
      *   the communication API to recreate WSEndpoint instances with the same parameters.
      */
-    public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint,
-            final EndpointCreationAttributes attributes) {
-        try {
-            this.id = id;
+    public ManagedEndpoint(/*final String id, */final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
+//        try {
+//            this.id = id;
+            this.creationAttributes = attributes;
             this.endpointDelegate = endpoint;
-            // We need to extract the ManagedService assertion from the endpoint policy
-            // right away because any reconfiguration will overwrite the policies in
-            // the endpoint.
-            this.assertion = ManagedServiceAssertion.getAssertion(endpoint);
+//            // We need to extract the ManagedService assertion from the endpoint policy
+//            // right away because any reconfiguration will overwrite the policies in
+//            // the endpoint.
+//            this.assertion = ManagedServiceAssertion.getAssertion(endpoint);
 
-            this.endpointDisposeDelay = this.assertion.getEndpointDisposeDelay(ENDPOINT_DISPOSE_DELAY_DEFAULT);
+//            this.endpointDisposeDelay = this.assertion.getEndpointDisposeDelay(ENDPOINT_DISPOSE_DELAY_DEFAULT);
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
                 classLoader = getClass().getClassLoader();
             }
 
-            final ManagementFactory factory = new ManagementFactory(this.assertion);
-
-            final ConfigReader<T> reader = factory.createConfigReaderImpl(
-                    this, attributes, classLoader, this);
-            final ConfigSaver<T> saver = factory.createConfigSaverImpl(this);
-            this.configurator = factory.createConfiguratorImpl(this, reader, saver);
-            this.commInterfaces = factory.createCommunicationImpls(this, attributes,
-                    classLoader, this.configurator, this);
-
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_5055_STARTING_CONFIGURATOR(this.configurator));
-            }
-            this.configurator.start();
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_5056_STARTED_CONFIGURATOR(this.configurator));
+//            final ManagementFactory factory = new ManagementFactory(this.assertion);
+//
+//            final ConfigReader<T> reader = factory.createConfigReaderImpl(
+//                    this, attributes, classLoader, this);
+//            final ConfigSaver<T> saver = factory.createConfigSaverImpl(this);
+//            this.configurator = factory.createConfiguratorImpl(this, reader, saver);
+//            this.commInterfaces = factory.createCommunicationImpls(this, attributes,
+//                    classLoader, this.configurator, this);
+//
+//            if (LOGGER.isLoggable(Level.FINE)) {
+//                LOGGER.fine(ManagementMessages.WSM_5055_STARTING_CONFIGURATOR(this.configurator));
+//            }
+//            this.configurator.start();
+//            if (LOGGER.isLoggable(Level.FINE)) {
+//                LOGGER.fine(ManagementMessages.WSM_5056_STARTED_CONFIGURATOR(this.configurator));
+//            }
+//            
+//            for (CommunicationServer<T> commInterface : commInterfaces) {
+//                if (LOGGER.isLoggable(Level.FINE)) {
+//                    LOGGER.fine(ManagementMessages.WSM_5057_STARTING_COMMUNICATION(commInterface));
+//                }
+//                commInterface.start();
+//                if (LOGGER.isLoggable(Level.FINE)) {
+//                    LOGGER.fine(ManagementMessages.WSM_5058_STARTED_COMMUNICATION(commInterface));
+//                }
+//            }
+//
+//            // block until we receive a start signal
+//            if (LOGGER.isLoggable(Level.CONFIG)) {
+//                LOGGER.config(ManagementMessages.WSM_5065_BLOCKING_ENDPOINT());
+//            }
+//
+//            this.startSignal.countDown();
+            for (ReconfigNotifier notifier : this.reconfigNotifiers) {
+                notifier.sendNotification();
             }
             
-            for (CommunicationServer<T> commInterface : commInterfaces) {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(ManagementMessages.WSM_5057_STARTING_COMMUNICATION(commInterface));
-                }
-                commInterface.start();
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(ManagementMessages.WSM_5058_STARTED_COMMUNICATION(commInterface));
-                }
-            }
-
-            // block until we receive a start signal
-            if (LOGGER.isLoggable(Level.CONFIG)) {
-                LOGGER.config(ManagementMessages.WSM_5065_BLOCKING_ENDPOINT());
-            }
-            startSignal.await();
             if (LOGGER.isLoggable(Level.CONFIG)) {
                 LOGGER.config(ManagementMessages.WSM_5066_STARTING_ENDPOINT());
             }
-        } catch (InterruptedException e) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5099_START_INTERRUPTED(), e));
-        }
+//        } catch (InterruptedException e) {
+//            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5099_START_INTERRUPTED(), e));
+//        }
     }
 
     /**
@@ -184,22 +190,23 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     public void addNotifier(final ReconfigNotifier notifier) {
         this.reconfigNotifiers.add(notifier);
     }
-
-    public void startEndpoint() {
-        this.startSignal.countDown();
-        for (ReconfigNotifier notifier : this.reconfigNotifiers) {
-            notifier.sendNotification();
-        }
-    }
-
-    /**
-     * Return the ID of this managed endpoint.
-     *
-     * @return The ID of the managed endpoint.
+    
+    /** 
+     * Returns attributes used for creation of this endpoint.
+     * @return 
      */
-    public String getId() {
-        return this.id;
+    public EndpointCreationAttributes getCreationAttributes() {
+        return this.creationAttributes;
     }
+
+//    /**
+//     * Return the ID of this managed endpoint.
+//     *
+//     * @return The ID of the managed endpoint.
+//     */
+//    public String getId() {
+//        return this.id;
+//    }
 
     /**
      * Sets a new WSEndpoint instance to which method calls will be forwarded from
@@ -210,8 +217,9 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
         // Plug in code that regenerates WSDL when the endpoint was reconfigured.
         final Set<EndpointComponent> endpointComponents = endpoint.getComponentRegistry();
-        // The Set will make sure that there is only one instance of the publisher.
-        endpointComponents.add(new ManagedHttpMetadataPublisher());
+
+//        The Set will make sure that there is only one instance of the publisher.
+//        endpointComponents.add(new ManagedHttpMetadataPublisher());
 
         final WSEndpoint<T> oldEndpoint = this.endpointDelegate;
         this.endpointDelegate = endpoint;
@@ -222,35 +230,35 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
             }
         }
         disposeDelegate(oldEndpoint);
-        LOGGER.info(ManagementMessages.WSM_5000_RECONFIGURED_ENDPOINT(this.id));
+        LOGGER.info(ManagementMessages.WSM_5000_RECONFIGURED_ENDPOINT(this/*.id*/));
     }
 
     @Override
     synchronized public void dispose() {
-        for (CommunicationServer<T> commInterface: this.commInterfaces) {
-            try {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(ManagementMessages.WSM_5061_STOPPING_COMMUNICATION(commInterface));
-                }
-                commInterface.stop();
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(ManagementMessages.WSM_5062_STOPPED_COMMUNICATION(commInterface));
-                }
-            } catch (WebServiceException e) {
-                LOGGER.severe(ManagementMessages.WSM_5063_FAILED_COMMUNICATION_STOP(commInterface));
-            }
-        }
-        try {
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_5059_STOPPING_CONFIGURATOR(this.configurator));
-            }
-            this.configurator.stop();
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_5060_STOPPED_CONFIGURATOR(this.configurator));
-            }
-        } catch (WebServiceException e) {
-            LOGGER.severe(ManagementMessages.WSM_5064_FAILED_CONFIGURATOR_STOP(this.configurator));
-        }
+//        for (CommunicationServer<T> commInterface: this.commInterfaces) {
+//            try {
+//                if (LOGGER.isLoggable(Level.FINE)) {
+//                    LOGGER.fine(ManagementMessages.WSM_5061_STOPPING_COMMUNICATION(commInterface));
+//                }
+//                commInterface.stop();
+//                if (LOGGER.isLoggable(Level.FINE)) {
+//                    LOGGER.fine(ManagementMessages.WSM_5062_STOPPED_COMMUNICATION(commInterface));
+//                }
+//            } catch (WebServiceException e) {
+//                LOGGER.severe(ManagementMessages.WSM_5063_FAILED_COMMUNICATION_STOP(commInterface));
+//            }
+//        }
+//        try {
+//            if (LOGGER.isLoggable(Level.FINE)) {
+//                LOGGER.fine(ManagementMessages.WSM_5059_STOPPING_CONFIGURATOR(this.configurator));
+//            }
+//            this.configurator.stop();
+//            if (LOGGER.isLoggable(Level.FINE)) {
+//                LOGGER.fine(ManagementMessages.WSM_5060_STOPPED_CONFIGURATOR(this.configurator));
+//            }
+//        } catch (WebServiceException e) {
+//            LOGGER.severe(ManagementMessages.WSM_5064_FAILED_CONFIGURATOR_STOP(this.configurator));
+//        }
         this.disposeThreadPool.shutdown();
         if (this.endpointDelegate != null) {
             this.endpointDelegate.dispose();
