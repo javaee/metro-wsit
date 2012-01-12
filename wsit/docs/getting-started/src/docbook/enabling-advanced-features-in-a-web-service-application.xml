@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+    Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+    The contents of this file are subject to the terms of either the GNU
+    General Public License Version 2 only ("GPL") or the Common Development
+    and Distribution License("CDDL") (collectively, the "License").  You
+    may not use this file except in compliance with the License.  You can
+    obtain a copy of the License at
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
+    or packager/legal/LICENSE.txt.  See the License for the specific
+    language governing permissions and limitations under the License.
+
+    When distributing the software, include this License Header Notice in each
+    file and include the License file at packager/legal/LICENSE.txt.
+
+    GPL Classpath Exception:
+    Oracle designates this particular file as subject to the "Classpath"
+    exception as provided by Oracle in the GPL Version 2 section of the License
+    file that accompanied this code.
+
+    Modifications:
+    If applicable, add the following below the License Header, with the fields
+    enclosed by brackets [] replaced by your own identifying information:
+    "Portions Copyright [year] [name of copyright owner]"
+
+    Contributor(s):
+    If you wish your version of this file to be governed by only the CDDL or
+    only the GPL Version 2, indicate your decision by adding "[Contributor]
+    elects to include this software in this distribution under the [CDDL or GPL
+    Version 2] license."  If you don't indicate a single choice of license, a
+    recipient has the option to distribute your version of this file under
+    either the CDDL, the GPL Version 2 or to extend the choice of license to
+    its licensees as provided above.  However, if you add GPL Version 2 code
+    and therefore, elected the GPL Version 2 license, then the option applies
+    only if the new code is made subject to such option by the copyright
+    holder.
+
+-->
+<article version="5.0"
+         xml:id="enabling-advanced-features-in-a-web-service-application"
+         xml:lang="en" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns5="http://www.w3.org/2000/svg"
+         xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+    <title>Enabling Advanced Features in a Web Service Application</title>
+
+    <info>
+        <!--title>Enabling Advanced Features in a Web Service Application</title-->
+
+        <abstract>
+            <para>This article highlights the steps required to enable
+            Metro-specific advanced functionalities in a web service and its
+            corresponding client application. As with the previous article,
+            two accompanying code samples are included. Again, one starts from
+            Java source code and the other from an existing WSDL document to
+            develop their respective web services. However, this article and
+            its code samples show how WS-Policy can used to enable
+            WS-Addressing and WS-Reliable Messaging in the web services and
+            their clients.</para>
+        </abstract>
+    </info>
+
+    <section>
+        <title>Overview</title>
+
+        <para>Supporting code samples are included to demonstrate building a
+        web service using WSIT functionality. The examples show how to develop
+        a web service both starting from Java source code and starting from an
+        existing WSDL document. For both cases, it shows how to develop a
+        corresponding client application from the web service's WSDL document.
+        The examples can be found in the WSIT source tree here:</para>
+
+        <itemizedlist role="package">
+            <listitem>
+                <para><link
+                xlink:href="download/wsit-enabled-fromjava.zip">From-Java
+                example</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="download/wsit-enabled-fromwsdl.zip">From-WSDL
+                example</link></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>As you follow along with the sample code, please confirm that
+        you are working in either <literal>wsit-enabled-fromjava</literal> or
+        <literal>wsit-enabled-fromwsdl</literal> rather than one of the
+        previous article's sample code directories,
+        <literal>wsit-jaxws-fromjava</literal> or
+        <literal>wsit-jaxws-fromwsdl</literal>.</para>
+    </section>
+
+    <section>
+        <title>Prerequisites and Environment Configuration</title>
+
+        <para>As in the previous article, the steps in this document require
+        that you have already installed the WSIT jars into your web container.
+        It also requires the following software be installed: <link
+        xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK
+        6.0 Update 29</link> or later, <link
+        xlink:href="http://ant.apache.org/">Apache Ant 1.6.5</link> or later,
+        and a web container: either <link
+        xlink:href="http://glassfish.java.net/">Glassfish v3.x</link> or <link
+        xlink:href="http://tomcat.apache.org/">Apache Tomcat 7.0</link>.
+        Further, your Metro build environment needs to be configured as
+        described in the <xref linkend="basma-environment"
+        xrefstyle="select:title" /> section of the previous article.</para>
+    </section>
+
+    <section>
+        <title>WSIT Configuration and WS-Policy</title>
+
+        <para>Advanced web service features are enabled and configured using a
+        mechanism defined by the <link
+        xlink:href="http://specs.xmlsoap.org/ws/2004/09/policy/">Web Services
+        Policy Framework</link> (WS-Policy) specification. A web service
+        expresses its requirements and capabilities via policies embedded in
+        the service's WSDL description. A service consumer verifies it can
+        handle the expressed requirements and, optionally, uses server
+        capabilities advertised in policies.</para>
+
+        <para>Technologies like Reliable Messaging, Addressing, or Secure
+        Conversations, provides a set of policy assertions it can process.
+        Those assertions provide the necessary configuration details to the
+        Metro run-time to enable proper operation of these features used by a
+        given web service. The assertions may specify particular configuration
+        settings or rely on default settings that are pre-determined by the
+        specific technology. For instance, in the snippet shown below,
+        <literal>wsrm:AcknowledgementInterval</literal> and
+        <literal>wsrm:InactivityTimeout</literal> are both optional and could
+        be omitted. The following is an XML snippet showing WS-Policy
+        assertions for WS-Addressing and WS-Reliable Messaging:</para>
+
+        <programlisting language="xml">&lt;wsp:Policy wsu:Id="AddNumbers_policy"&gt;
+  &lt;wsp:ExactlyOne&gt;
+    &lt;wsp:All&gt;
+      &lt;wsam:Addressing wsp:Optional="false"/&gt;
+      &lt;wsrm:RMAssertion&gt;
+        &lt;wsrm:InactivityTimeout Milliseconds="600000"/&gt;
+        &lt;wsrm:AcknowledgementInterval Milliseconds="200"/&gt;
+      &lt;/wsrm:RMAssertion&gt;
+    &lt;/wsp:All&gt;
+  &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+
+        <para>This snippet would be equally valid in either a WSIT
+        configuration file or a web service's WSDL document.</para>
+    </section>
+
+    <section>
+        <title>Configuring WSIT in the Web Service</title>
+
+        <section>
+            <title>Starting from Java</title>
+
+            <para>When developing a web service from scratch or based on an
+            existing Java class, WSIT features are enabled using a
+            configuration file. That file,
+            <literal>wsit-fromjava.server.AddNumberImpl.xml</literal>, is
+            written in WSDL format. An example configuration file can be found
+            in the accompanying samples:</para>
+
+            <itemizedlist role="document">
+                <listitem>
+                    <para><link
+                    xlink:href="samples/wsit-enabled-fromjava/etc/wsit-fromjava.server.AddNumbersImpl.xml">wsit-enabled-fromjava/etc/wsit-fromjava.server.AddNumbersImpl.xml</link></para>
+                </listitem>
+            </itemizedlist>
+
+            <para>The configuration file settings will be incorporated
+            dynamically by the WSIT run-time into the WSDL it generates for
+            the web service. So when a client requests the service's WSDL, the
+            run-time will embed into the WSDL any publically visible policy
+            assertions contained in the configuration file. For the example
+            link above, the Addressing and Reliable Messsaging assertions
+            would be part of the WSDL as seen by the client.</para>
+
+            <note>
+                <para><literal>wsit.xml</literal> must be in the
+                <literal>WEB-INF</literal> sub-directories of the
+                application's WAR file when it is deployed to the web
+                container. Otherwise, the WSIT run-time environment will not
+                find it.</para>
+            </note>
+        </section>
+
+        <section>
+            <title>Starting from WSDL</title>
+
+            <para>When developing a web service starting from an existing
+            WSDL, the situation is actually simpler. The policy assertions
+            needed to enable various WSIT technologies will already be
+            embedded in the WSDL document. Here is an example WSDL document in
+            the accompanying samples:</para>
+
+            <itemizedlist role="document">
+                <listitem>
+                    <para><link
+                    xlink:href="samples/wsit-enabled-fromwsdl/etc/AddNumbers.wsdl">wsit-enabled-fromwsdl/etc/AddNumbers.wsdl</link></para>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+
+    <section>
+        <title>Building and Deploying the Web Service</title>
+
+        <para>Once configured, a WSIT-enabled web service is built and
+        deployed in the same manner as a standard JAX-WS web service. If you
+        are not familiar with those steps, please review the following
+        sections from <xref linkend="building-a-simple-metro-application"
+        xrefstyle="select:title" />: <xref linkend="basma-building"
+        xrefstyle="select:title" /> and <xref linkend="basma-deploying"
+        xrefstyle="select:title" />. However, the URLs needed to verify the
+        respective web services differ from the previous article's examples
+        and are listed below:</para>
+
+        <itemizedlist role="document">
+            <listitem>
+                <para><link
+                xlink:href="http://localhost:8080/wsit-enabled-fromjava/addnumbers?wsdl">http://localhost:8080/wsit-enabled-fromjava/addnumbers?wsdl</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl">http://localhost:8080/wsit-enabled-fromwsdl/addnumbers?wsdl</link></para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
+    <section>
+        <title>Configuring WSIT in the Web Service Client</title>
+
+        <para>Client-side configuration of WSIT functionality is largely
+        automatic in the WSIT environment. The WSDL document seen by the
+        client will already contain the WSIT policy assertions. Those
+        assertions describe any requirements from the server as well as any
+        optional features the client may use. The WSIT build tools and
+        run-time environment will detect the WSDL's policy assertions and
+        configure themselves appropriately, if possible. If an unsupported
+        assertion is found, an error message describing the problem will be
+        displayed.</para>
+    </section>
+
+    <section>
+        <title>Building and Running a Web Service Client</title>
+
+        <para>As with the web service itself, building and running a
+        WSIT-enabled client application is identical to running a standard
+        JAX-WS client application. Those steps are described in the following
+        sections of the previous article: <xref
+        linkend="basma-building-client" xrefstyle="select:title" /> and <xref
+        linkend="basma-running-client" xrefstyle="select:title" />. You can
+        expect to see output from the client similar to the following:</para>
+
+        <programlisting>[java] Invoking addNumbers(10, 20)
+[java] The result of adding 10 and 20 is 30.
+[java]
+[java] Invoking addNumbers(-10, 20)
+[java] Caught AddNumbersFault_Exception: Numbers: -10, 20
+[java] 12.1.2012 15:34:37 [com.sun.xml.ws.rx.rm.runtime.ClientTube]  closeSequences
+[java] INFO: WSRM1157: Waiting for sequence [ uuid:6ecc55a3-78cf-4e8f-9b18-87ffa6fbb8b0 ] state change to [ CLOSED ] has timed out after 3 000 milliseconds
+
+[java] 12.1.2012 15:34:40 [com.sun.xml.ws.rx.rm.runtime.ClientTube]  closeRmSession
+[java] INFO: WSRM1157: Waiting for sequence [ uuid:6ecc55a3-78cf-4e8f-9b18-87ffa6fbb8b0 ] state change to [ TERMINATING ] has timed out after 3 000 milliseconds</programlisting>
+    </section>
+
+    <section>
+        <title>Undeploying a Web Service</title>
+
+        <para>As described in <xref linkend="basma-undeploying"
+        xrefstyle="select:title" />, to undeploy a web service means to both
+        disable and remove it from the web container. This section provides
+        the necessary commands to undeploy this article's sample web services
+        from both GlassFish and Tomcat.</para>
+
+        <section>
+            <title>Undeploying from GlassFish</title>
+
+            <programlisting>asadmin undeploy --user admin wsit-enabled-fromjava
+asadmin undeploy --user admin wsit-enabled-fromwsdl</programlisting>
+        </section>
+
+        <section>
+            <title>Undeploying from Tomcat</title>
+
+            <programlisting>rm $CATALINA_HOME/webapps/wsit-enabled-fromjava.war
+rm $CATALINA_HOME/webapps/wsit-enabled-fromwsdl.war</programlisting>
+        </section>
+    </section>
+</article>

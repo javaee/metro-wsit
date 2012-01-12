@@ -40,11 +40,9 @@
     holder.
 
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>docs</artifactId>
@@ -52,9 +50,9 @@
         <version>2.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>guide</artifactId>
+    <artifactId>getting-started</artifactId>
     <packaging>pom</packaging>
-    <name>Metro User Guide</name>
+    <name>Metro Getting Started</name>
 
     <build>
         <plugins>
@@ -69,9 +67,6 @@
                                 <copy todir="${src.dir}">
                                     <fileset dir="src/docbook"/>
                                 </copy>
-                                <replace file="${src.dir}/metro.ent" token="$version" value="${project.version}"/>
-                                <replace file="${src.dir}/metro.ent" token="$repository" value="${javanet.repository.id}"/>
-                                <replace file="${src.dir}/metro.ent" token="$jax-ws.version" value="${jaxws.ri.version}"/>
                             </tasks>
                         </configuration>
                         <id>process-entities</id>
@@ -131,15 +126,31 @@
                         <copy todir="${project.build.directory}/docbook/figures">
                             <fileset dir="${src.dir}/figures" />
                         </copy>
-                        <copy todir="${project.build.directory}/docbook/download">
-                            <fileset dir="${src.dir}/download" />
-                        </copy>
                         <copy todir="${project.build.directory}/docbook/style">
                             <fileset dir="${src.dir}/style" />
+                        </copy>
+                        <copy todir="${project.build.directory}/docbook/samples">
+                            <fileset dir="${src.dir}/samples" />
                         </copy>
                         <copy todir="${project.build.directory}/docbook/icons">
                             <fileset dir="${src.dir}/icons" />
                         </copy>
+
+                        <mkdir dir="${project.build.directory}/docbook/download" />
+
+                        <macrodef name="java-bundle">
+                            <attribute name="name"/>
+                            <sequential>
+                                <zip destfile="${project.build.directory}/docbook/download/@{name}.zip"
+                                        basedir="${project.build.directory}/docbook/samples/" includes="@{name}/**"/>
+                            </sequential>
+                        </macrodef>
+
+                        <java-bundle name="csclient" />
+                        <java-bundle name="wsit-enabled-fromjava" />
+                        <java-bundle name="wsit-enabled-fromwsdl" />
+                        <java-bundle name="wsit-jaxws-fromjava" />
+                        <java-bundle name="wsit-jaxws-fromwsdl" />
                     </preProcess>
                 </configuration>
                 <executions>
@@ -150,7 +161,7 @@
                             <goal>generate-pdf</goal>
                         </goals>
                         <configuration>
-                            <includes>user-guide.xml</includes>
+                            <includes>getting-started.xml</includes>
                         </configuration>
                         <phase>package</phase>
                     </execution>
@@ -163,7 +174,7 @@
                             <includes>index.xml</includes>
                             <chunkedOutput>true</chunkedOutput>
                             <chunkSectionDepth>0</chunkSectionDepth>
-                            <useIdAsFilename>false</useIdAsFilename>
+                            <useIdAsFilename>true</useIdAsFilename>
                         </configuration>
                         <phase>package</phase>
                     </execution>
