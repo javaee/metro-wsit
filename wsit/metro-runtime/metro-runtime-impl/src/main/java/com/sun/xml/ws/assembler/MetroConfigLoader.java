@@ -96,17 +96,41 @@ class MetroConfigLoader {
         }
     };
     //
-    private final MetroConfig defaultConfig;
-    private final URL defaultConfigUrl;
-    private final MetroConfig appConfig;
-    private final URL appConfigUrl;
+    private MetroConfig defaultConfig;
+    private URL defaultConfigUrl;
+    private MetroConfig appConfig;
+    private URL appConfigUrl;
 
     MetroConfigLoader(Container container) {
-        this(new MetroConfigUrlLoader(container));
+        ResourceLoader resourceLoader = null;
+        if (container != null) {
+            resourceLoader = container.getSPI(ResourceLoader.class);
+        }
+        if (resourceLoader == null) {
+            resourceLoader = new MetroConfigUrlLoader(container);
+        }
+        init(resourceLoader, container);
     }
 
-    private MetroConfigLoader(ResourceLoader loader) {
-        this.defaultConfigUrl = locateResource(DEFAULT_METRO_CFG_NAME, loader);
+    private void init(ResourceLoader loader, Container container) {
+       
+        String appFileName = null;
+        String defaultFileName = null;
+        if (container != null) {
+            MetroConfigName mcn = container.getSPI(MetroConfigName.class);
+            if (mcn != null) {
+                appFileName = mcn.getAppFileName();
+                defaultFileName = mcn.getDefaultFileName();
+            }
+        }
+        if (appFileName == null) {
+            appFileName = APP_METRO_CFG_NAME;
+        }
+        
+        if (defaultFileName == null) {
+            defaultFileName = DEFAULT_METRO_CFG_NAME;
+        }
+        this.defaultConfigUrl = locateResource(defaultFileName, loader);
         if (defaultConfigUrl == null) {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0001_DEFAULT_CFG_FILE_NOT_FOUND()));
         }
@@ -123,7 +147,7 @@ class MetroConfigLoader {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0005_NO_DEFAULT_TUBELINE_IN_DEFAULT_CFG_FILE()));
         }
 
-        this.appConfigUrl = locateResource(APP_METRO_CFG_NAME, loader);
+        this.appConfigUrl = locateResource(appFileName, loader);
         if (appConfigUrl != null) {
             LOGGER.config(LocalizationMessages.MASM_0006_APP_CFG_FILE_LOCATED(appConfigUrl));
             this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);

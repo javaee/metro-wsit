@@ -62,7 +62,7 @@ import java.util.logging.Level;
  */
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
-    private static class MetroTubelineAssembler implements TubelineAssembler {
+      static class MetroTubelineAssembler implements TubelineAssembler {
 
         private static final String COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE = "com.sun.metro.soap.dump";
 
@@ -101,6 +101,10 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
         MetroTubelineAssembler(final BindingID bindingId) {
             this.bindingId = bindingId;
             this.tubelineAssemblyController = new TubelineAssemblyController();
+        }
+
+        TubelineAssemblyController getTubelineAssemblyController() {
+            return tubelineAssemblyController;
         }
 
         @NotNull

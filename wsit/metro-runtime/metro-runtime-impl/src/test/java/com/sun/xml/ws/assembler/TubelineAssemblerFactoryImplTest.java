@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.EndpointAddress;
@@ -59,9 +60,11 @@ import com.sun.xml.ws.binding.BindingImpl;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,12 +114,63 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         }
     }
 
+    private class TestResourceLoader extends ResourceLoader {
+
+        @Override
+        public URL getResource(String resourceName) throws MalformedURLException {
+            return Thread.currentThread().getContextClassLoader().getResource(resourceName);
+        }
+        
+    }
+    public void testAlternateConfigFileName() throws Exception {
+        final BindingID bindingId = BindingID.SOAP11_HTTP;
+        final  String ALTERNATE_FILE_NAME = "metro-config/alternate.xml";
+        final Container container = new Container() {
+            public <S> S getSPI(Class<S> spiType) {
+                if (spiType.isAssignableFrom(MetroConfigName.class)) {
+                    return spiType.cast( new MetroConfigName()  {
+
+                        @Override
+                        public String getDefaultFileName() {
+                            return ALTERNATE_FILE_NAME;
+                        }
+
+                        @Override
+                        public String getAppFileName() {
+                            return ALTERNATE_FILE_NAME;
+                        }
+                        
+                    });
+                } else if (spiType.isAssignableFrom(ResourceLoader.class)) {
+                    return spiType.cast( new TestResourceLoader());
+                }
+                return null;
+            }   
+        };
+        final ClientTubeAssemblerContext jaxwsContext = getClientContext(bindingId, container);
+        TubelineAssemblerFactoryImpl.MetroTubelineAssembler assembler = (TubelineAssemblerFactoryImpl.MetroTubelineAssembler)getAssembler(bindingId);
+        TubelineAssemblyController tubelineAssemblyController = assembler.getTubelineAssemblyController();
+        ClientTubelineAssemblyContextImpl context = new ClientTubelineAssemblyContextImpl(jaxwsContext);
+        Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
+        assertEquals(2, tubeCreators.size());
+        
+    }
     /**
      * Test client creation with parameters that correspond to a dispatch client
      * with no wsit-client.xml and with no WSDL.
      */
     public void testCreateDispatchClientNoConfig() throws Exception {
         final BindingID bindingId = BindingID.SOAP11_HTTP;
+        final Container container = MockupMetroConfigLoader.createMockupContainer("metro-default.xml");
+
+        final ClientTubeAssemblerContext context = getClientContext(bindingId, container);
+        final Tube tubeline = getAssembler(bindingId).createClient(context);
+        assertNotNull(tubeline);
+    }
+
+    private ClientTubeAssemblerContext getClientContext(
+            final BindingID bindingId,
+            final Container container) {
         final WSBinding binding = bindingId.createBinding();
         final EndpointAddress address = new EndpointAddress(ADDRESS_URL);
         final WSDLPort port = null;
@@ -126,7 +180,6 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         // Corresponds to Service.addPort(portName, bindingId, address)
         service.addPort(portName, bindingId.toString(), ADDRESS_URL.toString());
         final WSPortInfo portInfo = ((WSServiceDelegate) service).safeGetPort(portName);
-        final Container container = MockupMetroConfigLoader.createMockupContainer("metro-default.xml");
 
         WSBindingProvider wsbp = new WSBindingProvider() {
 
@@ -203,8 +256,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
                 container,
                 ((BindingImpl)binding).createCodec(),
                 null, null);
-        final Tube tubeline = getAssembler(bindingId).createClient(context);
-        assertNotNull(tubeline);
+        return context;
     }
 
     /**
