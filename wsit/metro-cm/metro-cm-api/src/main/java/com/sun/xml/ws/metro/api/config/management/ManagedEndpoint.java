@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,9 @@
 
 package com.sun.xml.ws.metro.api.config.management;
 
+import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.Reconfigurable;
@@ -330,6 +332,11 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>/* implements EndpointStart
         return this.endpointDelegate.getComponentRegistry();
     }
 
+    @Override
+    public @NotNull Set<Component> getComponents() {
+            return this.endpointDelegate.getComponents();
+    }
+    
     @Override
     public SEIModel getSEIModel() {
         return this.endpointDelegate.getSEIModel();
