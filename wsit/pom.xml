@@ -436,11 +436,6 @@
                 <version>${gmbal.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.gmbal</groupId>
-                <artifactId>gmbal-api-only</artifactId>
-                <version>${gmbal.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.grizzly</groupId>
                 <artifactId>grizzly-framework-http</artifactId>
                 <version>1.0.40</version>
@@ -499,6 +494,12 @@
                 <version>${jaxws.ri.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish.gmbal</groupId>
+                        <artifactId>gmbal-api-only</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
