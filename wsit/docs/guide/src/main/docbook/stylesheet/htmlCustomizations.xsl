@@ -49,7 +49,7 @@
 
     <xsl:template name="user.header.content">
 
-    <small>Links: <a href="index.html">Table of Contents</a> | <a href="user-guide.html">Single HTML</a> | <a href="user-guide.pdf">Single PDF</a></small>
+    <small class="small">Links: <a href="index.html">Table of Contents</a> | <a href="user-guide.html">Single HTML</a> | <a href="user-guide.pdf">Single PDF</a></small>
     </xsl:template>
 
     <xsl:template name="user.head.content">

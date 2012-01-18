@@ -192,10 +192,76 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release-docs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-readme</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>metro-standalone</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                            <outputDirectory>${project.build.directory}/metro-standalone</outputDirectory>
+                                            <includes>**/*.html</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>new-version</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <taskdef name="soimp" classname="com.sun.istack.tools.soimp.Soimp" classpathref="maven.plugin.classpath" />
+
+                                        <copy tofile="${project.build.directory}/www/index.html"
+                                                file="${project.build.directory}/metro-standalone/metro/readme.html" />
+
+                                        <!-- new version -->
+
+                                        <soimp  dir="${project.build.directory}/www"
+                                                repository="${www.thisversion.scm.connection.url}"
+                                                username="${userguide.scm.username}"
+                                                password="${userguide.scm.password}"
+                                                create="true"
+                                                commitMessage="${project.name} (${project.version})" />
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <properties>
         <assembly.directory>${project.build.directory}/assembly</assembly.directory>
         <src.dir>${basedir}/target/gen-src</src.dir>
         <javanet.repository.id>snapshots</javanet.repository.id>
+
+        <www.repository.url>${www.userguide.latest.scm.connection.url}</www.repository.url>
+        <www.upload.dir>${project.build.directory}/www/guide</www.upload.dir>
     </properties>
 
 </project>

@@ -56,7 +56,7 @@
         <productnumber>
             &version;
         </productnumber>
-        <title>Metro &version; User Guide</title>
+        <title>Metro User Guide</title>
     </info>
     <preface xml:id="preface">
         <title>Preface</title>

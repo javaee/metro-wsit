@@ -207,6 +207,9 @@
         <assembly.directory>${project.build.directory}/assembly</assembly.directory>
         <src.dir>${basedir}/target/gen-src</src.dir>
         <javanet.repository.id>snapshots</javanet.repository.id>
+
+        <www.repository.url>${www.gettingstarted.scm.connection.url}</www.repository.url>
+        <www.upload.dir>${project.build.directory}/www/getting-started</www.upload.dir>
     </properties>
 
 </project>

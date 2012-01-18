@@ -61,4 +61,60 @@
         <module>getting-started</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>release-docs</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <artifactId>maven-antrun-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>checkin-docbook</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>run</goal>
+                                    </goals>
+                                    <configuration>
+                                        <tasks>
+                                            <taskdef name="soimp" classname="com.sun.istack.tools.soimp.Soimp" classpathref="maven.plugin.classpath" />
+
+                                            <copy todir="${www.upload.dir}">
+                                                <fileset dir="${project.build.directory}/docbook">
+                                                    <exclude name="*.fo" />
+                                                </fileset>
+                                            </copy>
+
+                                            <!-- update the latest docbook-version -->
+
+                                            <soimp  dir="${www.upload.dir}"
+                                                    repository="${www.repository.url}"
+                                                    username="${userguide.scm.username}"
+                                                    password="${userguide.scm.password}"
+                                                    create="true"
+                                                    commitMessage="${project.name} (${project.version})" />
+                                        </tasks>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>com.sun.istack</groupId>
+                                    <artifactId>istack-commons-tools</artifactId>
+                                    <version>2.7</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>args4j</groupId>
+                                    <artifactId>args4j</artifactId>
+                                    <version>2.0.1</version>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

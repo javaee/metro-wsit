@@ -2476,15 +2476,405 @@ WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
     </section>
 
     <section xml:id="deploying-jax-ws-with-...">
-        <title>Deploying JAX-WS with ...</title>
+        <title>Deploying Metro with ...</title>
 
         <section xml:id="weblogic-10">
-            <title>WebLogic 10</title>
+            <title>WebLogic 12</title>
 
-            <para>See <link
-            xlink:href="http://forums.java.net/jive/thread.jspa?threadID=29349&amp;tstart=105">this
-            thread</link> for information. If anyone can confirm/deny that
-            this works, that would be great.</para>
+            <para>Here are the steps to use the Metro 2.x/JAX-WS
+            implementation instead of Oracle's JAX-WS implementation in
+            Weblogic 12.1.1.0 without affecting the Weblogic domain or other
+            applications under the same domain:</para>
+
+            <orderedlist>
+                <listitem>
+                    <para>Create an <literal>EAR</literal> file and include
+                    your <literal>WAR</literal> file inside it. Here is the
+                    directory structure of the <literal>EAR</literal>
+                    file:</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><literal>META-INF/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>META-INF/MANIFEST.MF</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>META-INF/application.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>META-INF/weblogic-application.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>metro-custom-tubes.war</literal>
+                            (your <literal>.war</literal> application)</para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/stax-api.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/webservices-api.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/webservices-extra-api.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/webservices-extra.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/webservices-rt.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/lib/webservices-tools.jar</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>APP-INF/classes/</literal></para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para>Include a
+                    <literal>META-INF/application.xml</literal> file to point
+                    out the name of the <literal>EAR</literal> file and the
+                    location and context of the <literal>WAR</literal>
+                    file:</para>
+
+                    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/javaee"
+             xmlns:application="http://java.sun.com/xml/ns/javaee/application_5.xsd"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                 http://java.sun.com/xml/ns/javaee/application_5.xsd"
+             id="Application_ID" version="5"&gt;
+  &lt;module&gt;
+    &lt;web&gt;
+      &lt;web-uri&gt;metro-custom-tubes.war&lt;/web-uri&gt;
+      &lt;context-root&gt;metro-custom-tubes&lt;/context-root&gt;
+    &lt;/web&gt;
+  &lt;/module&gt;  
+&lt;/application&gt;</programlisting>
+                </listitem>
+
+                <listitem>
+                    <para>Include a
+                    <literal>META-INF/weblogic-application.xml</literal> file
+                    that uses Weblogic's class loading filtering feature to
+                    override the System class loader packages and resources
+                    with the ones from the application class loader:</para>
+
+                    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;wls:weblogic-application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:wls="http://www.bea.com/ns/weblogic/weblogic-application"
+        xsi:schemaLocation="
+            http://www.bea.com/ns/weblogic/weblogic-application
+            http://www.bea.com/ns/weblogic/weblogic-application.xsd
+            http://java.sun.com/xml/ns/j2ee
+            http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd"&gt;
+    &lt;wls:application-param&gt;
+        &lt;wls:param-name&gt;webapp.encoding.default&lt;/wls:param-name&gt;
+        &lt;wls:param-value&gt;UTF-8&lt;/wls:param-value&gt;
+    &lt;/wls:application-param&gt;
+    &lt;wls:prefer-application-packages&gt;
+        &lt;wls:package-name&gt;com.ctc.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.xml.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.istack.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.datatype.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.driver.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.grammar.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.reader.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.relaxns.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.scanner.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.util.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.verifier.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.msv.writer.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.org.apache.xml.internal.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;com.sun.wsit.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.jws.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.bind.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.soap.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.stream.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.ws.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.activation.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.annotation.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.mail.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.security.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.registry.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.rpc.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javax.xml.crypto.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;javanet.staxutils.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;jp.gr.xml.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.codehaus.stax2.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.glassfish.gmbal.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.iso_relax.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.jcp.xml.dsig.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.jvnet.*&lt;/wls:package-name&gt;
+        &lt;wls:package-name&gt;org.relaxng.*&lt;/wls:package-name&gt;
+    &lt;/wls:prefer-application-packages&gt;
+    &lt;wls:prefer-application-resources&gt;
+        &lt;wls:resource-name&gt;META-INF/services/com.sun.xml.ws.*&lt;/wls:resource-name&gt;
+        &lt;wls:resource-name&gt;META-INF/services/com.sun.tools.ws.*&lt;/wls:resource-name&gt;
+    &lt;/wls:prefer-application-resources&gt;
+&lt;/wls:weblogic-application&gt;</programlisting>
+                </listitem>
+
+                <listitem>
+                    <para>Make sure the <literal>webservices-*.jar</literal>
+                    files are placed in the <literal>APP-INF/lib</literal>
+                    directory.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Make sure any Metro classes you are overriding are
+                    placed in the <literal>APP-INF/classes</literal>
+                    directory.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Here is the directory structure of the
+                    <literal>WAR</literal> file:</para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para><literal>META-INF/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>META-INF/MANIFEST.MF</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/web.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/sun-jaxws.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/weblogic.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/metro.xml</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/wsdl/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/wsdl/AddNumbers.wsdl</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/classes/</literal></para>
+                        </listitem>
+
+                        <listitem>
+                            <para><literal>WEB-INF/classes/*</literal></para>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+
+                <listitem>
+                    <para>Include a <literal>WEB-INF\weblogic.xml</literal>
+                    file with the <literal>prefer-web-inf-classes</literal>
+                    entry to override the System class loader classes with the
+                    ones in the <literal>WEB-INF\lib</literal>
+                    directory:</para>
+
+                    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;weblogic-web-app xmlns="http://www.bea.com/ns/weblogic/90"&gt;
+    &lt;container-descriptor&gt;
+        &lt;prefer-web-inf-classes&gt;true&lt;/prefer-web-inf-classes&gt;
+    &lt;/container-descriptor&gt;
+&lt;/weblogic-web-app&gt;</programlisting>
+                </listitem>
+            </orderedlist>
+
+            <section>
+                <title>Known Issues</title>
+
+                <orderedlist>
+                    <listitem>
+                        <para>Make sure your <literal>web.xml</literal> file
+                        does not include the
+                        <literal>&lt;display-name&gt;</literal> and
+                        <literal>&lt;description&gt;</literal> elements under
+                        <literal>&lt;servlet&gt;</literal> element because
+                        they are not supported in the following 2.4 or 2.5 Web
+                        Deployment Descriptor XSDs:</para>
+
+                        <itemizedlist>
+                            <listitem>
+                                <para><link
+                                xlink:href="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd</link></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><link
+                                xlink:href="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd</link></para>
+                            </listitem>
+                        </itemizedlist>
+
+                        <para>Weblogic will throw this schema validation error
+                        if they are present:</para>
+
+                        <programlisting>Message icon - Error VALIDATION PROBLEMS WERE FOUND problem: 
+cvc-complex-type.2.4a: Expected elements 
+'servlet-class@http://java.sun.com/xml/ns/javaee  
+jsp-file@http://java.sun.com/xml/ns/javaee' instead of 
+'display-name@http://java.sun.com/xml/ns/javaee' here in element 
+servlet@http://java.sun.com/xml/ns/javaee:&lt;null&gt; problem: cvc-complex-type.2.4a: 
+Expected elements 'servlet-class@http://java.sun.com/xml/ns/javaee  
+jsp-file@http://java.sun.com/xml/ns/javaee' instead of 
+'description@http://java.sun.com/xml/ns/javaee' here in element 
+servlet@http://java.sun.com/xml/ns/javaee:&lt;null&gt;</programlisting>
+                    </listitem>
+
+                    <listitem>
+                        <para>Make sure any Oneway methods / operations in
+                        your service implementation class have the
+                        <literal>@Oneway</literal> annotation in order to
+                        avoid this
+                        <literal>NullPointerException</literal>:</para>
+
+                        <programlisting>com.sun.xml.ws.transport.http.servlet.WSServletContextListener contextInitialized 
+     SEVERE: WSSERVLET11: failed to parse runtime descriptor: 
+java.lang.NullPointerException 
+     java.lang.NullPointerException 
+         at com.sun.xml.ws.model.JavaMethodImpl.freeze(JavaMethodImpl.java:375) 
+         at com.sun.xml.ws.model.AbstractSEIModelImpl.freeze(AbstractSEIModelImpl</programlisting>
+                    </listitem>
+
+                    <listitem>
+                        <para>If you're getting an exception similar to the
+                        following one, extract the contents of the file <link
+                        xlink:href="download/MemberSubmissionEndpointReference.zip">MemberSubmissionEndpointReference.zip</link>
+                        into the <literal>APP-INF/classes</literal> directory
+                        in the <literal>EAR</literal> (subclasses
+                        <literal>MemberSubmissionEndpointReference.Address</literal>
+                        and
+                        <literal>MemberSubmissionEndpointReference.Elements</literal>
+                        have been annotated with
+                        <literal>@XmlType(name="elements",
+                        namespace=MemberSubmissionEndpointReference.MSNS)</literal>
+                        and <literal>@XmlType(name="address",
+                        namespace=MemberSubmissionEndpointReference.MSNS)</literal>
+                        respectively and recompiled). Make sure to preserve
+                        the hierarchy of the file (all classes from the file
+                        should be located in the directory
+                        <literal>APP-INF/classes/com/sun/xml/ws/developer/</literal>).</para>
+
+                        <programlisting>com.sun.xml.ws.transport.http.servlet.WSServletDelegate doGet
+SEVERE: caught throwable
+java.lang.ExceptionInInitializerError
+        at com.sun.xml.ws.api.addressing.WSEndpointReference.toSpec(WSEndpointReference.java:637)
+        at com.sun.xml.ws.rx.rm.runtime.ServerTube.handleCreateSequenceAction(ServerTube.java:334)
+        at com.sun.xml.ws.rx.rm.runtime.ServerTube.processProtocolMessage(ServerTube.java:302)
+        at com.sun.xml.ws.rx.rm.runtime.ServerTube.processRequest(ServerTube.java:169)
+        at com.sun.xml.ws.api.pipe.Fiber.__doRun(Fiber.java:641)
+        at com.sun.xml.ws.api.pipe.Fiber._doRun(Fiber.java:600)
+        at com.sun.xml.ws.api.pipe.Fiber.doRun(Fiber.java:585)
+        at com.sun.xml.ws.api.pipe.Fiber.runSync(Fiber.java:482)
+        at com.sun.xml.ws.server.WSEndpointImpl$2.process(WSEndpointImpl.java:314)
+        at com.sun.xml.ws.transport.http.HttpAdapter$HttpToolkit.handle(HttpAdapter.java:608)
+        at com.sun.xml.ws.transport.http.HttpAdapter.handle(HttpAdapter.java:259)
+        at com.sun.xml.ws.transport.http.servlet.ServletAdapter.invokeAsync(ServletAdapter.java:213)
+        at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doGet(WSServletDelegate.java:159)
+        at com.sun.xml.ws.transport.http.servlet.WSServletDelegate.doPost(WSServletDelegate.java:194)
+        at com.sun.xml.ws.transport.http.servlet.WSServlet.doPost(WSServlet.java:80)
+        at javax.servlet.http.HttpServlet.service(HttpServlet.java:751)
+        at javax.servlet.http.HttpServlet.service(HttpServlet.java:844)
+        at weblogic.servlet.internal.StubSecurityHelper$ServletServiceAction.run(StubSecurityHelper.java:242)
+        at weblogic.servlet.internal.StubSecurityHelper$ServletServiceAction.run(StubSecurityHelper.java:216)
+        at weblogic.servlet.internal.StubSecurityHelper.invokeServlet(StubSecurityHelper.java:132)
+        at weblogic.servlet.internal.ServletStubImpl.execute(ServletStubImpl.java:352)
+        at weblogic.servlet.internal.ServletStubImpl.execute(ServletStubImpl.java:235)
+        at weblogic.servlet.internal.WebAppServletContext$ServletInvocationAction.wrapRun(WebAppServletContext.java:3284)
+        at weblogic.servlet.internal.WebAppServletContext$ServletInvocationAction.run(WebAppServletContext.java:3254)
+        at weblogic.security.acl.internal.AuthenticatedSubject.doAs(AuthenticatedSubject.java:321)
+        at weblogic.security.service.SecurityManager.runAs(SecurityManager.java:120)
+        at weblogic.servlet.provider.WlsSubjectHandle.run(WlsSubjectHandle.java:57)
+        at weblogic.servlet.internal.WebAppServletContext.doSecuredExecute(WebAppServletContext.java:2163)
+        at weblogic.servlet.internal.WebAppServletContext.securedExecute(WebAppServletContext.java:2089)
+        at weblogic.servlet.internal.WebAppServletContext.execute(WebAppServletContext.java:2074)
+        at weblogic.servlet.internal.ServletRequestImpl.run(ServletRequestImpl.java:1512)
+        at weblogic.servlet.provider.ContainerSupportProviderImpl$WlsRequestExecutor.run(ContainerSupportProviderImpl.java:254)
+        at weblogic.work.ExecuteThread.execute(ExecuteThread.java:256)
+        at weblogic.work.ExecuteThread.run(ExecuteThread.java:221)
+Caused by: javax.xml.ws.WebServiceException: Error creating JAXBContext for W3CEndpointReference.
+        at com.sun.xml.ws.spi.ProviderImpl$2.run(ProviderImpl.java:266)
+        at com.sun.xml.ws.spi.ProviderImpl$2.run(ProviderImpl.java:262)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at com.sun.xml.ws.spi.ProviderImpl.getEPRJaxbContext(ProviderImpl.java:261)
+        at com.sun.xml.ws.spi.ProviderImpl.&lt;clinit&gt;(ProviderImpl.java:95)
+        ... 34 more
+Caused by: com.sun.xml.bind.v2.runtime.IllegalAnnotationsException: 2 counts of IllegalAnnotationExceptions
+Two classes have the same XML type name "address". Use @XmlType.name and @XmlType.namespace to assign different names to them.
+        this problem is related to the following location:
+                at com.sun.xml.ws.developer.MemberSubmissionEndpointReference$Address
+                at public com.sun.xml.ws.developer.MemberSubmissionEndpointReference$Address com.sun.xml.ws.developer.MemberSubmissionEndpointReference.address
+                at com.sun.xml.ws.developer.MemberSubmissionEndpointReference
+        this problem is related to the following location:
+                at javax.xml.ws.wsaddressing.W3CEndpointReference$Address
+                at private javax.xml.ws.wsaddressing.W3CEndpointReference$Address javax.xml.ws.wsaddressing.W3CEndpointReference.address
+                at javax.xml.ws.wsaddressing.W3CEndpointReference
+Two classes have the same XML type name "elements". Use @XmlType.name and @XmlType.namespace to assign different names to them.
+        this problem is related to the following location:
+                at com.sun.xml.ws.developer.MemberSubmissionEndpointReference$Elements
+                at public com.sun.xml.ws.developer.MemberSubmissionEndpointReference$Elements com.sun.xml.ws.developer.MemberSubmissionEndpointReference.referenceProperties
+                at com.sun.xml.ws.developer.MemberSubmissionEndpointReference
+        this problem is related to the following location:
+                at javax.xml.ws.wsaddressing.W3CEndpointReference$Elements
+                at private javax.xml.ws.wsaddressing.W3CEndpointReference$Elements javax.xml.ws.wsaddressing.W3CEndpointReference.referenceParameters
+                at javax.xml.ws.wsaddressing.W3CEndpointReference
+
+        at com.sun.xml.bind.v2.runtime.IllegalAnnotationsException$Builder.check(IllegalAnnotationsException.java:106)
+        at com.sun.xml.bind.v2.runtime.JAXBContextImpl.getTypeInfoSet(JAXBContextImpl.java:466)
+        at com.sun.xml.bind.v2.runtime.JAXBContextImpl.&lt;init&gt;(JAXBContextImpl.java:298)
+        at com.sun.xml.bind.v2.runtime.JAXBContextImpl.&lt;init&gt;(JAXBContextImpl.java:141)
+        at com.sun.xml.bind.v2.runtime.JAXBContextImpl$JAXBContextBuilder.build(JAXBContextImpl.java:1157)
+        at com.sun.xml.bind.v2.ContextFactory.createContext(ContextFactory.java:145)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:601)
+        at javax.xml.bind.ContextFinder.newInstance(ContextFinder.java:263)
+        at javax.xml.bind.ContextFinder.newInstance(ContextFinder.java:250)
+        at javax.xml.bind.ContextFinder.find(ContextFinder.java:447)
+        at javax.xml.bind.JAXBContext.newInstance(JAXBContext.java:652)
+        at javax.xml.bind.JAXBContext.newInstance(JAXBContext.java:599)
+        at com.sun.xml.ws.spi.ProviderImpl$2.run(ProviderImpl.java:264)
+        ... 38 more</programlisting>
+                    </listitem>
+                </orderedlist>
+            </section>
         </section>
     </section>
 

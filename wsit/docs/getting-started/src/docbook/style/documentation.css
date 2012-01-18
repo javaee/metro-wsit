@@ -41,165 +41,138 @@
 /* dev.java.net branding */
 
 body {
-	color:  #333;
+    color:  #333;
 }
 
 /*Headings*/
 
-h1, h2, h3, h4, h5, h6 {
+.book h1, .article h1, .book h2, .article h2, .book h3, .article h3, .book h4, .article h4, .book h5, .article h5, .book h6 , .article h6 {
     font-family: Arial,Helvetica,sans-serif !important;
 }
 
-h1 {
+/* dev.java.net branding */
+
+.book h1 , .article h1 {
     color: #E76F00;
-	font-size: 1.5em;
-	font-weight: bold;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0.67em 0;
 }
 
-h2 {
-	background-color: transparent;
-	font-size: 1.4em;
-	color: #E76F00;
+.book h2 , .article h2 {
+    background-color: transparent;
+    font-size: 1.4em;
+    color: #E76F00;
 }
 
-h3 {
-	color: #E76F00;
-	font-size: 1.3em;
-	background-color: transparent;
+.book h3 , .article h3 {
+    color: #E76F00;
+    font-size: 1.3em;
+    background-color: transparent;
 }
 
-h4 {
+.book h4 , .article h4 {
     margin-top: 0.3em;
     margin-bottom: 0.3em;
 }
 
 /*links*/
-a:link {
-	color: #069 !important;
-	text-decoration: none;
+.book a:link, .article a:link, .small a:link, .navheader a:link, .navfooter a:link {
+    color: #069 !important;
+    text-decoration: none;
 }
 
-a:hover {
-	color: #363 !important; 
-	text-decoration: none;
+.book a:hover, .article a:hover, .small a:hover, .navheader a:hover, .navfooter a:hover {
+    color: #363 !important;
+    text-decoration: none;
 }
 
-a:link.selfref, a:visited.selfref {
-	color: #363 !important;
-	text-decoration: none !important;	
+.book a:link.selfref, .article a:link.selfref, .book a:visited.selfref, .article a:visited.selfref, .small a:link.selfref, .small a:visited.selfref, .navheader a:link.selfref, .navheader a:visited.selfref, .navfooter a:link.selfref, .navfooter a:visited.selfref {
+    color: #363 !important;
+    text-decoration: none !important;
 }
 
-a:visited {
+.book a:visited, .article a:visited, .small a:visited, .navheader a:visited, .navfooter a:visited {
     color: #003366;
     text-decoration: none;
 }
 
 /* java.net font styles */
 
-body,th,td, p,li{
-	font-family: lucida,arial,sans-serif !important;
+body,.book th, .article th,.book td, .article td,.book p, .article p,.book li, .article li, .navheader th{
+    font-family: lucida,arial,sans-serif !important;
+    background-color: transparent;
 }
 
-body, input, select {
-	font-family: Verdana, Helvetica, Arial, sans-serif;
+body, .book input, .article input, .book select , .article select {
+    font-family: Verdana, Helvetica, Arial, sans-serif;
 }
 
-code, pre {
-	font-family: 'Andale Mono', Courier, monospace;
+.book code, .article code, .book pre , .article pre {
+    font-family: 'Andale Mono', Courier, monospace;
 }
 
-body, pre, code {
-	font-size: x-small;
-	voice-family: "\"}\"";
-	voice-family: inherit;
-	font-size: small;
+body, .book pre, .article pre, .book code , .article code {
+    font-size: x-small;
+    voice-family: "\"}\"";
+    voice-family: inherit;
+    font-size: small;
 }
 
 /* code highlight */
 
-pre.programlisting {
+.book pre.programlisting , .article pre.programlisting {
     background-color: #ffffd0;
     border-style: dashed;
     border-width: 1px;
     padding: 10px 10px 10px 10px;
 }
 
-span.Comment {color: rgb(150, 150, 150); font-weight: normal;}
-span.DocComment {color: rgb(150, 150, 150); font-weight: normal;}
-span.String {color: rgb(206, 123, 0); font-weight: normal;}
-span.EscString {color: rgb(206, 123, 0); font-weight: bold;}
-span.Character {color: rgb(206, 123, 0); font-weight: normal;}
-span.EscCharacter {color: rgb(206, 123, 0); font-weight: bold;}
-span.Numeric {color: black; font-weight: normal;}
-span.Identifier {color: black; font-weight: normal;}
-span.PredefinedIdentifier {color: rgb(0,0,230); font-weight: normal;}
-span.Type {color: black; font-weight: normal;}
-span.ReservedWord {color: rgb(0, 0, 230); font-weight: normal;}
-span.LibraryFunction {color: black; font-weight: normal;}
-span.Include {color: rgb(0,155,0); font-weight: normal;}
-span.Preprocessor {color: rgb(0,155,0); font-weight: normal;}
-span.Braces {color: black; font-weight: normal;}
-span.Symbol {color: black; font-weight: normal;}
-span.FunctionHeader {color: black; font-weight: normal;}
-span.FunctionHeaderName {color: black; font-weight: normal;}
-span.FunctionHeaderArgs {color: black; font-weight: normal;}
-span.RegEx {color: rgb(0,111,0); font-weight: bold;}
-span.Text {color: rgb(206, 123, 0); font-weight: normal;}
-span.Entity {color: black; font-weight: bold;}
-span.Assignment {color: black; font-weight: normal;}
-span.DependencyLine {color: black; font-weight: normal;}
-span.DependencyTarget {color: black; font-weight: bold;}
-span.DependencyContinuation {color: black; font-weight: bold;}
-span.Continuation {color: black; font-weight: bold;}
-span.Macro {color: rgb(0,153,0); font-weight: normal;}
-span.IntMacro {color: rgb(0,153,0); font-weight: normal;}
-span.EscVar {color: black; font-weight: bold;}
-/* Special coloring for HTML tags */
-span.PredefinedIdentifier > span.Braces {color: rgb(0,0,230); font-weight: normal;}
-span.PredefinedIdentifier > span.Identifier {color: rgb(0,153,0); font-weight: normal;}
-
-.toc .article {
+.book .toc .article , .article .toc .article {
     clear: both;
     min-height: 96px;
     margin-bottom: 10px;
 }
 
-.toc .article .article-image {
+.book .toc .article .article-image , .article .toc .article .article-image {
     float: left;
     margin-right: 10px;
 }
 
-.toc .article a {
+.book .toc .article a , .article .toc .article a {
     font-size: 1.2em;
     font-weight: bold;
 }
 
-ul.package, ul.document {
-    list-style-type: none;
+.book ul.package, .article ul.package, .book ul.document , .article ul.document {
+    list-style-type: none !important;
 }
 
-ul.package li, ul.document li {
+.book ul.package li, .article ul.package li, .book ul.document li , .article ul.document li {
     min-height: 32px;
 }
 
-ul.package li p, ul.document li p {
+.book ul.package li p, .article ul.package li p, .book ul.document li p , .article ul.document li p {
+    background-color: transparent;
     padding: 8px 40px;
 }
 
-ul.package li {
+.book ul.package li , .article ul.package li {
      background: url("../icons/package.gif") no-repeat;
 }
 
-ul.document li {
+.book ul.document li , .article ul.document li {
     background: url("../icons/document.gif") no-repeat;
 }
 
-.note {
+.book .note , .article .note {
     padding: 1em;
     border: 1px dashed black;
+    font-weight: normal;
+    text-transform: none;
 }
 
-.note p {
+.book .note p , .article .note p {
     margin: 0;
 
     font-style: italic;
@@ -208,6 +181,27 @@ ul.document li {
     color: #444;
 }
 
-.note h3.title {
+.book .note h3.title , .article .note h3.title {
     margin: 0;
+}
+
+.book dt , .article dt {
+    font-weight: normal !important;
+    padding: 0;
+}
+
+.navheader tbody tr:last-child td:last-child, .navfooter tbody tr td:last-child {
+    text-align: right !important;
+}
+
+.navheader tbody tr:last-child th, .navfooter tbody tr th {
+    text-align: center !important;
+}
+
+.navheader tbody tr:last-child td:first-child, .navfooter tbody tr td:first-child {
+    text-align: left !important;
+}
+
+.book dd , .article dd {
+    margin-left: 40px;
 }

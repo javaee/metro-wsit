@@ -116,7 +116,7 @@
     </xsl:template>
 
     <xsl:template name="user.header.content">
-        <small>Links: <a href="index.html">Table of Contents</a> | <a href="getting-started.html">Single HTML</a> | <a
+        <small class="small">Links: <a href="index.html">Table of Contents</a> | <a href="getting-started.html">Single HTML</a> | <a
                 href="getting-started.pdf">Single PDF</a></small>
     </xsl:template>
 
