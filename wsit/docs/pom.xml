@@ -93,7 +93,7 @@
                                                     username="${userguide.scm.username}"
                                                     password="${userguide.scm.password}"
                                                     create="true"
-                                                    commitMessage="${project.name} (${project.version})" />
+                                                    commitMessage="${project.artifactId}-${project.version}" />
                                         </tasks>
                                     </configuration>
                                 </execution>
