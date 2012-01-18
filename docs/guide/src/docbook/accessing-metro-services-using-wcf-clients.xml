@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="accessing-metro-using-wcf-client" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Accessing Metro Services Using WCF Clients</title>
+
+    <section xml:id="ahigp">
+        <title>Creating a WCF Client</title>
+
+        <para>The process of creating a WCF C# client to the
+        <code>addnumbers</code> service is similar to that for a Java
+        programming language client. To create a WCF client you will:</para>
+
+        <orderedlist>
+            <listitem>
+                <para>Use the <code>svcutil.exe</code> tool to generate the C#
+                proxy class and contracts for accessing the web
+                service.</para>
+            </listitem>
+
+            <listitem>
+                <para>Create a client program that uses the generated files to
+                make calls to the <code>addnumbers</code> web service.</para>
+            </listitem>
+        </orderedlist>
+
+        <para>This section covers the following topics:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><xref linkend="ahigq" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahigr" xrefstyle="select:title" /></para>
+            </listitem>
+
+            <listitem>
+                <para><xref linkend="ahigs" xrefstyle="select:title" /></para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="ahigq">
+            <title>Prerequisites to Creating the WCF Client</title>
+
+            <para>You must have the following software installed to create the
+            WCF client: <itemizedlist>
+                    <listitem>
+                        <para>Microsoft Windows Software Development Kit (SDK)
+                        for July Community Technology Preview</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>Microsoft .NET Framework 3.5 RTM</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The <code>csclient-enabled-fromjava.zip</code>
+                        example bundle, which is availalble for <link
+                        xlink:href="http://wsit.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/csclient-enabled-fromjava.zip">download</link>.</para>
+                    </listitem>
+                </itemizedlist> You must also deploy the
+            <code>addnumbers</code> service described in <xref linkend="ahifl"
+            xrefstyle="select:title" />. The service is also available for
+            <link
+            xlink:href="http://wsit.java.net/source/browse/*checkout*/wsit/wsit/docs/howto/wsit-enabled-fromjava.zip">download</link>.</para>
+        </section>
+
+        <section xml:id="ahigr">
+            <title>Examining the Client Class</title>
+
+            <para>The client class uses a generated proxy class,
+            <code>AddNumbersImpl</code>, to access the web service. The
+            <code>port</code> instance variable stores a reference to the
+            proxy class.</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">port = new AddNumbersImplClient("AddNumbersImplPort");
+...</programlisting>
+            </example>
+
+            <para>Then the web service operation <code>addNumbers</code> is
+            called on <code>port</code>:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">...
+int result = port.addNumbers (number1, number2);
+...</programlisting>
+            </example>
+
+            <para>The full <code>Client.cs</code> class is as follows:</para>
+
+            <example>
+                <programlisting language="java" linenumbering="unnumbered">using System;
+
+class Client {
+    static void Main(String[] args) {
+        AddNumbersImplClient port = null;
+        try {
+            port = new AddNumbersImplClient("AddNumbersImplPort");
+            int number1 = 10;
+            int number2 = 20;
+
+            Console.Write("Adding {0} and {1}. ", number1, number2);
+            int result = port.addNumbers (number1, number2);
+            Console.WriteLine("Result is {0}.\n\n",result);
+
+            number1 = -10;
+            Console.Write("Adding {0} and {1}. ", number1, number2);
+            result = port.addNumbers (number1, number2);
+            Console.WriteLine("Result is {0}.\n\n",result);
+            port.Close();
+        } catch (System.ServiceModel.FaultException e) {
+            Console.WriteLine("Exception: " + e.Message);
+            if (port != null) port.Close();
+        }
+    }
+}</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="ahigs">
+            <title>Building and Running the Client</title>
+
+            <para>The example bundle contains all the files you need to build
+            and run a WCF client that accesses a Metro web service written in
+            the Java programming language.</para>
+
+            <para>The <code>csclient-enabled-fromjava.zip</code> bundle
+            contains the following files: <itemizedlist>
+                    <listitem>
+                        <para><code>Client.cs</code>, the C# client
+                        class</para>
+                    </listitem>
+
+                    <listitem>
+                        <para><code>build.bat</code>, the build batch
+                        file</para>
+                    </listitem>
+                </itemizedlist></para>
+
+            <para>This section covers the following topics: <itemizedlist>
+                    <listitem>
+                        <para><xref linkend="ahigt"
+                        xrefstyle="select:title" /></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><xref linkend="gfrfw"
+                        xrefstyle="select:title" /></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><xref linkend="gfreh"
+                        xrefstyle="select:title" /></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><xref linkend="gfreu"
+                        xrefstyle="select:title" /></para>
+                    </listitem>
+                </itemizedlist></para>
+
+            <section xml:id="ahigt">
+                <title>Generating the Proxy Class and Configuration
+                File</title>
+
+                <para>When creating a Java programming language client, you
+                use the <code>wsimport</code> tool to generate the proxy and
+                helper classes used by the client class to access the web
+                service. When creating a WCF client, the
+                <code>svcutil.exe</code> tool provides the same functionality
+                as the <code>wsimport</code> tool. <code>svcutil.exe</code>
+                generates the C# proxy class and contracts for accessing the
+                service from a C# client program.</para>
+
+                <para>The example bundle contains a batch file,
+                <code>build.bat</code>, that calls <code>svcutil.exe</code> to
+                generate the proxy class. The command is:</para>
+
+                <programlisting><emphasis role="bold">svcutil /config:Client.exe.config http://localhost:8080/wsit-enabled-fromjava/addnumbers?wsdl</emphasis></programlisting>
+
+                <section xml:id="gfrfw">
+                    <title>To Build the AddNumbers Client</title>
+
+                    <para>The example bundle's <code>build.bat</code> file
+                    first generates the proxy class and configuration file for
+                    the client, then compiles the proxy class, configuration
+                    file, and <code>Client.cs</code> client class into the
+                    <code>Client.exe</code> executable file.</para>
+
+                    <para>To run <code>build.bat</code>, do the following.
+                    <orderedlist>
+                            <listitem>
+                                <para><emphasis role="bold">At a command prompt,
+                                navigate to the location where you extracted the
+                                example bundle.</emphasis></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">If necessary, customize
+                                the <code>build.bat</code> file as described in
+                                <xref linkend="gfreh"
+                                xrefstyle="select:title" />.</emphasis></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">Type the following
+                                command:</emphasis> <programlisting><emphasis role="bold">build.bat</emphasis></programlisting></para>
+                            </listitem>
+                        </orderedlist></para>
+                </section>
+
+                <section xml:id="gfreh">
+                    <title>To Customize the build.bat File</title>
+
+                    <para>To customize the <code>build.bat</code> file for
+                    your environment, do the following: <orderedlist>
+                            <listitem>
+                                <para><emphasis role="bold">Open
+                                <code>build.bat</code> in a text
+                                editor.</emphasis></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">On the first line, type
+                                the full path to the <code>svcutil.exe</code> tool.
+                                By default, it is installed at <code>C:\Program
+                                Files\Microsoft
+                                SDKs\Windows\v6.0\Bin</code>.</emphasis></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">On the first line,
+                                change the WSDL location URL if you did not deploy
+                                the <code>addnumbers</code> service to the local
+                                machine, or if the service was deployed to a
+                                different port than the default 8080 port
+                                number.</emphasis></para>
+
+                                <para>For example, the following command (all on one
+                                line) sets the host name to
+                                <code>testmachine.example.com</code> and the port
+                                number to 8081:</para>
+
+                                <programlisting><emphasis role="bold">svcutil /config:Client.exe.config http://testmachine.example.com:8081/wsit-enabled-fromjava/addnumbers?wsdl</emphasis></programlisting>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">On line 2, change the
+                                location of the <code>csc.exe</code> C# compiler and
+                                the <code>System.ServiceModel</code> and
+                                <code>System.Runtime.Serialization</code> support
+                                DLLs if you installed the .NET 2.0 and 3.0
+                                frameworks to non-default
+                                locations.</emphasis></para>
+                            </listitem>
+                        </orderedlist></para>
+                </section>
+
+                <section xml:id="gfreu">
+                    <title>To Run the AddNumbers Client</title>
+
+                    <para>After the client has been built, run the client by
+                    following these steps. <orderedlist>
+                            <listitem>
+                                <para><emphasis role="bold">At a command prompt,
+                                navigate to the location where you extracted the
+                                example bundle.</emphasis></para>
+                            </listitem>
+
+                            <listitem>
+                                <para><emphasis role="bold">Type the following
+                                command:</emphasis> <programlisting><emphasis role="bold">Client.exe</emphasis></programlisting>
+                                You will see the following output: <programlisting>Adding 10 and 20. Result is 30.
+Adding -10 and 20. Exception: Negative numbers can't be added!</programlisting></para>
+                            </listitem>
+                        </orderedlist></para>
+                </section>
+            </section>
+        </section>
+    </section>
+</chapter>

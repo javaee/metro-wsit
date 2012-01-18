@@ -338,6 +338,11 @@
                         </excludes-->
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.agilejava.docbkx</groupId>
+                    <artifactId>docbkx-maven-plugin</artifactId>
+                    <version>2.0.11</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -370,6 +375,7 @@
         <module>ws-tx</module>
         <module>xmlfilter</module>
         <module>bundles</module>
+        <module>docs</module>
         <!-- module>contribs</module -->
     </modules>
 
@@ -708,5 +714,10 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
+
+        <!-- Docs -->
+        <www.thisversion.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/${project.version}</www.thisversion.scm.connection.url>
+        <www.userguide.latest.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/guide</www.userguide.latest.scm.connection.url>
+        <www.gettingstarted.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/getting-started</www.gettingstarted.scm.connection.url>
     </properties>
 </project>

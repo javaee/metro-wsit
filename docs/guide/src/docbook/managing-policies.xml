@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="policiesa" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Managing Policies</title>
+
+    <section xml:id="managing-policies">
+        <title>Managing Policies</title>
+
+        <section xml:id="introduction">
+            <title>Introduction</title>
+
+            <para>The section <xref linkend="ahifp"
+            xrefstyle="select:title" /> explained how WSIT functionality is
+            configured using policies. If you are deploying a web service
+            bundled with WSDL then all these policies are contained in the
+            WSDL document. A web service that has no WSDL bundled will read
+            the policies from a configuration file and then generate WSDL that
+            contains these policies. This model works fine if you develop a
+            few web services and do not want to share policies. NetBeans will
+            generate the configuration with the policies for you and you do
+            not need to be concerned with the details. Sometimes however,
+            particularly in larger scale deployments, you will want to use the
+            same policies for all web services or you might want to use an
+            enterprise-wide policy. The following sections explain how to use
+            externally defined policies.</para>
+        </section>
+
+        <section xml:id="policy-references">
+            <title>Policy References</title>
+
+            <para>Policies are referenced using the XML element
+            PolicyReference. Here is an example of a WSDL fragment that
+            contains a policy and its reference: <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/
+                   oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://service.test.policy.ws.xml.sun.com/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        targetNamespace="http://service.test.policy.ws.xml.sun.com/"
+        name="TestServiceService"&gt;
+   ...
+   &lt;wsp:Policy
+           wsu:Id="TestServicePortBindingPolicy"
+           xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+           xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+               xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;wsrm:RMAssertion/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+   ...
+   &lt;binding name="TestServicePortBinding" type="tns:TestService"&gt;
+      &lt;wsp:PolicyReference URI="#TestServicePortBindingPolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+                    style="document"/&gt;
+      &lt;operation name="echo"&gt;
+         &lt;soap:operation soapAction=""/&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   ...
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+
+            <para>Above you see one policy defined with the id <emphasis
+            role="bold">TestServicePortBindingPolicy</emphasis>. This policy
+            is referenced by the <emphasis
+            role="bold">PolicyReference</emphasis> element in the WSDL binding
+            section. You can see here that the policy reference <emphasis
+            role="bold">#TestServicePortBindingPolicy</emphasis> is relative
+            as signified by the leading # character. This is telling the
+            policy processor that it is to look for this policy only in the
+            enclosing document.</para>
+
+            <para>An alternative to WS-Policy identifiers and relative
+            references are <link
+            xlink:href="http://www.w3.org/TR/2007/REC-ws-policy-20070904/#Policy_Identification">WS-Policy
+            Names</link>. A <emphasis role="bold">Name</emphasis> is an
+            absolute URI that can be resolved across document boundaries. Here
+            is an example of a WSDL fragment that contains a policy identified
+            by a Name and the corresponding PolicyReference: <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/
+                   oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://service.test.policy.ws.xml.sun.com/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        targetNamespace="http://service.test.policy.ws.xml.sun.com/"
+        name="TestServiceService"&gt;
+   ...
+   &lt;wsp:Policy
+           Name="http://service.test.policy.ws.xml.sun.com/
+                 TestServicePortBindingPolicy"
+           xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+           xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+               xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;wsrm:RMAssertion/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+   ...
+   &lt;binding name="TestServicePortBinding" type="tns:TestService"&gt;
+      &lt;wsp:PolicyReference
+              URI="http://service.test.policy.ws.xml.sun.com/
+                   TestServicePortBindingPolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+                    style="document"/&gt;
+      &lt;operation name="echo"&gt;
+         &lt;soap:operation soapAction=""/&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   ...
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+
+            <para>The mechanism of using a PolicyReference element to
+            reference a policy is defined in <link
+            xlink:href="http://www.w3.org/TR/2007/REC-ws-policy-20070904/#Policy_References">WS-Policy</link>.
+            The PolicyReference element in the above examples is a direct
+            child element of the WSDL binding element. That effectively means
+            that we attached the policy with id TestServicePortBindingPolicy
+            to this particular WSDL binding element. In theory, policies could
+            be attached to any WSDL element using that technique. In practice
+            however, policies may only be attached to a few select elements,
+            depending on the policy assertions that the policy contains. In
+            the example above we have one addressing and one reliable
+            messaging assertion. Both may only be attached to WSDL port and
+            WSDL binding elements.</para>
+        </section>
+
+        <section xml:id="policies-wsdl-import">
+            <title>WSDL Import</title>
+
+            <para>The <link
+            xlink:href="http://www.w3.org/TR/wsdl#_document-n">WSDL
+            import</link> statement lets us to manage policies in one central
+            document and refer to these policies from any other WSDL document.
+            The policies contained in a separate WSDL document are best
+            identified using the WS-Policy Name attribute because that allows
+            to reference these policies by an absolute URI that does not
+            depend on the location of the imported WSDL document. Here is an
+            example of how this may look.</para>
+
+            <para><example>
+                    <title>policies.wsdl</title>
+
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions xmlns:tns="http://policies.test.policy.ws.xml.sun.com/"
+             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             targetNamespace="http://policies.test.policy.ws.xml.sun.com/"
+             name="Policies"&gt;
+
+   &lt;wsp:Policy
+           Name="http://policies.test.policy.ws.xml.sun.com/
+                 ReliableMessagingPolicy"
+           xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+           xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+               xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;wsrm:RMAssertion/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+   &lt;wsp:Policy
+        Name="http://policies.test.policy.ws.xml.sun.com/SecurePolicy"
+        xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+               xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;sp:SymmetricBinding&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:ProtectionToken&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:X509Token
+                            sp:IncludeToken="http://schemas.xmlsoap.org/
+                            ws/2005/07/securitypolicy/IncludeToken/Never"&gt;
+                           &lt;wsp:Policy&gt;
+                              &lt;sp:WssX509V3Token10/&gt;
+                           &lt;/wsp:Policy&gt;
+                        &lt;/sp:X509Token&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:ProtectionToken&gt;
+                  &lt;sp:Layout&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Strict/&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:Layout&gt;
+                  &lt;sp:IncludeTimestamp/&gt;
+                  &lt;sp:OnlySignEntireHeadersAndBody/&gt;
+                  &lt;sp:AlgorithmSuite&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Basic128/&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:AlgorithmSuite&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:SymmetricBinding&gt;
+            &lt;sp:Wss11&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:MustSupportRefKeyIdentifier/&gt;
+                  &lt;sp:MustSupportRefIssuerSerial/&gt;
+                  &lt;sp:MustSupportRefThumbprint/&gt;
+                  &lt;sp:MustSupportRefEncryptedKey/&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:Wss11&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+
+            <para><example>
+                    <title>reliable-service.wsdl</title>
+
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://reliable.service.test.policy.ws.xml.sun.com/"
+             targetNamespace="http://reliable.service.test.policy.ws.xml.sun.com/"
+             name="ReliableService"&gt;
+   ...
+   &lt;import namespace="http://reliable.service.test.policy.ws.xml.sun.com/"
+           location=".../policies.wsdl"/&gt;
+   ...
+   &lt;binding name="ReliableServicePortBinding"
+            type="tns:ReliableService"&gt;
+      &lt;wsp:PolicyReference
+              URI="http://policies.test.policy.ws.xml.sun.com/
+                   ReliableMessagingPolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+                    style="document"/&gt;
+      &lt;operation name="echo"&gt;
+         &lt;soap:operation soapAction=""/&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   ...
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+
+            <para><example>
+                    <title>secure-service.wsdl</title>
+
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://secure.service.test.policy.ws.xml.sun.com/"
+             targetNamespace="http://secure.service.test.policy.ws.xml.sun.com/"
+             name="SecureService"&gt;
+   ...
+   &lt;import namespace="http://secure.service.test.policy.ws.xml.sun.com/"
+           location=".../policies.wsdl"/&gt;
+   ...
+   &lt;binding name="SecureServicePortBinding" type="tns:SecureService"&gt;
+      &lt;wsp:PolicyReference
+              URI="http://policies.test.policy.ws.xml.sun.com/SecurePolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+                    style="document"/&gt;
+      &lt;operation name="echo"&gt;
+         &lt;soap:operation soapAction=""/&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   ...
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+        </section>
+
+        <section xml:id="external-policy-references">
+            <title>External Policy References</title>
+
+            <para>Since the PolicyReference is a URI, it comes natural to use
+            an absolute URI instead of a relative URI. This is exactly how you
+            would attach an external policy, i.e. a policy that is not
+            contained in the same document as the PolicyReference. You still
+            need to reference the policy ID by attaching it to the URI of the
+            document. Here is an example of a file that contains the same
+            policy as the one that was inside the WSDL document previously:
+            <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;wsp:Policy wsu:Id="TestServicePortBindingPolicy"
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/
+                       oasis-200401-wss-wssecurity-utility-1.0.xsd"
+            xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+            xmlns:wsaws="http://www.w3.org/2005/08/addressing"
+            xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"&gt;
+   &lt;wsp:ExactlyOne&gt;
+      &lt;wsp:All&gt;
+         &lt;wsaws:UsingAddressing
+                 xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+         &lt;wsrm:RMAssertion/&gt;
+      &lt;/wsp:All&gt;
+   &lt;/wsp:ExactlyOne&gt;
+&lt;/wsp:Policy&gt;</programlisting>
+                </example></para>
+
+            <para>Let's assume the document above can be retrieved from the
+            URI http://example.test/policy. You could now write a WSDL
+            document like this: <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://service.test.policy.ws.xml.sun.com/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             targetNamespace="http://service.test.policy.ws.xml.sun.com/"
+             name="TestServiceService"&gt;
+   ...
+   &lt;binding name="TestServicePortBinding" type="tns:TestService"&gt;
+      &lt;wsp:PolicyReference
+              URI="http://example.test/policy#TestServicePortBindingPolicy"/&gt;
+      &lt;soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+                    style="document"/&gt;
+      &lt;operation name="echo"&gt;
+         &lt;soap:operation soapAction=""/&gt;
+         &lt;input&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;soap:body use="literal"/&gt;
+         &lt;/output&gt;
+      &lt;/operation&gt;
+   &lt;/binding&gt;
+   ...
+&lt;/definitions&gt;</programlisting>
+                </example></para>
+
+            <para>Note that the PolicyReference above uses an absolute URI. It
+            references the document URI appended with the # character and the
+            ID of the policy. The fact that you need to state the particular
+            ID allows to contain multiple policies inside one document and
+            reference single policies out of that document. Here is an example
+            of a document with more than one policy: <example>
+                    <programlisting language="xml" linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;policies xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+          xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/
+                     oasis-200401-wss-wssecurity-utility-1.0.xsd"
+          xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/
+                       optimizedmimeserialization"
+          xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"
+          xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"&gt;
+
+   &lt;wsp:Policy wsu:Id="GlobalRMPolicy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsaws:UsingAddressing
+                    xmlns:wsaws="http://www.w3.org/2006/05/addressing/wsdl"/&gt;
+            &lt;wsrm:RMAssertion/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+   &lt;wsp:Policy wsu:Id="GlobalMtomPolicy"&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsoma:OptimizedMimeSerialization/&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+&lt;/policies&gt;</programlisting>
+                </example></para>
+
+            <para>The policies are contained by a policies element so that
+            this document is valid XML. This root element may actually have
+            any name. Assuming that this document has the absolute URI
+            http://example.test/policies, you can now create references for
+            both policies: <code>&lt;PolicyReference
+            URI="http://example.test/policies#GlobalRMPolicy"/&gt;</code> and
+            <code>&lt;PolicyReference
+            URI="http://example.test/policies#GlobalMtomPolicy"/&gt;</code>.</para>
+
+            <para>Note that unlike the approach discussed in section <xref
+            linkend="policies-wsdl-import" xrefstyle="select:title" />,
+            external policy references may not be interoperable with other
+            products.</para>
+        </section>
+    </section>
+</chapter>

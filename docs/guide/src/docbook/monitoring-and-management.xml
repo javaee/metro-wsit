@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common Development
+and Distribution License("CDDL") (collectively, the "License").  You
+may not use this file except in compliance with the License.  You can
+obtain a copy of the License at
+http://glassfish.java.net/public/CDDL+GPL_1_1.html
+or packager/legal/LICENSE.txt.  See the License for the specific
+language governing permissions and limitations under the License.
+
+When distributing the software, include this License Header Notice in each
+file and include the License file at packager/legal/LICENSE.txt.
+
+GPL Classpath Exception:
+Oracle designates this particular file as subject to the "Classpath"
+exception as provided by Oracle in the GPL Version 2 section of the License
+file that accompanied this code.
+
+Modifications:
+If applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyright [year] [name of copyright owner]"
+
+Contributor(s):
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or GPL
+Version 2] license."  If you don't indicate a single choice of license, a
+recipient has the option to distribute your version of this file under
+either the CDDL, the GPL Version 2 or to extend the choice of license to
+its licensees as provided above.  However, if you add GPL Version 2 code
+and therefore, elected the GPL Version 2 license, then the option applies
+only if the new code is made subject to such option by the copyright
+holder.
+
+-->
+<!DOCTYPE book [
+<!ENTITY % ents SYSTEM "metro.ent">
+%ents;
+]>
+<chapter version="5.0" xml:id="monitoringandmanagement" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+    <title>Monitoring and Management</title>
+
+    <section xml:id="monitoring-intro">
+        <title>Introduction to Metro JMX Monitoring</title>
+
+        <para>JMX monitoring and management is built into Metro-based services
+        and clients. Monitoring allows one to view the state of parts of Metro
+        runtime system while it is in operation. Management allows one to
+        change values dynamically. The rest of this document will refer to
+        Metro monitoring and management as simply "monitoring".</para>
+
+        <para>Metro monitoring should not be confused with Metro's Web Service
+        Configuration Management (Metro CM). Monitoring enables one to view
+        the state of the Metro runtime, whereas Metro CM is for
+        (re)configuring a web service.</para>
+    </section>
+
+    <section xml:id="monitoring-enabling">
+        <title>Enabling and Disabling Monitoring</title>
+
+        <para>Metro-based services have monitoring turned
+        <emphasis>on</emphasis> by default.</para>
+
+        <para>Metro-based clients have monitoring turned
+        <emphasis>off</emphasis> by default.</para>
+
+        <para>Clients are off by default because there is no standard way to
+        dispose of a client and release its resources. Metro does include a
+        proprietary method for disposing a proxy. Assuming you have an
+        <code>AddNumbers</code> service:</para>
+
+        <example>
+            <programlisting>AddNumbersPortType port = new AddNumbersService().getAddNumbersPort();
+...            
+((java.io.Closeable)port).close();</programlisting>
+        </example>
+
+        <para>If you enable client monitoring it is recommended you
+        <code>close</code> client proxies when they are no longer used.</para>
+
+        <section xml:id="monitoring-enabling-properties">
+            <title>Enabling and disabling Metro monitoring via system
+            properties</title>
+
+            <para>Metro has two system properties for controlling monitoring
+            scoped to the JVM:</para>
+
+            <example>
+                <programlisting>com.sun.xml.ws.monitoring.endpoint
+com.sun.xml.ws.monitoring.client</programlisting>
+            </example>
+
+            <para>Setting either to <code>false</code> will disable all
+            monitoring for Metro-based endpoints (i.e., web services) or
+            clients, respectively, in a JVM.</para>
+        </section>
+
+        <section xml:id="monitoring-enabling-policy-endpoint">
+            <title>Enabling and disabling endpoint monitoring via
+            policy</title>
+
+            <para>Metro includes a policy assertion for enabling and disabling
+            monitoring for specific services and endpoints. For an endpoint
+            (using an <code>AddNumbersService</code> as an example):</para>
+
+            <example>
+                <programlisting>&lt;service name="AddNumbersService"&gt;
+    &lt;port name="AddNumbersPort" binding="tns:AddNumbersPortBinding"&gt;
+        &lt;wsp:Policy&gt;
+            &lt;sunman:ManagedService
+                xmlns:sunman="http://java.sun.com/xml/ns/metro/management"
+                management="false"
+                monitoring="true"&gt;
+            &lt;/sunman:ManagedService&gt;
+        &lt;/wsp:Policy&gt;
+        ...
+    &lt;/port&gt;
+&lt;/service&gt;</programlisting>
+            </example>
+
+            <para>The <code>ManagedService</code> assertion is placed inside
+            (or referenced from) the <code>port</code> element in the
+            endpoint's WSDL (if creating a service from WSDL) or in the
+            endpoint's configuration file (if creating a service from
+            Java).</para>
+
+            <para>This assertion is used by both Metro CM and monitoring. See
+            Metro CM for the meaning and operation of the
+            <code>management</code> attribute.</para>
+
+            <para>Metro monitoring is turned off for the specific endpoint if
+            the <code>monitoring</code> attribute is set to
+            <code>false</code>. If the policy assertion or the
+            <code>monitoring</code> attribute is not present, or the
+            <code>monitoring</code> attribute is set to <code>true</code> then
+            monitoring is turned on for that endpoint (unless endpoint
+            monitoring is turned off for the JVM).</para>
+        </section>
+
+        <section xml:id="monitoring-enabling-policy-client">
+            <title>Enabling and disabling client monitoring via policy</title>
+
+            <para>For a client the <code>ManagedClient</code> assertion is
+            used:</para>
+
+            <example>
+                <programlisting>&lt;sunman:ManagedClient
+        xmlns:sunman="http://java.sun.com/xml/ns/metro/management"
+        management="false"
+        monitoring="true"
+        &gt;
+&lt;/sunman:ManagedClient&gt;</programlisting>
+            </example>
+
+            <para>This is placed inside the
+            <code>&lt;service&gt;/&lt;port&gt;</code> element of the
+            <code>*.xml</code> file corresponding to the service referenced
+            from the <code>src/java/META-INF/wsit-client.xml</code>
+            configuration file. (Note: the example path to the
+            <code>wsit-client.xml</code> file is where the file is located
+            when building using NetBeans.)</para>
+
+            <para>When the <code>monitoring</code> attribute of
+            <code>ManagedClient</code> is set to <code>true</code> then
+            monitoring will be turned on for that specific client (unless the
+            client JVM property is set to <code>false</code>).</para>
+        </section>
+    </section>
+
+    <section xml:id="monitoring-identifiers">
+        <title>Monitoring Identifiers</title>
+
+        <section xml:id="monitoring-identifiers-endpoints">
+            <title>Endpoint Monitoring Identifiers</title>
+
+            <section xml:id="monitoring-identifiers-endpoints-default">
+                <title>Default Endpoint Monitoring Identifiers</title>
+
+                <para>Each endpoint is given a unique monitoring identifier
+                (also call "root name"). That identifier is made up of (in
+                order):</para>
+
+                <itemizedlist>
+                    <listitem>
+                        <para>The context path (if it is available).</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The local part of the service name.</para>
+                    </listitem>
+
+                    <listitem>
+                        <para>The local part of the port name.</para>
+                    </listitem>
+                </itemizedlist>
+
+                <para>For example, suppose one creates a web application with
+                a context path of <code>/AddNumbersService</code> and a Metro
+                web service is deployed under that context path with an
+                <code>AddNumbersService</code> service name and a
+                <code>AddNumbersPort</code> port name. Then the identifier
+                will be:</para>
+
+                <example>
+                    <programlisting>/AddNumbersService-AddNumbersService-AddNumbersPort</programlisting>
+                </example>
+
+                <para>When deploying in GlassFish an <code>INFO</code> log
+                message is output to GlassFish's <code>server.log</code> file
+                when the monitoring root is created. In this example the
+                message would be:</para>
+
+                <example>
+                    <programlisting>Metro monitoring rootname successfully set to: amx:pp=/mon/server-mon[server],type=WSEndpoint,name=/AddNumbersService-AddNumbersService-AddNumbersPort</programlisting>
+                </example>
+
+                <para>The <code>name</code> part is the identifier. The
+                <code>amx:pp=...</code> part reflects that this Metro endpoint
+                is federated under GlassFish's AMX tree. Note: when deploying
+                in non-GlassFish containers then Metro monitoring will be
+                under a top-level node: <code>com.sun.metro</code>.</para>
+            </section>
+
+            <section xml:id="monitoring-identifiers-endpoints-user-assigned">
+                <title>User-assigned Endpoint Monitoring Identifiers</title>
+
+                <para>It is possible to give user-assigned identifiers to
+                monitoring endpoints. Include an <code>id</code> attribute in
+                the <code>ManagedService</code> policy assertion. For
+                example:</para>
+
+                <example>
+                    <programlisting>&lt;sunman:ManagedService
+        xmlns:sunman="http://java.sun.com/xml/ns/metro/management"
+        management="false"
+        monitoring="true"
+        id="ExampleService"
+        &gt;
+&lt;/sunman:ManagedService&gt;</programlisting>
+                </example>
+
+                <para>In this case, the <code>INFO</code> log will say:</para>
+
+                <example>
+                    <programlisting>Metro monitoring rootname successfully set to: amx:pp=/mon/server-mon[server],type=WSEndpoint,name=ExampleService</programlisting>
+                </example>
+            </section>
+        </section>
+
+        <section xml:id="monitoring-identifiers-clients">
+            <title>Client monitoring identifiers</title>
+
+            <section xml:id="monitoring-identifiers-clients-default">
+                <title>Default Client Monitoring Identifiers</title>
+
+                <para>Each client stub is given a unique monitoring
+                identifier. That identifier is the endpoint address of the
+                service it will communicate with. For example, for a client of
+                the <code>AddNumbersService</code> above the identifier, as
+                shown in GlassFish's log, will be:</para>
+
+                <example>
+                    <programlisting>Metro monitoring rootname successfully set to: amx:pp=/mon/server-mon[server],type=WSClient,name=http-//localhost-8080/AddNumbersService/AddNumbersService</programlisting>
+                </example>
+
+                <para>(Note that ':' characters have been replaced with '-'.
+                See below for more info.)</para>
+            </section>
+
+            <section xml:id="monitoring-identifiers-clients-user-assigned">
+                <title>User-assigned Client Monitoring Identifiers</title>
+
+                <para>To give a user-assigned identifier use the
+                <code>id</code> attribute in the <code>ManagedClient</code>
+                policy assertion.</para>
+            </section>
+        </section>
+
+        <section xml:id="monitoring-identifier-character-mapping">
+            <title>Identifier Character Mapping</title>
+
+            <para>Some characters in a root name are converted to the '-'
+            character. This is to avoid the need to quote characters that are
+            not legal in JMX. The regular expression used to find and replace
+            those characters is:</para>
+
+            <example>
+                <programlisting>"\n|\\|\"|\\*|\\?|:|=|,"</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="monitoring-resolving-name-conflicts">
+            <title>Resolving Monitoring Root Name Conflicts</title>
+
+            <para>It is possible that two root names can be the same. This can
+            happen when deploying web services with the same service name and
+            port name under different context paths in non-GlassFish
+            containers because the context path is not available to the naming
+            mechanism when in other containers. This can also happen when two
+            different proxies are communicating with the same service.</para>
+
+            <para>When root names clash, then the rootname has
+            <code>-&lt;N&gt;</code> appended, where <code>N</code> is a unique
+            integer.</para>
+        </section>
+    </section>
+
+    <section xml:id="monitoring-available-information">
+        <title>Available Monitoring Information</title>
+
+        <para>To show what monitoring information is available we will use two
+        tools:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><link
+                xlink:href="http://www.openjdk.org/tools/svc/jconsole/index.html">
+                JConsole</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="http://www.cyclopsgroup.org/projects/jmxterm/">
+                Jmxterm</link></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>Neither of these tools is officially supported by GlassFish nor
+        Metro. However, they are useful for browsing the mbeans in a
+        JVM.</para>
+
+        <para>The following screenshot shows one client and two services
+        running inside the same instance of GlassFish.</para>
+
+        <para><figure xml:id="f0.4755328135644029">
+                <title>Monitoring - One client and two services running inside
+                the same instance of GlassFish</title>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata contentdepth="100%"
+                                   fileref="figures/jconsole-overview.png"
+                                   scalefit="1" width="100%"></imagedata>
+                    </imageobject>
+                </mediaobject>
+            </figure></para>
+
+        <para>Metro has five mbean types:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>WSClient <itemizedlist>
+                        <listitem>
+                            <para>General information for a client.</para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+
+            <listitem>
+                <para>WSEndpoint <itemizedlist>
+                        <listitem>
+                            <para>General information for an endpoint.</para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+
+            <listitem>
+                <para>WSNonceManager <itemizedlist>
+                        <listitem>
+                            <para><link
+                            xlink:href="http://en.wikipedia.org/wiki/Cryptographic_nonce">
+                            Nonce</link> manager used by endpoints to prevent
+                            replay attacks.</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>This only exists on the endpoint side, scoped
+                            per-endpoint.</para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+
+            <listitem>
+                <para>WSRMSCSessionManager <itemizedlist>
+                        <listitem>
+                            <para>Manages Reliable Messaging (RM) and/or Secure
+                            Conversation (SC) sessions.</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>This only exists on the endpoint side, scoped
+                            per-endpoint.</para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+
+            <listitem>
+                <para>WSRMSequenceManager <itemizedlist>
+                        <listitem>
+                            <para>Manages Reliable Messaging sequences.</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>This exists on both client and endpoints
+                            sides, scoped per-stub and per-endpoint
+                            respectively.</para>
+                        </listitem>
+                    </itemizedlist></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>In the screenshot there is</para>
+
+        <itemizedlist>
+            <listitem>
+                <para>one client that is connected to the
+                <code>AddNumbersService</code></para>
+            </listitem>
+
+            <listitem>
+                <para>two endpoints: a <code>/s17...</code> service and an
+                <code>ExampleService</code></para>
+            </listitem>
+
+            <listitem>
+                <para>one <code>WSNonceManager</code> associated with the
+                <code>/s17...</code> service</para>
+            </listitem>
+
+            <listitem>
+                <para>two <code>WSRMSCSessionManager</code>s, one for each of
+                the two services</para>
+            </listitem>
+
+            <listitem>
+                <para>two <code>WSRMSequenceManager</code>s, one associated
+                with the client, the other with
+                <code>ExampleService</code>.</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>Using Jmxterm you can find these same mbeans (note: the output
+        of <code>beans</code> show a lot of beans, this has been edited to
+        only show Metro's mbeans):</para>
+
+        <example>
+            <programlisting>java -jar &lt;Jmxterm-jar&gt;
+Welcome to JMX terminal. Type "help" for available commands.
+$&gt;open localhost:8686
+#Connection to localhost:8686 is opened
+$&gt;beans
+...
+#domain = amx:
+amx:name=/s17-PingService-PingPort,pp=/mon/server-mon[server],type=WSEndpoint
+
+amx:name=ExampleService,pp=/mon/server-mon[server],type=WSEndpoint
+
+amx:name=NonceManager,pp=/mon/server-mon[server]/WSEndpoint[/s17-PingService-PingPort],type=WSNonceManager
+
+amx:name=RMSequenceManager,pp=/mon/server-mon[server]/WSClient[http-//localhost-8080/AddNumbersService/AddNumbersService],type=WSRMSequenceManager
+
+amx:name=RMSequenceManager,pp=/mon/server-mon[server]/WSEndpoint[ExampleService],type=WSRMSequenceManager
+
+amx:name=RM_SC_SessionManager,pp=/mon/server-mon[server]/WSEndpoint[/s17-PingService-PingPort],type=WSRMSCSessionManager
+
+amx:name=RM_SC_SessionManager,pp=/mon/server-mon[server]/WSEndpoint[ExampleService],type=WSRMSCSessionManager
+
+amx:name=http-//localhost-8080/AddNumbersService/AddNumbersService,pp=/mon/server-mon[server],type=WSClient
+...    </programlisting>
+        </example>
+
+        <section xml:id="monitoring-wsclient-information">
+            <title>WSClient Information</title>
+
+            <para>The following screenshot shows the top-level information
+            available for each client:</para>
+
+            <para><figure xml:id="f0.2892391260409608">
+                    <title>Monitoring - top-level information available for
+                    each client</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/jconsole-wsclient.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+                    </mediaobject>
+                </figure></para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Children: the <code>WSRMSequenceManager</code> that
+                    is used by this client.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Container: the container in which the client is
+                    deployed---in this case: GlassFish. Note that the actual
+                    container object has not been instrumented with monitoring
+                    so it Java class@address is printed.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Name: the root name given for this client.</para>
+                </listitem>
+
+                <listitem>
+                    <para>Parent: show the <code>WSClient</code> under the AMX
+                    mbean.</para>
+                </listitem>
+
+                <listitem>
+                    <para>qnameToPortInfoMap: an internal map used by the
+                    runtime system.</para>
+                </listitem>
+
+                <listitem>
+                    <para>serviceClass: The SEI (service endpoint
+                    interface).</para>
+                </listitem>
+
+                <listitem>
+                    <para>serviceName: From the WSDL.</para>
+                </listitem>
+
+                <listitem>
+                    <para>wsdlDocumentLocation: Where the WSDL used to create
+                    the client lives. (Note: when a service is created using
+                    NetBeans it makes a local copy of the WSDL, therefore the
+                    example shows a <code>file</code> instead of an
+                    <code>http</code> location.)</para>
+                </listitem>
+
+                <listitem>
+                    <para>wsdlService: an internal data structure that is not
+                    instrumented.</para>
+                </listitem>
+            </itemizedlist>
+
+            <para>To see these attributes in jmxterm:</para>
+
+            <example>
+                <programlisting>$&gt;bean amx:name=http-//localhost-8080/AddNumbersService/AddNumbersService,pp=/mon/server-mon[server],type=WSClient
+
+$&gt;info
+#class name = WSClient
+# attributes
+  %0   - Children ([Ljavax.management.ObjectName;, r)
+  %1   - Container (java.lang.String, r)
+  %2   - Name (java.lang.String, r)
+  %3   - Parent (javax.management.ObjectName, r)
+  %4   - qnameToPortInfoMap (javax.management.openmbean.TabularData, r)
+  %5   - serviceClass (java.lang.String, r)
+  %6   - serviceName (java.lang.String, r)
+  %7   - wsdlDocumentLocation (java.lang.String, r)
+  %8   - wsdlService (java.lang.String, r)
+
+$&gt;get Name
+
+Name = http-//localhost-8080/AddNumbersService/AddNumbersService;</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="monitoring-wsendpoint-information">
+            <title>WSEndpoint Information</title>
+
+            <para><figure xml:id="f0.3177156319073998">
+                    <title>Monitoring - WSEndpoint information</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/jconsole-wsendpoint.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+                    </mediaobject>
+                </figure></para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>Children: in this example there are two other mbeans
+                    associated with the example service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>addressingVersion: generally this will be
+                    <code>W3C</code> unless explicitly using a different
+                    version of addressing.</para>
+                </listitem>
+
+                <listitem>
+                    <para>bindingID: the namespace for the type of binding
+                    used for the service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>dumpHTTPMessages: when set to <code>true</code> then
+                    HTTP messages received and sent by this service are
+                    "dumped" into the log file. It is possible to dynamically
+                    set this value. Just click on the value, type in the value
+                    and hit return using JConsole. In jmxterm: <example>
+                            <programlisting>$&gt;bean amx:name=ExampleService,pp=/mon/server-mon[server],type=WSEndpoint
+
+$&gt;set dumpHTTPMessages true</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>features: the "features" (see the JAX-WS
+                    specification) used in this endpoint. Using jmxterm
+                    (assuming the bean has been set as in dump above: <example>
+                            <programlisting>$&gt;get features
+features = [ { 
+  enabled = true;
+  iD = http://www.w3.org/2005/08/addressing/module;
+ }, { 
+  enabled = true;
+  iD = com.sun.xml.ws.rm.ReliableMessagingFeature;
+ } ];</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>jaxwsRuntimeVersion: the version of the JAX-WS
+                    specification which is implemented by Metro.</para>
+                </listitem>
+
+                <listitem>
+                    <para>policy: A representation of the policy used by the
+                    endpoint. The entire policy is more easily viewed using
+                    jmxterm: <code>$&gt;get policy</code>. Note: the format of
+                    the policy output <emphasis role="bold">can and will
+                    change</emphasis>.</para>
+                </listitem>
+
+                <listitem>
+                    <para>portName: The WSDL port name.</para>
+                </listitem>
+
+                <listitem>
+                    <para>seiModelWSDLLocation: not currently
+                    supported.</para>
+                </listitem>
+
+                <listitem>
+                    <para>serviceDefinitionImports: a list of any of files
+                    imported by the main WSDL file for this service.</para>
+                </listitem>
+
+                <listitem>
+                    <para>serviceDefinitionURL: the service's WSDL.</para>
+                </listitem>
+
+                <listitem>
+                    <para>serviceName: The WSDL service name.</para>
+                </listitem>
+
+                <listitem>
+                    <para>soapVersionHttpBindingId: The namespace of the HTTP
+                    binding.</para>
+                </listitem>
+
+                <listitem>
+                    <para>wsdlEndpointAddress: this generally will not contain
+                    the real address since it depends on a client calling the
+                    service to exist and the value is taken before that
+                    happens.</para>
+                </listitem>
+
+                <listitem>
+                    <para>wsdlPortTypeName: The WSDL port type.</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="monitoring-wsnoncemanager-information">
+            <title>WSNonceManager Information</title>
+
+            <para>This allows one to examine the contents of a nonce manager
+            of a specific service. Using jmxterm:</para>
+
+            <example>
+                <programlisting>$&gt;bean amx:name=NonceManager,pp=/mon/server-mon[server]/WSEndpoint[/s17-PingService-PingPort],type=WSNonceManager
+
+$&gt;get NonceCache
+
+NonceCache = { 
+  maxNonceAge = 900000;
+  nonceCache = { 
+    ( F2jz9MkcI9Gcshk1K0snDPhC ) = { 
+      key = F2jz9MkcI9Gcshk1K0snDPhC;
+      value = 2009-12-03T22:21:39Z;
+     };
+   };
+  oldNonceCache = { 
+   };
+  scheduled = true;
+  wasCanceled = false;
+ };</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="monitoring-wsrmscsessionmanager-information">
+            <title>WSRMSCSessionManager Information</title>
+
+            <para>Examine reliable messaging and secure conversation keys and
+            sessions for a specific service. Using jmxterm:</para>
+
+            <example>
+                <programlisting>$&gt;bean amx:name=RM_SC_SessionManager,pp=/mon/server-mon[server]/WSEndpoint[ExampleService],type=WSRMSCSessionManager
+
+$&gt;get keys
+
+keys = [ uuid:8593cea6-9328-41fe-986a-abf0745c4470, uuid:0987fa78-cd7d-4c1c-9ec2-e849b7f68881 ];
+
+$&gt;get sessions
+
+sessions = [ { 
+  creationTime = 1259879310907;
+  lastAccessedTime = 1259879310907;
+  securityInfo = { 
+    creationTime = null;
+    expirationTime = null;
+    externalId = null;
+    identifier = null;
+    issuedTokenContext = null;
+    secret = null;
+   };
+  sessionKey = uuid:8593cea6-9328-41fe-986a-abf0745c4470;
+ }, { 
+  creationTime = 1259866808000;
+  lastAccessedTime = 1259866808000;
+  securityInfo = { 
+    creationTime = null;
+    expirationTime = null;
+    externalId = null;
+    identifier = null;
+    issuedTokenContext = null;
+    secret = null;
+   };
+  sessionKey = uuid:0987fa78-cd7d-4c1c-9ec2-e849b7f68881;
+ } ];</programlisting>
+            </example>
+        </section>
+
+        <section xml:id="monitoring-wsrmssequencemanager-information">
+            <title>WSRMSequenceManager Information</title>
+
+            <para><figure xml:id="f0.5153231558395726">
+                    <title>Monitoring - WSRMSequenceManager
+                    Information</title>
+
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata contentdepth="100%"
+                                       fileref="figures/jconsole-wsrmsequencemanager.png"
+                                       scalefit="1" width="100%"></imagedata>
+                        </imageobject>
+                    </mediaobject>
+                </figure></para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>boundSequences: generally an inbound sequence will
+                    be bound to an outbound sequence so that requests
+                    <emphasis>and</emphasis> replies are reliable. This table
+                    gives the sequence identifiers for those pairs.</para>
+                </listitem>
+
+                <listitem>
+                    <para>concurrentlyOpenedInbound: the number of inbound
+                    sequences opened.</para>
+                </listitem>
+
+                <listitem>
+                    <para>persistent: true if using Metro's persistent
+                    reliable messaging.</para>
+                </listitem>
+
+                <listitem>
+                    <para>sequences: a map from a sequence identifier to
+                    information on that sequence. In jmxterm: <example>
+                            <programlisting>$&gt;bean amx:name=RMSequenceManager,pp=/mon/server-mon[server]/WSEndpoint[ExampleService],type=WSRMSequenceManager
+
+$&gt;get sequences
+
+sequences = { 
+  ( uuid:5145de4e-618b-4da3-9004-c715770934d2 ) = { 
+    key = uuid:5145de4e-618b-4da3-9004-c715770934d2;
+    value = { 
+      ackRequested = false;
+      boundSecurityTokenReferenceId = null;
+      closed = false;
+      expired = false;
+      hasUnacknowledgedMessages = true;
+      id = uuid:5145de4e-618b-4da3-9004-c715770934d2;
+      lastActivityTime = 1259880084724;
+      lastMessageNumber = 1;
+      state = CREATED;
+     };
+   };
+  ( uuid:d16b0fb9-7e80-4598-a3e2-789c9bac9474 ) = { 
+    key = uuid:d16b0fb9-7e80-4598-a3e2-789c9bac9474;
+    value = { 
+      ackRequested = false;
+      boundSecurityTokenReferenceId = null;
+      closed = false;
+      expired = false;
+      hasUnacknowledgedMessages = false;
+      id = uuid:d16b0fb9-7e80-4598-a3e2-789c9bac9474;
+      lastActivityTime = 1259880084724;
+      lastMessageNumber = 1;
+      state = CREATED;
+     };
+   };
+ };</programlisting>
+                        </example></para>
+                </listitem>
+
+                <listitem>
+                    <para>uniqueEndpointId: An identifier used by the reliable
+                    messaging implementation. Note: this is
+                    <emphasis>not</emphasis> related to client and endpoint
+                    root name identifiers</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+
+    <section xml:id="monitoring-notes">
+        <title>Notes</title>
+
+        <para>The AMX mbean is created lazily. Therefore, if one deploys an
+        endpoint in GlassFish and then looks for the Metro
+        <code>WSEndpoint</code> mbeans using JConsole there are times where
+        the AMX mbean does not appear. To activate it start up the asadmin GUI
+        or CLI. Or use jmxterm and issue its <code>domains</code>
+        command.</para>
+
+        <para>In some cases Metro endpoint mbeans will not appear until the
+        endpoint receives its first client invocation.</para>
+
+        <para><code>WSClient</code> mbeans can appear and disappear quickly if
+        the stub is just used for one call then closed immediately. A stub
+        that uses reliable messaging or secure conversation generally stays
+        active longer since it will most likely be used for multiple
+        calls.</para>
+    </section>
+</chapter>

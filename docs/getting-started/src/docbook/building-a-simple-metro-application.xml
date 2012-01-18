@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+    Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+
+    The contents of this file are subject to the terms of either the GNU
+    General Public License Version 2 only ("GPL") or the Common Development
+    and Distribution License("CDDL") (collectively, the "License").  You
+    may not use this file except in compliance with the License.  You can
+    obtain a copy of the License at
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
+    or packager/legal/LICENSE.txt.  See the License for the specific
+    language governing permissions and limitations under the License.
+
+    When distributing the software, include this License Header Notice in each
+    file and include the License file at packager/legal/LICENSE.txt.
+
+    GPL Classpath Exception:
+    Oracle designates this particular file as subject to the "Classpath"
+    exception as provided by Oracle in the GPL Version 2 section of the License
+    file that accompanied this code.
+
+    Modifications:
+    If applicable, add the following below the License Header, with the fields
+    enclosed by brackets [] replaced by your own identifying information:
+    "Portions Copyright [year] [name of copyright owner]"
+
+    Contributor(s):
+    If you wish your version of this file to be governed by only the CDDL or
+    only the GPL Version 2, indicate your decision by adding "[Contributor]
+    elects to include this software in this distribution under the [CDDL or GPL
+    Version 2] license."  If you don't indicate a single choice of license, a
+    recipient has the option to distribute your version of this file under
+    either the CDDL, the GPL Version 2 or to extend the choice of license to
+    its licensees as provided above.  However, if you add GPL Version 2 code
+    and therefore, elected the GPL Version 2 license, then the option applies
+    only if the new code is made subject to such option by the copyright
+    holder.
+
+-->
+<article version="5.0" xml:id="building-a-simple-metro-application"
+         xml:lang="en" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns5="http://www.w3.org/2000/svg"
+         xmlns:ns4="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+    <title>Building a Simple Metro Application</title>
+
+    <info>
+        <!--title>Building a JAX-WS Application in the Metro Environment</title-->
+
+        <abstract>
+            <para>The intent of this article is to demonstrate the steps
+            required to build a web service starting both from Java code and
+            from a WSDL document, to deploy that application into a web
+            container, and to build a corresponding web service client
+            application. In this example, the resulting application is
+            portable across JAX-WS 2.0 implementations and do not use any
+            Metro-specific technologies. It is intended as a baseline from
+            which to develop your understanding of the larger Metro
+            stack.</para>
+        </abstract>
+    </info>
+
+    <section>
+        <title>Overview</title>
+
+        <para>Supporting code samples are included to demonstrate building a
+        JAX-WS web service in the Metro environment. The examples show how to
+        develop a web service both starting from Java source code and starting
+        from an existing WSDL document. For both scenarios, it shows how to
+        develop a corresponding client application from the web service's WSDL
+        document. The examples can be found below:</para>
+
+        <itemizedlist role="package">
+            <listitem>
+                <para><link
+                xlink:href="download/wsit-jaxws-fromjava.zip">From-Java
+                example</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="download/wsit-jaxws-fromwsdl.zip">From-WSDL
+                example</link></para>
+            </listitem>
+        </itemizedlist>
+
+        <para>As mentioned above, these examples do not enable any
+        Metro-specific technologies. However, the following article in this
+        series, <xref
+        linkend="enabling-advanced-features-in-a-web-service-application"
+        xrefstyle="select:title" />, builds on the information presented in
+        this document. It explains configuring a web service and its client to
+        enable advanced features available in Metro.</para>
+    </section>
+
+    <section xml:id="basma-environment">
+        <title>Environment Configuration Settings</title>
+
+        <section>
+            <title>Prerequisites</title>
+
+            <para>These series of articles require the following software to
+            be installed on your system:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para><link
+                    xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK
+                    6.0 Update 29</link> or later,</para>
+                </listitem>
+
+                <listitem>
+                    <para><link xlink:href="http://ant.apache.org/">Apache Ant
+                    1.6.5</link> or later,</para>
+                </listitem>
+
+                <listitem>
+                    <para>web container: either <link
+                    xlink:href="http://glassfish.java.net/">Glassfish
+                    v3.x</link> or <link
+                    xlink:href="http://tomcat.apache.org/">Apache Tomcat
+                    7.0</link></para>
+                </listitem>
+
+                <listitem>
+                    <para><link xlink:href="http://metro.java.net/">Metro
+                    Standalone Budle 2.x</link> (in case of using Apache
+                    Tomcat as a web container)</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section>
+            <title>Adding WSIT (Metro) libraries into your web
+            container</title>
+
+            <para>The following steps are required only if using Apache Tomcat
+            as a web container (Glassfish v3 already contains Metro
+            libraries): Unzip downloaded Metro Standalone Bundle and copy all
+            <literal>.jar</literal> files from the <literal>lib/</literal>
+            directory into
+            <literal>&lt;tomcat-install-directory&gt;/endorsed</literal>
+            (where <literal>&lt;tomcat-install-directory&gt;</literal> points
+            to your Apache Tomcat installation directory). Also put a copy of
+            the <literal>servlet-api.jar</literal> library
+            (<literal>&lt;tomcat-install-directory&gt;/lib</literal>) into
+            <literal>endorsed/</literal> libs.</para>
+        </section>
+
+        <section>
+            <title>Web Container "Listen" Port</title>
+
+            <para>The Java code and configuration files for the examples used
+            in this document presume that the web container is listening on
+            port 8080. Port 8080 is the default "listen" port for both
+            GlassFish (<literal>domain1</literal>) and Tomcat. If you have
+            changed the "listen" port, you will need to edit the example
+            source files to account for that. The following is a list of the
+            files which contain references to the "listen" port:</para>
+
+            <orderedlist>
+                <listitem>
+                    <para><literal>wsit-jaxws-fromjava/src/fromjava/server/AddWebservice.java</literal></para>
+                </listitem>
+
+                <listitem>
+                    <para><literal>wsit-jaxws-fromjava/etc/custom-schema.xml</literal></para>
+                </listitem>
+
+                <listitem>
+                    <para><literal>wsit-jaxws-fromjava/etc/custom-client.xml</literal></para>
+                </listitem>
+
+                <listitem>
+                    <para><literal>wsit-jaxws-fromjava/etc/build.properties</literal></para>
+                </listitem>
+
+                <listitem>
+                    <para><literal>wsit-jaxws-fromwsdl/etc/custom-client.xml</literal></para>
+                </listitem>
+
+                <listitem>
+                    <para><literal>wsit-jaxws-fromwsdl/etc/build.properties</literal></para>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <section>
+            <title>Web Container Home Directory</title>
+
+            <para>Before building and deploying the web service and its
+            client, the home directory of the web container must be set either
+            as an environment variable or as a property in the respective
+            <literal>build.xml</literal> file.</para>
+
+            <simplesect>
+                <title>Environment Variables</title>
+
+                <para>Assuming that you are running from the command-line, it
+                is probably simplest to set the appropriate environment
+                variable indicating the web container's "home" directory. For
+                GlassFish, <literal>AS_HOME</literal> should be set to the
+                top-level directory of the GlassFish installation. For Tomcat,
+                <literal>CATALINA_HOME</literal> needs to be set to the Tomcat
+                top-level directory.</para>
+            </simplesect>
+
+            <simplesect>
+                <title>Ant <literal>build.xml</literal> File</title>
+
+                <para>If you would rather not have to set the environment
+                variable for each new terminal session, you can edit the
+                <literal>build.xml</literal> file located at the top-level
+                directory of each of the examples. There are two commented
+                lines, one each for GlassFish (<literal>as.home</literal>) and
+                Tomcat (<literal>catalina.home</literal>). Simply uncomment
+                the appropriate line and edit the value for the directory
+                name.</para>
+            </simplesect>
+        </section>
+    </section>
+
+    <section xml:id="basma-building">
+        <title>Building a JAX-WS Web Service</title>
+
+        <section>
+            <title>Starting from Java</title>
+
+            <para>One way to create a web service application is to start by
+            coding the endpoint in Java. If you are developing your Java web
+            service from scratch or have an existing Java class you wish to
+            expose as a web service, this is the most direct path.</para>
+
+            <para>The web service is written as a normal Java class. Then the
+            class and its methods that are to be exposed are annotated with
+            specific web service annotations, <literal>@WebService</literal>
+            and <literal>@WebMethod</literal>. The following code snippet
+            shows an example:</para>
+
+            <programlisting language="java">@WebService
+public class AddNumbersImpl {
+    @WebMethod
+    public int addNumbers(int a, int b) throws AddNumbersException {
+        if (a &lt; 0 || b &lt; 0) {
+            throw new AddNumbersException("Negative number cant be added!",
+                    "Numbers: " + a + ", " + b);
+        }
+        return a + b;
+    }
+}</programlisting>
+
+            <para>If you are using GlassFish, the web service in the
+            <literal>wsit-jaxws-fromjava</literal> example can be compiled and
+            bundled simply by invoking:</para>
+
+            <programlisting>ant server</programlisting>
+
+            <para>If using Tomcat, the command-line would be:</para>
+
+            <programlisting>ant -Duse.tomcat=true server</programlisting>
+
+            <para>The <literal>server</literal> target in
+            <literal>build.xml</literal> in turn invokes the tools necessary
+            to process the annotations and compile the sources, and to bundle
+            the Java class files and configuration files into a deployable web
+            archive (WAR file). The WAR file will be
+            <literal>build/war/wsit-jaxws-fromjava.war</literal>. The tools
+            that were called by ant during this step are briefly described
+            next.</para>
+
+            <para>The JAX-WS tool <command>apt</command> (annotation
+            processing tool) processes the annotated source code and invokes
+            the compiler itself, resulting in the class files for each of the
+            Java source files. In the accompanying <literal>fromjava</literal>
+            example, the <command>ant</command> target
+            <command>build-server-java</command> in
+            <literal>build.xml</literal> handles this portion of the process.
+            Then the individual class files are bundled together along with
+            the web service's supporting configuration files into the
+            application's WAR file. It is this file that will be deployed to
+            the web container in the next step. The
+            <command>create-war</command> target takes care of this.</para>
+        </section>
+
+        <section>
+            <title>Starting from WSDL</title>
+
+            <para>Typically, you would start from WSDL to build your web
+            service if you want to implement a web service that is already
+            defined either by a standard or an existing instance of the
+            service. In either case, the WSDL already exists. The JAX-WS
+            <command>wsimport</command> tool will process the existing WSDL
+            document, either from a local copy on disk or by retrieving it
+            from a network address. An example of manually accessing a
+            service's WSDL using a web browser is shown below as part of the
+            section on verifying deployment.</para>
+
+            <para>As in the previous example, to build the
+            <literal>wsit-jaxws-fromwsdl</literal> service for GlassFish, you
+            can simply invoke:</para>
+
+            <programlisting>ant server</programlisting>
+
+            <para>Otherwise for Tomcat use:</para>
+
+            <programlisting>ant -Duse.tomcat=true server</programlisting>
+
+            <para><command>wsimport</command> will take the WSDL description
+            and generate a corresponding Java interface and other supporting
+            classes. Then the Java compiler needs to be called to compile both
+            the user's code and the generated code. Finally, the class files
+            are bundled together into the WAR file. The details can be seen in
+            the <literal>wsit-jaxws-fromwsdl</literal>
+            <literal>build.xml</literal> file as the
+            <command>build-server-wsdl</command> and
+            <command>create-war</command> targets.</para>
+        </section>
+    </section>
+
+    <section xml:id="basma-deploying">
+        <title>Deploying the Web Service to a Web Container</title>
+
+        <para>As a convenience, invoking each sample's
+        <command>server</command> target will build that web service's WAR
+        file and immediately deploy it to the web container. However, in some
+        situations, such as after undeploying a web service from its
+        container, it may be useful to deploy the web service without
+        rebuilding it.</para>
+
+        <para>For both the <emphasis>from Java</emphasis> and <emphasis>from
+        WSDL</emphasis> scenarios described above, the resulting application
+        is deployed in the same manner. However, the details of the deployment
+        process differ slightly between the GlassFish and Tomcat web
+        containers.</para>
+
+        <section>
+            <title>Deploying to GlassFish</title>
+
+            <para>For development purposes, it is simplest to use the
+            "autodeploy" facility of GlassFish. To do so, copy your
+            application's WAR file to the <literal>autodeploy</literal>
+            directory for the domain to which you want to deploy. If you are
+            using the default domain, <literal>domain1</literal>, set up by
+            the GlassFish installation process, then the appropriate directory
+            path would be
+            <literal>&lt;glassfish-install-home&gt;/domains/domain1/autodeploy</literal>.</para>
+
+            <para>The <literal>build.xml</literal> file which accompanies this
+            example has a deploy target for GlassFish. Invoke that target by
+            running <command>ant</command> in the top-level directory of the
+            respective examples, either <literal>fromjava</literal> or
+            <literal>fromwsdl</literal>, as follows.</para>
+
+            <programlisting>ant deploy</programlisting>
+        </section>
+
+        <section>
+            <title>Deploying to Tomcat</title>
+
+            <para>Tomcat also has an "autodeploy" feature. That feature can be
+            turned off but is enabled by Tomcat’s "out of the box"
+            configuration settings. Look in
+            <literal>&lt;tomcat-install-directory&gt;/conf/server.xml</literal>
+            for the value of "<parameter>autoDeploy</parameter>" if you are
+            unsure. Assuming "<parameter>autoDeploy</parameter>" is enabled,
+            then copying your application to
+            <literal>&lt;tomcat-install-home&gt;/webapps</literal> is all that
+            is necessary. Again, there is a target in the
+            <command>ant</command> <literal>build.xml</literal> file which
+            accompanies this sample. The deploy target can be invoked by
+            running the following command in the example's top-level
+            directory.</para>
+
+            <programlisting>ant -Duse.tomcat=true deploy</programlisting>
+        </section>
+
+        <section>
+            <title>Verifying Successful Deployment</title>
+
+            <para>One basic test to verify that the application has deployed
+            properly is to use a web browser to retrieve the application's
+            WSDL from its hosting web container. The following URLs would
+            retrieve the WSDL from each of the two example services. If you
+            are running your web browser and web container on different
+            machines, you will need to replace "localhost" with the name of
+            the machine hosting your web service. It is also worth ensuring
+            that your web container is actually running at this
+            point.<itemizedlist role="document">
+                    <listitem>
+                        <para><link
+                        xlink:href="http://localhost:8080/wsit-jaxws-fromjava/addnumbers?wsdl">http://localhost:8080/wsit-jaxws-fromjava/addnumbers?wsdl</link></para>
+                    </listitem>
+
+                    <listitem>
+                        <para><link
+                        xlink:href="http://localhost:8080/wsit-jaxws-fromwsdl/addnumbers?wsdl">http://localhost:8080/wsit-jaxws-fromwsdl/addnumbers?wsdl</link></para>
+                    </listitem>
+                </itemizedlist></para>
+
+            <para>If the browser displays a pageful of XML, things are
+            working. If not, check the web container logs for any error
+            messages related to the the sample WAR you have just deployed. For
+            GlassFish, the appropriate log can be found at
+            <literal>&lt;glassfish-install-directory&gt;/domains/&lt;your-domain&gt;/logs/server.log</literal>.
+            For Tomcat, the appropriate log file will be
+            <literal>&lt;tomcat-install-directory&gt;/logs/catalina.out</literal>.</para>
+        </section>
+    </section>
+
+    <section xml:id="basma-building-client">
+        <title>Building a JAX-WS Web Service Client</title>
+
+        <para>Unlike developing a web service provider, the process for
+        creating a web service client application will always start with an
+        existing WSDL document. This process is similar to the steps taken
+        when building a service from an existing WSDL. Typically, the WSDL
+        will be retrieved directly from a web service provider by the
+        <command>wsimport</command> tool . Wsimport then generates the
+        corresponding Java source code for the described interface.
+        <command>javac</command>, the Java compiler, is then called to compile
+        the source into class files. The programmer's code uses the generated
+        classes to access the web service. Here is an example code
+        snippet:</para>
+
+        <programlisting language="java">AddNumbersPortType port = new AddNumbersService().getAddNumbersPort();
+int a = 10;
+int b = 20;
+int result = port.addNumbers(a,b);</programlisting>
+
+        <para>For both of the associated examples, invoking</para>
+
+        <programlisting>ant client</programlisting>
+
+        <para>or</para>
+
+        <programlisting>ant -Duse.tomcat=true client</programlisting>
+
+        <para>will run <command>wsimport</command> to retrieve the service's
+        WSDL and compile the source.</para>
+    </section>
+
+    <section xml:id="basma-running-client">
+        <title>Running the Web Service Client</title>
+
+        <para>For both examples, execute the resulting command-line clients
+        via</para>
+
+        <programlisting>ant run</programlisting>
+
+        <para>or</para>
+
+        <programlisting>ant -Duse.tomcat=true run</programlisting>
+
+        <para>That target simply runs Java with the name of the client's
+        class, such as <command>java
+        fromwsdl.client.AddNumbersClient</command>. However, for convenience
+        the <command>run</command> target takes care of passing a list of jar
+        files via Java's <option>-classpath</option> option. When you invoke
+        the <command>run</command> target, you can expect to see output from
+        the client similar to the following:</para>
+
+        <programlisting>[java] May 4, 2006 2:45:50 PM [com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExten
+       sion]  addClientConfigToMap
+[java] WARNING: Optional client configuration file URL is missing. No client con
+       figuration is processed.
+[java] Invoking addNumbers(10, 20)
+[java] The result of adding 10 and 20 is 30.
+
+[java] Invoking addNumbers(-10, 20)
+[java] Caught AddNumbersFault_Exception: Numbers: -10, 20</programlisting>
+
+        <para>The <literal>WARNING</literal> line above is expected for both
+        of these examples. Given that no Metro technologies are enabled, a
+        configuration file is unnecessary. More information will be provided
+        on Metro configuration files in the following article.</para>
+    </section>
+
+    <section xml:id="basma-undeploying">
+        <title>Undeploying a JAX-WS Web Service</title>
+
+        <para>Undeploying a web service means to disable &amp; remove it from
+        the web container. Clients will no longer be able to use the web
+        service nor will the web service restart without explicit redeployment
+        by the user. During the development process, it is often useful to
+        undeploy a web service. This section explains the necessary steps for
+        both GlassFish and Tomcat.</para>
+
+        <section>
+            <title>Undeploying from GlassFish</title>
+
+            <para>The <command>asadmin</command> command provides the simplest
+            method of undeploying a web service from GlassFish.</para>
+
+            <programlisting>asadmin undeploy --user admin wsit-jaxws-fromjava
+asadmin undeploy --user admin wsit-jaxws-fromwsdl</programlisting>
+        </section>
+
+        <section>
+            <title>Undeploying from Tomcat</title>
+
+            <para>Undeploying a given web service from Tomcat requires
+            deleting its WAR file from the Tomcat <literal>webapps</literal>
+            directory. For a typical UNIX scenario the commands below would
+            delete the sample WAR files. Tomcat then automatically undeploys
+            the web service within a few seconds.</para>
+
+            <programlisting>rm $CATALINA_HOME/webapps/wsit-jaxws-fromjava.war
+rm $CATALINA_HOME/webapps/wsit-jaxws-fromwsdl.war</programlisting>
+        </section>
+    </section>
+</article>
