@@ -43,16 +43,20 @@
 <html>
     <title>${product.name}</title>
     <body>
-        <h1>${product.name}</h1>
+		<div style="float:right;text-align: center;font-weight: bold">
+			<a href="${download.link}">
+				<img  alt="Download ${product.name}" src="http://metro.java.net/download.png" border="0"/>
+			</a>
+			<div class="title">
+				<a href="${download.link}">Download ${product.name}</a>
+			</div>
+		</div>
 
-
+        <h1 style="clear: left;">${product.name}</h1>
         <p><tt>Release Date: ${release.date}</tt></p>
-        <div style="float:right">
-            <a href="${download.link}"><img  alt="Download ${product.name}" src="http://metro.java.net/${metro.release.version}/download.png" border="0"/></a>
-        </div>
 
         <a name="downloading"></a>
-        <h2>Downloading ${product.name}</h2>
+        <h2 style="clear: left">Downloading ${product.name}</h2>
         <p>
             Unless you have already done so, please download the 
             <a href="${download.link}">${product.name} ZIP archive</a>.
