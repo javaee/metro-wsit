@@ -45,36 +45,38 @@
                 exclude-result-prefixes="xslthl"
                 version='1.0'>
 
-  <xsl:template match='xslthl:keyword'>
-    <span class="ReservedWord"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:import href="urn:docbkx:stylesheet/highlight.xsl"/>
 
-  <xsl:template match='xslthl:comment'>
-    <span class="Comment"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:keyword' mode="xslthl">
+        <span class="ReservedWord"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
-  <xsl:template match='xslthl:oneline-comment'>
-    <span class="Comment"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:comment' mode="xslthl">
+        <span class="Comment"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
-  <xsl:template match='xslthl:multiline-comment'>
-    <span class="DocComment"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:oneline-comment' mode="xslthl">
+        <span class="Comment"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
-  <xsl:template match='xslthl:tag'>
-    <span class="ReservedWord"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:multiline-comment' mode="xslthl">
+        <span class="DocComment"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
-  <xsl:template match='xslthl:attribute'>
-    <span class="Identifier"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:tag' mode="xslthl">
+        <span class="ReservedWord"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
-  <xsl:template match='xslthl:value'>
-    <span class="String"><xsl:value-of select='.'/></span>
-  </xsl:template>
-  
-  <xsl:template match='xslthl:string'>
-    <span class="String"><xsl:value-of select='.'/></span>
-  </xsl:template>
+    <xsl:template match='xslthl:attribute' mode="xslthl">
+        <span class="Identifier"><xsl:value-of select='.'/></span>
+    </xsl:template>
+
+    <xsl:template match='xslthl:value' mode="xslthl">
+        <span class="String"><xsl:value-of select='.'/></span>
+    </xsl:template>
+
+    <xsl:template match='xslthl:string' mode="xslthl">
+        <span class="String"><xsl:value-of select='.'/></span>
+    </xsl:template>
 
 </xsl:stylesheet>

@@ -719,5 +719,6 @@
         <www.thisversion.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/${project.version}</www.thisversion.scm.connection.url>
         <www.userguide.latest.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/guide</www.userguide.latest.scm.connection.url>
         <www.gettingstarted.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/getting-started</www.gettingstarted.scm.connection.url>
+        <www.guide.jaxws.version>${jaxws.ri.version}</www.guide.jaxws.version>
     </properties>
 </project>
