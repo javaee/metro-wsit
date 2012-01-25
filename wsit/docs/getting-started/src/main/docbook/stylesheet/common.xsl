@@ -47,7 +47,7 @@
                 version="1.0">
 
     <xsl:import href="urn:docbkx:stylesheet"/>
-    <xsl:import href="urn:docbkx:stylesheet/highlight.xsl"/>
+    <xsl:import href="highlight.xsl"/>
 
     <xsl:param name="abstract.notitle.enabled" select="1"/>
 

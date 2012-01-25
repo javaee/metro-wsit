@@ -71,7 +71,7 @@
                                 </copy>
                                 <replace file="${src.dir}/metro.ent" token="$version" value="${project.version}"/>
                                 <replace file="${src.dir}/metro.ent" token="$repository" value="${javanet.repository.id}"/>
-                                <replace file="${src.dir}/metro.ent" token="$jax-ws.version" value="${jaxws.ri.version}"/>
+                                <replace file="${src.dir}/metro.ent" token="$jax-ws.version" value="${jaxws.spec.version}"/>
                             </tasks>
                         </configuration>
                         <id>process-entities</id>

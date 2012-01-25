@@ -205,3 +205,37 @@ body, .book pre, .article pre, .book code , .article code {
 .book dd , .article dd {
     margin-left: 40px;
 }
+
+span.Comment {color: rgb(150, 150, 150); font-weight: normal;}
+span.DocComment {color: rgb(150, 150, 150); font-weight: normal;}
+span.String {color: rgb(206, 123, 0); font-weight: normal;}
+span.EscString {color: rgb(206, 123, 0); font-weight: bold;}
+span.Character {color: rgb(206, 123, 0); font-weight: normal;}
+span.EscCharacter {color: rgb(206, 123, 0); font-weight: bold;}
+span.Numeric {color: black; font-weight: normal;}
+span.Identifier {color: black; font-weight: normal;}
+span.PredefinedIdentifier {color: rgb(0,0,230); font-weight: normal;}
+span.Type {color: black; font-weight: normal;}
+span.ReservedWord {color: rgb(0, 0, 230); font-weight: normal;}
+span.LibraryFunction {color: black; font-weight: normal;}
+span.Include {color: rgb(0,155,0); font-weight: normal;}
+span.Preprocessor {color: rgb(0,155,0); font-weight: normal;}
+span.Braces {color: black; font-weight: normal;}
+span.Symbol {color: black; font-weight: normal;}
+span.FunctionHeader {color: black; font-weight: normal;}
+span.FunctionHeaderName {color: black; font-weight: normal;}
+span.FunctionHeaderArgs {color: black; font-weight: normal;}
+span.RegEx {color: rgb(0,111,0); font-weight: bold;}
+span.Text {color: rgb(206, 123, 0); font-weight: normal;}
+span.Entity {color: black; font-weight: bold;}
+span.Assignment {color: black; font-weight: normal;}
+span.DependencyLine {color: black; font-weight: normal;}
+span.DependencyTarget {color: black; font-weight: bold;}
+span.DependencyContinuation {color: black; font-weight: bold;}
+span.Continuation {color: black; font-weight: bold;}
+span.Macro {color: rgb(0,153,0); font-weight: normal;}
+span.IntMacro {color: rgb(0,153,0); font-weight: normal;}
+span.EscVar {color: black; font-weight: bold;}
+/* Special coloring for HTML tags */
+span.PredefinedIdentifier > span.Braces {color: rgb(0,0,230); font-weight: normal;}
+span.PredefinedIdentifier > span.Identifier {color: rgb(0,153,0); font-weight: normal;}
