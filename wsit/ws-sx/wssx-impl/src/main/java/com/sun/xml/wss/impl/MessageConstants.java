@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -536,4 +536,6 @@ public class MessageConstants {
     public static final String X509_AUTH_TYPE = "urn:oasis:names:tc:SAML:2.0:ac:classes:X509";
     
     public static final String WSENDPOINT="WSEndpoint";
+
+    public static final String WSIT_CLIENT_AUTHCONTEXT = "WSITClientAuthContext";
 }

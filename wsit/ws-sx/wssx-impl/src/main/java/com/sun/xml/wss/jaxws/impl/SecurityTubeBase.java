@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -82,8 +82,10 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.security.policy.SessionManagerStore;
 import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
@@ -1429,9 +1431,17 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 populateCertStoreProps(props, (CertStoreConfig) as);
             } else if ("KerberosConfig".equals(as.getName().getLocalPart())) {
                 populateKerberosProps(props, (KerberosConfig) as);
+            } else if ("SessionManagerStore".equals(as.getName().getLocalPart())) {
+                populateSessionMgrProps(props,(SessionManagerStore)as);
             }
         }
         return null;
+    }
+    private void populateSessionMgrProps(Properties props, SessionManagerStore smStore) {
+        if(smStore.getSessionTimeOut() != null) {
+            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());
+            props.put(SessionManager.SESSION_THRESHOLD, smStore.getSessionThreshold());
+        }
     }
 
     private void populateKerberosProps(Properties props, KerberosConfig kerbConfig) {

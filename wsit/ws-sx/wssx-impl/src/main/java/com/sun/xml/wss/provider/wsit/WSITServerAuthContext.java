@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -165,7 +165,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         if (!this.getInBoundSCP(null).isEmpty()|| !this.getOutBoundSCP(null).isEmpty()){
                 isSC = true;
         }
-        sessionManager = SessionManager.getSessionManager(endPoint.get(), isSC);
+        
 
         //need to merge config assertions from all alternatives
         //because we do not know which alternative the req uses
@@ -194,9 +194,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         }
         String isGF = System.getProperty("com.sun.aas.installRoot");
+        Properties props = new Properties();
         if (isGF != null) {            
             try {
-                Properties props = new Properties();
+                
                 populateConfigProperties(configAssertions, props);
                 String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
                 if (jmacHandler != null) {
@@ -219,7 +220,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             //This will handle Non-GF containers where no config assertions
             // are required in the WSDL. Ex. UsernamePassword validation
             // with Default Realm Authentication
-            Properties props = new Properties();
+           
             handler = configureServerHandler(configAssertions, props);
             String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
             if (jmacHandler != null) {
@@ -236,6 +237,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
             }
         }
+        
+        sessionManager = SessionManager.getSessionManager(endPoint.get(), isSC, props);
         
         //initialize the AuthModules and keep references to them
         authModule = new WSITServerAuthModule();

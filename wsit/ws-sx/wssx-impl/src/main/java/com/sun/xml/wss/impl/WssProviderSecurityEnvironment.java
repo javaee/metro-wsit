@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -279,16 +279,16 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
                  while (it.hasNext()) {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
-                    BigInteger serialNo = x509Cert.getSerialNumber();
-                    String currentIssuerName =
-                          com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                 x509Cert.getIssuerDN().getName());
-                    if (serialNo.equals(cert.getSerialNumber()) &&
-                        currentIssuerName.equals(issuerName)) {
-                        return cred.getPrivateKey();
+                    BigInteger serialNo = x509Cert.getSerialNumber();  
+                       
+                    X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                    X500Principal issuerPrincipal = new X500Principal(issuerName);
+                    if (serialNo.equals(cert.getSerialNumber())
+                           && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                       return cred.getPrivateKey();
                     }
-                 }
-              }
+                   }
+               }
            }
 
            PrivateKeyCallback.Request request = new PrivateKeyCallback.IssuerSerialNumRequest(
@@ -329,13 +329,13 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
                     BigInteger serialNo = x509Cert.getSerialNumber();
-                    String currentIssuerName =
-                          com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                 x509Cert.getIssuerDN().getName());
-                    if (serialNo.equals(serialNumber) &&
-                        currentIssuerName.equals(issuerName)) {
-                        return cred.getPrivateKey();
-                    }
+                     
+                     X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                     X500Principal issuerPrincipal = new X500Principal(issuerName);
+                     if (serialNo.equals(serialNumber)
+                             && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                         return cred.getPrivateKey();
+                     }
                  }
               }
            }
@@ -705,12 +705,12 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
                  X500PrivateCredential cred = (X500PrivateCredential)it.next();
                  X509Certificate x509Cert = cred.getCertificate();
                  BigInteger serialNo = x509Cert.getSerialNumber();
-                 String currentIssuerName =
-                        com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                                x509Cert.getIssuerDN().getName());
-                 if (serialNo.equals(serialNumber) &&
-                     currentIssuerName.equals(issuerName)) {
-                     return x509Cert;
+                  
+                 X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                 X500Principal issuerPrincipal = new X500Principal(issuerName);
+                 if (serialNo.equals(serialNumber)
+                           && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                      return x509Cert;
                  }
               }
            }
@@ -1030,14 +1030,15 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
         X509Certificate x509Cert) {
 
         BigInteger serialNumber = x509Cert.getSerialNumber();
-        String issuerName =
-            com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                x509Cert.getIssuerDN().getName());
+         
+        X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+        X500Principal issuerPrincipal = new X500Principal(issuerNameMatch);
 
         if (serialNumber.equals(serialNumberMatch)
-            && issuerName.equals(issuerNameMatch)) {
+            && currentIssuerPrincipal.equals(issuerPrincipal)) {
             return true;
         }
+
         return false;
     }
 
@@ -1062,13 +1063,12 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
 
                 X509Certificate x509Cert = (X509Certificate) cert;
                 BigInteger serialNo = x509Cert.getSerialNumber();
-                String currentIssuerName =
-                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                        x509Cert.getIssuerDN().getName());
-
-                if (serialNo.equals(serialNumber) &&
-                    currentIssuerName.equals(issuerName)) {
-                    return x509Cert;
+                 
+                X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
+                if (serialNo.equals(serialNumber)
+                       && currentIssuerPrincipal.equals(issuerPrincipal)) {
+                   return x509Cert;
                 }
             }
         } catch (KeyStoreException kEx) {

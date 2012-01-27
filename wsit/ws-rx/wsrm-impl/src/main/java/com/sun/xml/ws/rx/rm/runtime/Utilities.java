@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -102,7 +102,7 @@ final class Utilities {
      * @return The Session
      */
     static Session startSession(WSEndpoint endpoint, String sessionId) {
-        SessionManager manager = SessionManager.getSessionManager(endpoint);
+        SessionManager manager = SessionManager.getSessionManager(endpoint,null);
         Session session = manager.getSession(sessionId);
         if (session == null) {
             session = manager.createSession(sessionId);
@@ -119,7 +119,7 @@ final class Utilities {
      * @param sessionId session identifier
      */
     static void endSessionIfExists(WSEndpoint endpoint, String sessionId) {
-        SessionManager manager = SessionManager.getSessionManager(endpoint);
+        SessionManager manager = SessionManager.getSessionManager(endpoint,null);
         if (manager.getSession(sessionId) != null) {
             manager.terminateSession(sessionId);
         }

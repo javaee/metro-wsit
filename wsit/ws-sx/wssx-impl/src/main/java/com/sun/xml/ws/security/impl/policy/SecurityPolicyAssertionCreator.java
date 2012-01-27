@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -124,6 +124,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.Wss11);
         implementedAssertions.add(Constants.X509Token);
         implementedAssertions.add(Constants.KeyStore);
+        implementedAssertions.add(Constants.SessionManger);
         implementedAssertions.add(Constants.TrustStore);
         implementedAssertions.add(Constants.CallbackHandler);
         implementedAssertions.add(Constants.CallbackHandlerConfiguration);

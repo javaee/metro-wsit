@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -495,7 +495,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             return null;
         }
 
-        return SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
+        return SessionManager.getSessionManager(packet.endpoint,null).getSession(sessionId);
     }
 
     /**
@@ -511,7 +511,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private void setSession(String sessionId, Packet packet) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
-        Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
+        Session session = SessionManager.getSessionManager(packet.endpoint,null).getSession(sessionId);
 
         if (session == null) {
             session = Utilities.startSession(packet.endpoint, sessionId);

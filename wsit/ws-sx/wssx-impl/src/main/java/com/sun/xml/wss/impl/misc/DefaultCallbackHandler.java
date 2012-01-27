@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -127,6 +127,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.security.auth.Subject;
 import javax.xml.ws.BindingProvider;
 import org.w3c.dom.Element;
@@ -1482,10 +1483,18 @@ public class DefaultCallbackHandler implements CallbackHandler {
             // validate timestamp creation and expiration time.
             TimestampValidationCallback.UTCTimestampRequest utcTimestampRequest =
                     (TimestampValidationCallback.UTCTimestampRequest) request;
+            
+             // Get UTC time zone
+            TimeZone utc = TimeZone.getTimeZone( "UTC" );
+
 
 
             SimpleDateFormat calendarFormatter1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            //Fix for issue 1585
+            calendarFormatter1.setTimeZone(utc);
             SimpleDateFormat calendarFormatter2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
+            calendarFormatter2.setTimeZone(utc);
+            
             Date created = null;
             Date expired = null;
 
@@ -1531,9 +1540,9 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Expiration time called");
-        Date currentTime =
-                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
-        if (expires.before(currentTime)) {
+        Date current = getCurrentDateTimeAdjustedBy( -1 * maxClockSkew );
+
+        if (expires.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1514_ERROR_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The current time is ahead of the expiration time in Timestamp");
@@ -1547,7 +1556,8 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Creation time called");
-        Date current = getFreshnessAndSkewAdjustedDate(maxClockSkew, timestampFreshnessLimit);
+        Date current = getCurrentDateTimeAdjustedBy( -1 * (maxClockSkew + timestampFreshnessLimit) );
+
 
         if (created.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1515_ERROR_CURRENT_TIME());
@@ -1558,49 +1568,28 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     + " currenttime - timestamp-freshness-limit - max-clock-skew");
         }
 
-        Date currentTime =
-                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, true);
-        if (currentTime.before(created)) {
+       current = getCurrentDateTimeAdjustedBy( maxClockSkew );
+
+        if (current.before(created)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1516_ERROR_CREATION_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The creation time is ahead of the current time.");
         }
     }
 
-    private static Date getFreshnessAndSkewAdjustedDate(
-            long maxClockSkew, long timestampFreshnessLimit) {
-        Calendar c = new GregorianCalendar();
-        long offset = c.get(Calendar.ZONE_OFFSET);
-        if (c.getTimeZone().inDaylightTime(c.getTime())) {
-            offset += c.getTimeZone().getDSTSavings();
-        }
-        long beforeTime = c.getTimeInMillis();
-        long currentTime = beforeTime - offset;
-
-        long adjustedTime = currentTime - maxClockSkew - timestampFreshnessLimit;
-        c.setTimeInMillis(adjustedTime);
-
-        return c.getTime();
+    /**
+     * Gets the current date adjusted by milliseconds.
+     * 
+     * @param adjustment
+     * @return
+     */
+    private Date getCurrentDateTimeAdjustedBy( long adjustment ) {
+    	Calendar now = new GregorianCalendar();
+    	now.setTimeInMillis( now.getTimeInMillis() + adjustment );
+  	
+        return now.getTime();
     }
 
-    private static Date getGMTDateWithSkewAdjusted(
-            Calendar c, long maxClockSkew, boolean addSkew) {
-        long offset = c.get(Calendar.ZONE_OFFSET);
-        if (c.getTimeZone().inDaylightTime(c.getTime())) {
-            offset += c.getTimeZone().getDSTSavings();
-        }
-        long beforeTime = c.getTimeInMillis();
-        long currentTime = beforeTime - offset;
-
-        if (addSkew) {
-            currentTime = currentTime + maxClockSkew;
-        } else {
-            currentTime = currentTime - maxClockSkew;
-        }
-
-        c.setTimeInMillis(currentTime);
-        return c.getTime();
-    }
 
     /**
      *

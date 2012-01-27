@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -70,6 +70,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
@@ -104,6 +106,8 @@ public class SessionManagerImpl extends SessionManager {
 
     private final BackingStore<StickyKey, HASecurityContextTokenInfo> sctBs;
     
+
+    
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl(WSEndpoint endpoint, boolean isSC) {
         if (isSC){
@@ -116,6 +120,12 @@ public class SessionManagerImpl extends SessionManager {
         } else{
             sctBs = null;
         }
+    }
+    
+    /** Creates a new instance of SessionManagerImpl */
+    public SessionManagerImpl(WSEndpoint endpoint, boolean isSC, Properties config) {
+        this(endpoint,isSC);
+        this.setConfig(config);
     }
     
     /**
@@ -171,6 +181,22 @@ public class SessionManagerImpl extends SessionManager {
      * 
      */ 
     public  Session createSession(String key, Class clasz) {
+        //Issue 17328 - clear expired sessions after timeout
+        Properties props = getConfig();
+        String timeout = (String)props.get(TIMEOUT_INTERVAL);
+        int timeOut = 30;
+        if (timeout != null) {
+            timeOut = Integer.parseInt(timeout);
+        }
+        for(Session session:sessionMap.values()) {
+            SecurityContextTokenInfo securityInfo =  session.getSecurityInfo();
+            Date expDate = securityInfo.getExpirationTime();
+            Calendar expCal = Calendar.getInstance(Locale.getDefault());
+            expCal.setTimeInMillis(expDate.getTime());
+            if(Calendar.getInstance(Locale.getDefault()).compareTo(expCal)> (timeOut * 60 * 1000)) {
+               terminateSession(session.getSessionKey()); 
+            }
+        }
         Session sess;
         try {
             sess = new Session(this, key, clasz.newInstance());

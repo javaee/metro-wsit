@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -100,6 +100,7 @@ import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -404,7 +405,7 @@ public class WSSCPlugin {
             respPacket = fiber.runSync(tubeline, reqPacket);
             respPacket = ((SecurityClientTube)sctConfig.getClientTube()).processClientResponsePacket(respPacket);            
         }else{
-            WSITClientAuthContext wsitAuthCtx = (WSITClientAuthContext)sctConfig.getOtherOptions().get("WSITClientAuthContext");
+            WSITClientAuthContext wsitAuthCtx = (WSITClientAuthContext)sctConfig.getOtherOptions().get(MessageConstants.WSIT_CLIENT_AUTHCONTEXT);
             if (wsitAuthCtx != null){
                 try{
                     respPacket = wsitAuthCtx.secureRequest(reqPacket, null, true);

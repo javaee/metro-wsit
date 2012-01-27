@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -666,7 +666,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             //create RST for Issue
             try{
                 SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), packet, addVer, scClientAssertion);
-                config.getOtherOptions().put("WSITClientAuthCOntext", this);
+                config.getOtherOptions().put(MessageConstants.WSIT_CLIENT_AUTHCONTEXT, this);
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
                 issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
@@ -766,7 +766,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 try{
                     //create RST for Issue         
                     SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), packet, addVer, scClientAssertion);
-                    config.getOtherOptions().put("WSITClientAuthContext", this);
+                    config.getOtherOptions().put(MessageConstants.WSIT_CLIENT_AUTHCONTEXT, this);
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);
