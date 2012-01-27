@@ -1291,6 +1291,28 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
 
     }
 
+    protected WSDLBoundOperation getWSDLOpFromAction(Packet packet, boolean isIncomming, boolean isFault) {
+        String uriValue = getAction(packet);
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            Set<WSDLBoundOperation> keys = p.getOutMessagePolicyMap().keySet();
+            for (WSDLBoundOperation wbo : keys) {
+                WSDLOperation wo = wbo.getOperation();
+                // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
+                String action = getAction(wo, isIncomming);
+                if(isFault) {
+                    if(action != null) {
+                        return wbo;
+                    }
+                }
+                else if(action != null && action.equals(uriValue)) {
+                    return wbo;
+                }
+            }
+        }
+        return null;
+
+    }
+
     protected void buildProtocolPolicy(Policy endpointPolicy, PolicyAlternativeHolder ph) throws PolicyException {
         if (endpointPolicy == null) {
             return;

@@ -407,7 +407,11 @@ public class SecurityServerTube extends SecurityTubeBase {
                 cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
                 if (cachedOperation == null) {
                     if (addVer != null) {
-                        cachedOperation = getWSDLOpFromAction(packet, true);
+                        if(thereWasAFault) {
+                            cachedOperation = getWSDLOpFromAction(packet, true, true);
+                        } else {
+                            cachedOperation = getWSDLOpFromAction(packet, true);
+                        }
                     }
                 }
             }
@@ -433,7 +437,7 @@ public class SecurityServerTube extends SecurityTubeBase {
                     return doInvoke(next, packet);
                 }
             } else {
-                return doReturnWith(retPacket);
+                return processResponse(retPacket);
             }
 
         } finally {
