@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
-//import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -63,6 +63,15 @@ public class ReDelegate {
 
     private static final Logger LOGGER = Logger.getLogger(ReDelegate.class);
 
+    /**
+     * Replaces underlying endpoint in managedEndpoint instance with new instance 
+     * configured from a new set of features, using creation parameters of old endpoint
+     * @param <T>
+     * @param endpoint - endpoint to be reconfigured
+     * @param features - new set of features
+     * @return new endpoint instance, reconfigured with set of new features, or 
+     *         throws WebServiceException when recreation fails
+     */
     public static <T> void recreate(ManagedEndpoint<T> managedEndpoint, WebServiceFeature... features) {
         try {
             WSEndpoint<T> delegate = recreateEndpoint(managedEndpoint, features);
@@ -83,10 +92,7 @@ public class ReDelegate {
         endpoint.closeManagedObjectManager();
         
         EndpointCreationAttributes creationAttributes = endpoint.getCreationAttributes();
-
-        // TODO - only set features or recreate the binding?
-        // WSBinding newBinding = BindingImpl.create(endpoint.getBinding().getBindingId(), features);
-        ((BindingImpl)endpoint.getBinding()).setFeatures(features);
+        WSBinding recreatedBinding = BindingImpl.create(endpoint.getBinding().getBindingId(), features);
         
         final WSEndpoint<T> result = EndpointFactory.createEndpoint(endpoint.getImplementationClass(),
                 creationAttributes.isProcessHandlerAnnotation(),
@@ -94,7 +100,7 @@ public class ReDelegate {
                 endpoint.getServiceName(),
                 endpoint.getPortName(),
                 endpoint.getContainer(),
-                endpoint.getBinding(),
+                recreatedBinding,
                 null,
                 null,
                 creationAttributes.getEntityResolver(),
