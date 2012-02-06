@@ -124,11 +124,14 @@ public class Conditions extends ConditionsType
 
         if (condition != null) {
             setConditionOrAudienceRestrictionOrOneTimeUse(condition);
-        } else if (ar != null) {
+        }
+        if (ar != null) {
             setConditionOrAudienceRestrictionOrOneTimeUse(ar);
-        } else if (oneTimeUse != null) {
+        }
+        if (oneTimeUse != null) {
             setConditionOrAudienceRestrictionOrOneTimeUse(oneTimeUse);
-        } else if (proxyRestriction != null) {
+        }
+        if (proxyRestriction != null) {
             setConditionOrAudienceRestrictionOrOneTimeUse(proxyRestriction);
         }
     }    
