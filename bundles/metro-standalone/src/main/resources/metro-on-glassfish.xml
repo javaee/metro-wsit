@@ -133,7 +133,6 @@
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
-                <include name="jsr173_api.jar"/>
             </fileset>
         </copy>
         <echo message="... installation complete."/>
@@ -180,7 +179,7 @@
         </copy>
 
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
-            <fileset dir="${backup.dir}" includes="webservices-api.jar, jsr173_api.jar"/>
+            <fileset dir="${backup.dir}" includes="webservices-api.jar"/>
         </copy>
 
         <delete dir="${backup.dir}" includeemptydirs="true"/>

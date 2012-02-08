@@ -119,7 +119,6 @@
         <copy toDir="${catalina.endorsed}" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
-                <include name="jsr173_api.jar"/>
             </fileset>
         </copy>
     </target>
@@ -129,7 +128,6 @@
         <copy toDir="${catalina.home}/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
-                <include name="jsr173_api.jar"/>
             </fileset>
         </copy>
     </target>
@@ -179,10 +177,10 @@
             <fileset dir="${catalina.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${catalina.endorsed}" includes="webservices-api.jar, jsr173_api.jar"/>
+            <fileset dir="${catalina.endorsed}" includes="webservices-api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${@java.home.string@}/lib/endorsed" includes="webservices-api.jar, jsr173_api.jar"/>
+            <fileset dir="${@java.home.string@}/lib/endorsed" includes="webservices-api.jar"/>
         </delete>
     </target>
 
