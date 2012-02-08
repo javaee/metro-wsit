@@ -38,26 +38,33 @@
  * holder.
  */
 
-package com.sun.xml.ws.assembler.jaxws;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.TubeFactory;
-import javax.xml.ws.WebServiceException;
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
+import com.sun.xml.ws.assembler.dev.MetroClientTubelineAssemblyContext;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 
 /**
- * TubeFactory implementation creating one of the standard JAX-WS RI tubes
- *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class AddressingTubeFactory implements TubeFactory {
+public class MetroClientTubelineAssemblyContextImpl extends DefaultClientTubelineAssemblyContext implements MetroClientTubelineAssemblyContext {
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        return context.getWrappedContext().createWsaTube(context.getTubelineHead());
+    private SecureConversationInitiator scInitiator;
+
+    public MetroClientTubelineAssemblyContextImpl(@NotNull ClientTubeAssemblerContext context) {
+        super(context);
     }
 
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        return context.getWrappedContext().createWsaTube(context.getTubelineHead());
+    public SecureConversationInitiator getScInitiator() {
+        return scInitiator;
+    }
+    
+    public void setScInitiator(SecureConversationInitiator initiator) {
+        this.scInitiator = initiator;
     }
 }

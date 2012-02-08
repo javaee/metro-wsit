@@ -40,28 +40,16 @@
 
 package com.sun.xml.ws.assembler.dev;
 
-import com.sun.xml.ws.api.pipe.Tube;
-import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface TubeFactory {
-    /**
-     * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
-     *
-     * @param context wsit client tubeline assembler context
-     * @return new tail of the client-side tubeline
-     */
-    Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException;
+public interface MetroClientTubelineAssemblyContext extends ClientTubelineAssemblyContext {
 
-    /**
-     * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
-     *
-     * @param context wsit service tubeline assembler context
-     * @return new head of the service-side tubeline
-     */
-    Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException;
+    SecureConversationInitiator getScInitiator();
+
+    void setScInitiator(SecureConversationInitiator initiator);
 
 }

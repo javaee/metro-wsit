@@ -40,12 +40,7 @@
 
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.ResourceLoader;
-import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.api.Component;
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.*;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.message.Header;
@@ -54,11 +49,18 @@ import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.binding.BindingImpl;
-
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.developer.WSBindingProvider;
+import com.sun.xml.ws.policy.PolicyException;
+import junit.framework.TestCase;
+import org.glassfish.gmbal.ManagedObjectManager;
+
+import javax.xml.namespace.QName;
+import javax.xml.ws.Binding;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
+import javax.xml.ws.soap.AddressingFeature;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -68,13 +70,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Binding;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.Service;
-import javax.xml.ws.soap.AddressingFeature;
-import junit.framework.TestCase;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -148,9 +143,9 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
             }   
         };
         final ClientTubeAssemblerContext jaxwsContext = getClientContext(bindingId, container);
-        TubelineAssemblerFactoryImpl.MetroTubelineAssembler assembler = (TubelineAssemblerFactoryImpl.MetroTubelineAssembler)getAssembler(bindingId);
+        MetroTubelineAssembler assembler = (MetroTubelineAssembler)getAssembler(bindingId);
         TubelineAssemblyController tubelineAssemblyController = assembler.getTubelineAssemblyController();
-        ClientTubelineAssemblyContextImpl context = new ClientTubelineAssemblyContextImpl(jaxwsContext);
+        MetroClientTubelineAssemblyContextImpl context = new MetroClientTubelineAssemblyContextImpl(jaxwsContext);
         Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
         assertEquals(2, tubeCreators.size());
         
@@ -390,7 +385,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
     }
 
     private TubelineAssembler getAssembler(BindingID bindingId) {
-        TubelineAssemblerFactoryImpl taFactory = new TubelineAssemblerFactoryImpl();
+        MetroTubelineAssemblerFactoryImpl taFactory = new MetroTubelineAssemblerFactoryImpl();
         return taFactory.doCreate(bindingId);
     }
 }

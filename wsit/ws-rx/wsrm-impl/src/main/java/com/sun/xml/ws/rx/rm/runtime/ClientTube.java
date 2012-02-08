@@ -40,40 +40,31 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.sun.xml.ws.commons.VolatileReference;
-import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
-import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
-import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
-import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rx.util.Communicator;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.MetroClientTubelineAssemblyContext;
+import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.commons.VolatileReference;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
 import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
-import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
-import com.sun.xml.ws.rx.rm.protocol.CloseSequenceResponseData;
-import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
-import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
-import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
-import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceResponseData;
+import com.sun.xml.ws.rx.rm.protocol.*;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
-import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
+import com.sun.xml.ws.rx.rm.runtime.sequence.*;
+import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -117,7 +108,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {
             // TODO P3 remove this condition and remove context.getScInitiator() method
-            scInitiator = context.getScInitiator();
+            scInitiator = ((MetroClientTubelineAssemblyContext) context).getScInitiator();
         }
 
         this.rc = RuntimeContext.builder(

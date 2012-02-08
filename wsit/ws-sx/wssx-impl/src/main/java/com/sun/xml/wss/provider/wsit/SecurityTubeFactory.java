@@ -40,63 +40,53 @@
 
 package com.sun.xml.wss.provider.wsit;
 
-import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.wss.impl.misc.SecurityUtil;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-
-import com.sun.xml.ws.security.encoding.LazyStreamCodec;
-import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
-import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.assembler.dev.ClientPipelineHook;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.assembler.ServerPipelineHook;
-import com.sun.xml.ws.assembler.dev.TubeFactory;
-import com.sun.xml.ws.assembler.dev.TubelineAssemblyContextUpdater;
-import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.*;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.runtime.dev.SessionManager;
+import com.sun.xml.ws.security.encoding.LazyStreamCodec;
 import com.sun.xml.ws.security.impl.policy.SecurityFeatureConfigurator;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
-import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.config.SecurityConfigProvider;
+import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
-
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import com.sun.xml.xwss.XWSSClientTube;
+import com.sun.xml.xwss.XWSSServerTube;
+
+import javax.security.auth.message.config.AuthConfigFactory;
+import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
-import javax.security.auth.message.config.AuthConfigFactory;
-import com.sun.xml.xwss.XWSSClientTube;
-import com.sun.xml.xwss.XWSSServerTube;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.ws.WebServiceFeature;
 
 public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
 
@@ -274,7 +264,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                         context.getContainer());
                 Pipe securityPipe = hook.createSecurityPipe(context.getPolicyMap(), pipeContext, context.getAdaptedTubelineHead());
                 if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                    context.setScInitiator((SecureConversationInitiator) securityPipe);
+                    ((MetroClientTubelineAssemblyContext) context).setScInitiator((SecureConversationInitiator) securityPipe);
                 }
                 securityTube = PipeAdapter.adapt(securityPipe);
             }
@@ -284,7 +274,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
             //Pipe securityPipe = new SecurityClientPipe(context, context.getAdaptedTubelineHead());
             Tube securityTube = new SecurityClientTube(context, context.getTubelineHead());
             //context.setScInitiator((SecureConversationInitiator) securityPipe);
-            context.setScInitiator((SecureConversationInitiator) securityTube);
+            ((MetroClientTubelineAssemblyContext) context).setScInitiator((SecureConversationInitiator) securityTube);
             //return PipeAdapter.adapt(securityPipe);
             return securityTube;
         } else if (!context.isPolicyAvailable() && isSecurityConfigPresent(context)) {
