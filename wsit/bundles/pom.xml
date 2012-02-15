@@ -54,6 +54,10 @@
     <packaging>pom</packaging>
     <name>Metro Bundles</name>
 
+    <properties>
+        <findbugs.skip>true</findbugs.skip>
+    </properties>
+
     <modules>
         <module>webservices-api</module>
         <module>webservices-rt</module>

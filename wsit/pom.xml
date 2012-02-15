@@ -343,6 +343,32 @@
                     <artifactId>docbkx-maven-plugin</artifactId>
                     <version>2.0.11</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>2.4.0</version>
+                    <configuration>
+                        <skip>${findbugs.skip}</skip>
+                        <threshold>${findbugs.threshold}</threshold>
+                        <excludeFilterFile>${findbugs.exclude}</excludeFilterFile>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.glassfish</groupId>
+                            <artifactId>findbugs</artifactId>
+                            <version>3.2-b06</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <minmemory>128m</minmemory>
+                        <maxmemory>512m</maxmemory>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -512,11 +538,6 @@
                 <version>${jaxws.ri.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-tools</artifactId>
-                <version>${jaxws.ri.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
@@ -721,5 +742,9 @@
         <www.userguide.latest.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/guide</www.userguide.latest.scm.connection.url>
         <www.gettingstarted.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/getting-started</www.gettingstarted.scm.connection.url>
         <www.guide.jaxws.version>${jaxws.ri.version}</www.guide.jaxws.version>
+
+        <findbugs.skip>false</findbugs.skip>
+        <findbugs.threshold>Low</findbugs.threshold>
+        <findbugs.exclude></findbugs.exclude>
     </properties>
 </project>
