@@ -56,7 +56,6 @@
 <!ENTITY jax-ws.uri.wsimportant "http://jax-ws.java.net/&jax-ws.version;/docs/wsimportant.html">
 <!ENTITY jax-ws.uri.wsgen "http://jax-ws.java.net/&jax-ws.version;/docs/wsgen.html">
 <!ENTITY jax-ws.uri.wsgenant "http://jax-ws.java.net/&jax-ws.version;/docs/wsgenant.html">
-<!ENTITY jax-ws.uri.apt "http://jax-ws.java.net/&jax-ws.version;/docs/apt.html">
 
 <!ENTITY jax-ws.overview "<link xlink:href='&jax-ws.uri.overview;'>Overview</link>">
 <!ENTITY jax-ws.wsimport "<link xlink:href='&jax-ws.uri.wsimport;'>Wsimport CLI</link>">

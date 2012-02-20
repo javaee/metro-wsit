@@ -617,10 +617,7 @@ public class AddNumbersImpl{
             WAR file to the web container.</para>
 
             <para>The <code>ant</code> command calls multiple tools to build
-            and deploy the web service. The JAX-WS annotation processing tool
-            (<code>apt</code>) processes the annotated source code and invokes
-            the compiler itself, resulting in the class files for each of the
-            Java source files. In the <code>wsit-enabled-fromjava</code>
+            and deploy the web service. In the <code>wsit-enabled-fromjava</code>
             example, the Ant target <code>build-server-java</code> in
             <code>build.xml</code> handles this portion of the process. Next,
             the individual class files are bundled together along with the web

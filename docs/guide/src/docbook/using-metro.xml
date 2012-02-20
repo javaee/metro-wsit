@@ -86,10 +86,6 @@ holder.
             </listitem>
 
             <listitem>
-                <para>&jax-ws.apt;</para>
-            </listitem>
-
-            <listitem>
                 <para><link
                 xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">Wsimport
                 and Wsgen Maven2 plugin</link></para>
@@ -2105,8 +2101,8 @@ null: HTTP/1.1 200 OK
 
             <para>Typically, one creates the WAR file with a GUI development
             tool or with the <code>ant</code> <code>war</code> task from the
-            generated artifacts from <code>wsimport</code>,
-            <code>wsgen</code>, or <code>apt</code> tools.</para>
+            generated artifacts from <code>wsimport</code> or 
+            <code>wsgen</code> tools.</para>
 
             <para>For example, a sample WAR file starting from a WSDL
             file:</para>

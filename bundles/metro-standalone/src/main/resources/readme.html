@@ -2,7 +2,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2011-2012 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -73,8 +73,7 @@
         <ul>
             <li><tt>metro-on-glassfish.xml</tt></li>
             <li><tt>metro-on-tomcat.xml</tt></li>
-            <li>and <tt>metro-on-glassfish-3.x.xml</tt>, an experimental stand-alone GlassFish 3.x installer</li>
-
+            <li><tt>metro-on-glassfish-v3.xml</tt>, an experimental stand-alone GlassFish 3.x installer</li>
         </ul>
         <p>
             These files are used to install the Metro binaries into the respective web containers.
@@ -116,32 +115,10 @@ ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glass
 asadmin start-domain <i>&lt;domain-name&gt;</i>
         </pre>
 
-        <a name="gfv2"></a>
-        <h3>GlassFish v2</h3>
-        <p>
-            GlassFish v2 bundles Metro. However you may want to replace the default Metro version by this
-            more up-to-date release. To do that, you must pass the name of the GlassFish v2 top-level directory
-            into <tt>ant</tt>. In our instructions bellow, that information is passed as an <tt>ant</tt> property
-            value on the command line. To stop GlassFish v2 instance, install ${product.name} on top of it and restart
-            the GlassFish v2 instance again execute the following commands:
-        </p>
-        <pre>
-asadmin stop-domain <i>&lt;domain-name&gt;</i>
-ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml install
-asadmin start-domain <i>&lt;domain-name&gt;</i>
-        </pre> 
-        <p>
-            This process creates a backup copy of the original Metro installation, copies the ${product.name} jar files
-            into your GlassFish v2 installation's <tt>lib</tt> directory and makes the necessary classpath alterations
-            in the domain configuration file: <tt>domain.xml</tt>.
-            It will also update the classpath for the utility script files: <tt>wsimport</tt> and <tt>wsgen</tt>.
-        </p>
-
         <a name="tomcat"></a>
         <h3>Tomcat</h3>
         <p>
-            The installation process for Tomcat is very similar to that of <a href="#gfv2">GlassFish v2</a>. Again, the top-level
-            directory of the Tomcat installation is passed as an argument to the <tt>ant</tt> command.
+            The top-level directory of the Tomcat installation is passed as an argument to the <tt>ant</tt> command.
             To shutdown Tomcat, change directories, invoke <tt>ant</tt>, and restart Tomcat by executing
             these commands:
         </p>
@@ -164,11 +141,6 @@ catalina.sh start
             with a new version of the Metro binaries. To update your Metro installation to ${product.name}, follow
             the same steps used for the initial install, shown <a href="#installing">above</a>. 
         </p>
-        <p>
-            Note that for GlassFish v2, the second and subsequent installs only update the Metro binaries;
-            no configuration files are modified.
-        </p>
-
 
         <a name="uninstalling"></a>
         <h2>Uninstalling Metro</h2>
@@ -179,13 +151,6 @@ catalina.sh start
 
             <h3>GlassFish 3.x</h3>
             Use the Update Tool to remove Metro Web Services from GlassFish.
-
-            <h3>GlassFish v2</h3>
-            <pre>
-asadmin stop-domain domain1
-ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml uninstall
-asadmin start-domain domain1
-            </pre>
 
             <h3>Tomcat</h3>
             <pre>
@@ -200,8 +165,8 @@ catalina.sh start
         </p>
         <ul>
             <li>Metro/WSIT ${metro.release.version} - <a href="http://java.net/projects/wsit/sources/svn/content/trunk/www/status-notes/status-notes-${metro.release.version}-FCS.html?raw=true">Browse the WSIT release notes online.</a></li>
-            <li>JAX-WS RI ${jaxws.ri.release.version} - <a href="http://jax-ws.java.net/${jaxws.ri.release.version}/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
-            <li>JAXB RI ${jaxb.ri.release.version} - <a href="http://jaxb.java.net/${jaxb.ri.release.version}/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
+            <li>JAX-WS RI ${jaxws.ri.release.version} - <a href="http://jax-ws.java.net/${jaxws.ri.release.version}/docs/">Browse the JAX-WS RI release doc online.</a></li>
+            <li>JAXB RI ${jaxb.ri.release.version} - <a href="http://jaxb.java.net/${jaxb.ri.release.version}/docs/">Browse the JAXB RI release doc online.</a></li>
         </ul>
 
     <h2>Users Guide</h2>
