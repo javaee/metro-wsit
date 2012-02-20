@@ -368,6 +368,6 @@
         <release.date>${maven.build.timestamp}</release.date>
         <bundle.artifact.name>${project.artifactId}-${project.version}.zip</bundle.artifact.name>
         <src.bundle.artifact.name>${project.artifactId}-${project.version}.src.zip</src.bundle.artifact.name>
-        <download.link>${release.repository.url}/${project.artifactId}/${project.version}/${bundle.artifact.name}</download.link>
+        <download.link>${release.repository.url}/org/glassfish/metro/${project.artifactId}/${project.version}/${bundle.artifact.name}</download.link>
     </properties>
 </project>
