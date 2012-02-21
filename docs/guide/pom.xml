@@ -244,6 +244,7 @@
                                                 username="${userguide.scm.username}"
                                                 password="${userguide.scm.password}"
                                                 create="true"
+                                                additionalOptions="--no-auth-cache"
                                                 commitMessage="${project.artifactId}-${project.version}" />
                                     </tasks>
                                 </configuration>
