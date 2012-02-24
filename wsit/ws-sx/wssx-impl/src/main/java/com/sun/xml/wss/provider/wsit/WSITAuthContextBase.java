@@ -1168,7 +1168,7 @@ public abstract class WSITAuthContextBase  {
                 populateCertStoreProps(props, (CertStoreConfig)as);
             } else if("KerberosConfig".equals(as.getName().getLocalPart())){
                 populateKerberosProps(props, (KerberosConfig)as);
-            } else if ("SessionManager".equals(as.getName().getLocalPart())) {
+            } else if ("SessionManagerStore".equals(as.getName().getLocalPart())) {
                 populateSessionMgrProps(props,(SessionManagerStore)as);
             }
         }
@@ -1177,7 +1177,9 @@ public abstract class WSITAuthContextBase  {
     
     private void populateSessionMgrProps(Properties props, SessionManagerStore smStore) {
         if(smStore.getSessionTimeOut() != null) {
-            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());
+            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());            
+        }
+        if(smStore.getSessionThreshold() != null) {           
             props.put(SessionManager.SESSION_THRESHOLD, smStore.getSessionThreshold());
         }
     }

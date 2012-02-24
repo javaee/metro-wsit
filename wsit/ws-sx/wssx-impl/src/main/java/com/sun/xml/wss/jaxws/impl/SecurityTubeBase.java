@@ -1461,7 +1461,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     private void populateSessionMgrProps(Properties props, SessionManagerStore smStore) {
         if(smStore.getSessionTimeOut() != null) {
-            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());
+            props.put(SessionManager.TIMEOUT_INTERVAL, smStore.getSessionTimeOut());            
+        }
+        if(smStore.getSessionThreshold() != null) {           
             props.put(SessionManager.SESSION_THRESHOLD, smStore.getSessionThreshold());
         }
     }

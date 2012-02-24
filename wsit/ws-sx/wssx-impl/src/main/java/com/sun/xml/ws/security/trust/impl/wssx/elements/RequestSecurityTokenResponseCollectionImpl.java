@@ -99,7 +99,10 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
                     rstr = (RequestSecurityTokenResponseType)obj.getValue();
                 }
             } else{
-                rstr = (RequestSecurityTokenResponseType)object;
+                if(object instanceof RequestSecurityTokenResponseType) {
+                    rstr = (RequestSecurityTokenResponseType)object;
+                }
+                
             }
             if (rstr != null){
                 addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl(rstr));

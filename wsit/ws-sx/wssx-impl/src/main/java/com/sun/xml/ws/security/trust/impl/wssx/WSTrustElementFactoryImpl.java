@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.security.trust.impl.wssx;
 
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
@@ -133,7 +134,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.PropertyException;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.wss.impl.MessageConstants;
 import java.util.logging.Logger;
+import javax.xml.namespace.QName;
+import javax.xml.rpc.soap.SOAPFaultException;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPFault;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 
@@ -476,6 +485,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      * Create RSTR Collection from Element
      */
     public  RequestSecurityTokenResponseCollection createRSTRCollectionFrom(Element elem) {
+        checkElement(elem);
         try {
             javax.xml.bind.Unmarshaller u = getContext(WSTrustVersion.WS_TRUST_13).createUnmarshaller();
             JAXBElement<RequestSecurityTokenResponseCollectionType> rstrcType = u.unmarshal(elem, RequestSecurityTokenResponseCollectionType.class);
@@ -856,6 +866,26 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
                     LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
             throw new RuntimeException(
                     LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
+        }
+    }
+
+    private void checkElement(Element elem) {
+        if (elem != null && elem.getLocalName().equalsIgnoreCase("Fault")) {
+            try {
+                QName qname = null;
+                Node codeNode = elem.getFirstChild();
+                Node reasonNode = elem.getLastChild();
+                String reasonText = reasonNode.getFirstChild().getTextContent();
+                if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_1_NS)) {
+                        qname = new QName(MessageConstants.SOAP_1_1_NS, elem.getLocalName());
+                    } else if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_2_NS)) {
+                        qname = new QName(MessageConstants.SOAP_1_2_NS, elem.getLocalName());
+                    }
+                    throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance().createFault(reasonText, qname));                
+
+            } catch (SOAPException se) {
+                throw new RuntimeException(se.getMessage());
+            }
         }
     }
 }
