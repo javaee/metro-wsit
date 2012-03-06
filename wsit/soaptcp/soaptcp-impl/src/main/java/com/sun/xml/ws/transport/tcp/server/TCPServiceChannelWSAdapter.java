@@ -40,8 +40,8 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
-import org.jvnet.ws.message.DistributedPropertySet;
-import org.jvnet.ws.message.PropertySet;
+import com.sun.xml.ws.api.DistributedPropertySet;
+import com.sun.xml.ws.api.PropertySet;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
