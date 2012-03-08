@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,7 +59,7 @@ import java.util.concurrent.Executors;
  *
  * <b>
  * WARNING: This class is a private utility class used by WS-RX implementation. Any usage outside
- * the intedned scope is strongly discouraged. The API exposed by this class may be changed, replaced
+ * the intended scope is strongly discouraged. The API exposed by this class may be changed, replaced
  * or removed without any advance notice.
  * </b>
  *
@@ -85,7 +85,7 @@ public final class FiberExecutor {
     public FiberExecutor(String id, Tube masterTubeline) {
         this.tubelinePool = new Pool.TubePool(masterTubeline);
         fiberExecutorService = Executors.newCachedThreadPool(new NamedThreadFactory(id + "-fiber-executor"));
-        this.engine = new Engine(id,fiberExecutorService);
+        this.engine = new Engine(id, fiberExecutorService);
     }
 
     public Packet runSync(Packet request) {
