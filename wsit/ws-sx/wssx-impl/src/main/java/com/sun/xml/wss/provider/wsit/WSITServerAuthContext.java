@@ -333,7 +333,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     public Packet validateRequest(Packet packet, Subject clientSubject, Subject serviceSubject, Map<Object, Object> sharedState)
     throws XWSSecurityException {
         
-        Message msg = packet.getMessage();
+        Message msg = packet.getInternalMessage();
         
         boolean isSCIssueMessage = false;
         boolean isSCCancelMessage = false;

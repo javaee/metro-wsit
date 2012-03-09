@@ -319,7 +319,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     public Packet secureRequest(
             Packet packet, Subject clientSubject, boolean isSCMessage) throws XWSSecurityException {
         // invoke the Trust Plugin if necessary
-        Message msg = packet.getMessage();
+        Message msg = packet.getInternalMessage();
         invokeTrustPlugin(packet, isSCMessage);
 
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
@@ -456,7 +456,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
         PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(this.policyAlternatives,cachedOperation(req), pipeConfig, addVer, true, rmVer, mcVer);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,pr);
-        Message msg = req.getMessage();
+        Message msg = req.getInternalMessage();
 
         try {
             if (!optimized) {

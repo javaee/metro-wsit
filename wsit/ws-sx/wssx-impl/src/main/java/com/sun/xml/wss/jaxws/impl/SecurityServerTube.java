@@ -242,7 +242,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         try {
             HaContext.initFrom(packet);
             
-            Message msg = packet.getMessage();
+            Message msg = packet.getInternalMessage();
             isSCIssueMessage = false;
             isSCCancelMessage = false;
             isTrustMessage = false;

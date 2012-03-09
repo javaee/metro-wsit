@@ -267,7 +267,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
 
         // keep the message
-        Message msg = packet.getMessage();
+        Message msg = packet.getInternalMessage();
 
         boolean isSCMessage = isSCMessage(packet);
 
@@ -379,7 +379,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
 
         // Could be OneWay
-        if (ret.getMessage() == null) {
+        if (ret.getInternalMessage() == null) {
             return ret;
         }
 
@@ -409,7 +409,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
         Message msg = null;
         try {
-            msg = ret.getMessage();
+            msg = ret.getInternalMessage();
             // Could be OneWay
             if (msg == null) {
                 return ret;
