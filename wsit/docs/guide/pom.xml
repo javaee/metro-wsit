@@ -232,7 +232,7 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <taskdef name="soimp" classname="com.sun.istack.tools.soimp.Soimp" classpathref="maven.plugin.classpath" />
+                                        <taskdef name="soimp" classname="com.sun.istack.soimp.Soimp" classpathref="maven.plugin.classpath" />
 
                                         <copy tofile="${project.build.directory}/www/index.html"
                                                 file="${project.build.directory}/metro-standalone/metro/readme.html" />

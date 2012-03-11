@@ -78,7 +78,7 @@
                                     </goals>
                                     <configuration>
                                         <tasks>
-                                            <taskdef name="soimp" classname="com.sun.istack.tools.soimp.Soimp" classpathref="maven.plugin.classpath" />
+                                            <taskdef name="soimp" classname="com.sun.istack.soimp.Soimp" classpathref="maven.plugin.classpath" />
 
                                             <copy todir="${www.upload.dir}">
                                                 <fileset dir="${project.build.directory}/docbook">
@@ -102,8 +102,8 @@
                             <dependencies>
                                 <dependency>
                                     <groupId>com.sun.istack</groupId>
-                                    <artifactId>istack-commons-tools</artifactId>
-                                    <version>2.9</version>
+                                    <artifactId>istack-commons-soimp</artifactId>
+                                    <version>2.10</version>
                                 </dependency>
                                 <dependency>
                                     <groupId>args4j</groupId>
