@@ -62,21 +62,24 @@
     </condition>
 
     <!-- Check if we are running JAVA SE 6 --> 
-    <condition property="jdk6">
-        <contains string="${@java.version.string@}" substring="1.6.0"/>
+    <condition property="jdk6+">
+        <or>
+            <contains string="${@java.version.string@}" substring="1.6.0"/>
+            <contains string="${@java.version.string@}" substring="1.7.0"/>
+        </or>
     </condition>
 
-    <target name="jdk6-message" if="jdk6">
-        <echo message="Metro is being installed using Java SE 6."/>
+    <target name="jdk-message" if="jdk6+">
+        <echo message="Metro is being installed using Java SE ${@java.version.string@}."/>
         <echo/>
-        <echo message="  ${product.name} provides JAX-WS API ${jaxws.spec.version} while Java SE 6 includes"/>
-        <echo message="  JAX-WS API 2.1. If you want to run Metro applications"/>
+        <echo message="  ${product.name} provides JAX-WS API ${jaxws.spec.version} while Java SE ${@java.version.string@} includes"/>
+        <echo message="  another version. If you want to run Metro applications"/>
         <echo message="  outside GlassFish you will need to use the endorsed"/>
         <echo message="  standards override mechanism. For more details see"/>
         <echo message="  http://download.oracle.com/javase/6/docs/technotes/guides/standards/index.html"/>
         <echo/>
         <echo message="  If you want to enable JAX-WS ${jaxws.spec.version} for all applications"/>
-        <echo message="  running under Java SE 6, you may run the command"/>
+        <echo message="  running under Java SE ${@java.version.string@}, you may run the command"/>
         <echo message="  'ant install-api'."/>
         <echo message="  That command will copy the file webservices-api.jar to"/>
         <echo message="  ${@java.home.string@}/lib/endorsed."/>
@@ -138,7 +141,7 @@
         <echo message="... installation complete."/>
     </target>
 
-    <target name="test-api" description="Test if 'webservices-api.jar' is already installed in $JAVA_HOME/lib/endorsed" if="jdk6">
+    <target name="test-api" description="Test if 'webservices-api.jar' is already installed in $JAVA_HOME/lib/endorsed" if="jdk6+">
         <echo message="${@java.home.string@}/lib/endorsed/webservices-api.jar"/>
         <available property="api.installed" file="${@java.home.string@}/lib/endorsed/webservices-api.jar"/>
     </target>
@@ -159,7 +162,7 @@
         <echo message="  into ${@java.home.string@}/lib/endorsed."/>
     </target>
 
-    <target name="install-api" if="jdk6" depends="init"
+    <target name="install-api" if="jdk6+" depends="init"
             description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
         <mkdir dir="${@java.home.string@}/lib/endorsed"/>
         <copy toDir="${@java.home.string@}/lib/endorsed" overwrite="true">
@@ -202,7 +205,7 @@
         <echo/>
         <echo message="Usage:"/>
         <echo message="  ant -f metro-on-glassfish.xml {install,uninstall}"/>
-        <antcall target="jdk6-message"/>
+        <antcall target="jdk-message"/>
         <antcall target="gfv3-message"/>
     </target>
 
