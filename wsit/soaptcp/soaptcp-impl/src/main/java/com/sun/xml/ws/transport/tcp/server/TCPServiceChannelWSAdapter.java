@@ -126,7 +126,7 @@ public final class TCPServiceChannelWSAdapter extends TCPAdapter {
             model = parse(ServiceChannelWSSatellite.class);
         }
         
-        public PropertySet.PropertyMap getPropertyMap() {
+        public DistributedPropertySet.PropertyMap getPropertyMap() {
             return model;
         }
         
