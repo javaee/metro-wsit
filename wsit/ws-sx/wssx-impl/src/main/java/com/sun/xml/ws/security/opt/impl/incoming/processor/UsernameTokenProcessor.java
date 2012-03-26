@@ -66,7 +66,7 @@ public class UsernameTokenProcessor implements StreamFilter{
     private static String NONCE = "Nonce".intern();
     private static String CREATED = "Created".intern();
     private static String SALT = "Salt".intern();
-    private static String ITERATIONS = "Iterations".intern();
+    private static String ITERATIONS = "Iteration".intern();
     
     /** Creates a new instance of UsernameTokenProcessor */
     public UsernameTokenProcessor() {
@@ -91,7 +91,7 @@ public class UsernameTokenProcessor implements StreamFilter{
                 currentElement = CREATED;
             }else if("Salt".equals(reader.getLocalName())){
                 currentElement = SALT;
-            }else if("Iterations".equals(reader.getLocalName())){
+            }else if("Iteration".equals(reader.getLocalName())){
                 currentElement = ITERATIONS;
             }
         }
