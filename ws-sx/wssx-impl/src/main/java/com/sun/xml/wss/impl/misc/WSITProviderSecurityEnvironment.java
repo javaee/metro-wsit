@@ -191,6 +191,8 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
     /** logger */
     protected static final Logger log =  Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
+    public static final String USERNAME_CBH = "username.callback.handler";
+    public static final String PASSWORD_CBH = "password.callback.handler";
     
     private static final SimpleDateFormat calendarFormatter1 =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -218,7 +220,8 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
     private String krbLoginModule = null;
     private String krbServicePrincipal = null;
     private boolean krbCredentialDelegation = false;
-    
+    private Class usernameCbHandler;
+    private Class passwordCbHandler;
     private String mcs;
     private String tfl;
     private String mna; 
@@ -259,6 +262,8 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
     private Subject loginContextSubjectForKeystore;
     private String keyStoreCBH;
     private CallbackHandler keystoreCbHandlerClass;
+    private CallbackHandler usernameHandler;
+    private CallbackHandler passwordHandler;
     /** Creates a new instance of WSITProviderSecurityEnvironment */
     @SuppressWarnings("empty-statement")
     public WSITProviderSecurityEnvironment(CallbackHandler handler, Map options, Properties configAssertions)
@@ -292,6 +297,9 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         this.krbLoginModule = configAssertions.getProperty(DefaultCallbackHandler.KRB5_LOGIN_MODULE);
         this.krbServicePrincipal = configAssertions.getProperty(DefaultCallbackHandler.KRB5_SERVICE_PRINCIPAL);
         this.krbCredentialDelegation = Boolean.valueOf(configAssertions.getProperty(DefaultCallbackHandler.KRB5_CREDENTIAL_DELEGATION));
+
+        String uCBH = configAssertions.getProperty(USERNAME_CBH);
+        String pCBH = configAssertions.getProperty(PASSWORD_CBH);
 
         this.myUsername = configAssertions.getProperty(DefaultCallbackHandler.MY_USERNAME);
         this.myPassword = configAssertions.getProperty(DefaultCallbackHandler.MY_PASSWORD);
@@ -352,6 +360,8 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         String tV = configAssertions.getProperty(DefaultCallbackHandler.TIMESTAMP_VALIDATOR);
         usernameValidator = loadClass(uV);
         timestampValidator = loadClass(tV);
+        usernameCbHandler = loadClass(uCBH);
+        passwordCbHandler = loadClass(pCBH);
         
         try {
             if (certificateValidator != null) {
@@ -2331,29 +2341,39 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
             }
         }
         
-        if (!this.isAppClient) {
-            //cannot make a Callback since GF CBH will throw UnSupported Exception
-            // for a servlet client
-            return null;
-        }
-        //this is an Appclient so try and make a callback.
-        NameCallback nameCallback    = new NameCallback("Username: ");
+        NameCallback nameCallback = new NameCallback("Username: ");
         try {
             Callback[] cbs = null;
-            if (this.useXWSSCallbacks) {
+            if (useXWSSCallbacks) {
                 RuntimeProperties props = new RuntimeProperties(context);
                 cbs = new Callback[]{props, nameCallback};
+
             } else {
                 cbs = new Callback[]{nameCallback};
             }
-            _handler.handle(cbs);
+
+            if (usernameCbHandler != null) {
+                usernameHandler = (CallbackHandler) usernameCbHandler.newInstance();
+                usernameHandler.handle(cbs);
+                nameCallback.setName(((javax.security.auth.callback.NameCallback) cbs[0]).getName());
+            } else {
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE, "Got NULL for Username Callback Handler");
+                }
+                if (!this.isAppClient) {
+                    //cannot make a Callback since GF CBH will throw UnSupported Exception
+                    // for a servlet client
+                    return null;
+                }
+                _handler.handle(cbs);
+            }
         } catch (Exception e) {
-            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION( "NameCallback"),
-                    new Object[] { "NameCallback"});            
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("NameCallback"),
+                    new Object[]{"NameCallback"});
             throw new RuntimeException(e);
         }
-                                                                                                                                              
-       return nameCallback.getName();
+
+        return nameCallback.getName();
     }
 
      
@@ -2396,30 +2416,43 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 return password;
             } 
         }
-        
-        if (!this.isAppClient) {
-            //servlet client: 109
-            //cannot make callback so return null
-            return null;
-        }
         PasswordCallback pwdCallback = new PasswordCallback("Password: ", false);
+        Callback[] cbs = null;
+        if (this.useXWSSCallbacks) {
+            RuntimeProperties props = new RuntimeProperties(context);
+            cbs = new Callback[]{props, pwdCallback};
+        } else {
+            cbs = new Callback[]{pwdCallback};
+        }
         try {
-            Callback[] cbs = null;
-            if (this.useXWSSCallbacks) {
-                RuntimeProperties props = new RuntimeProperties(context);
-                cbs = new Callback[]{props, pwdCallback};
+            if (passwordCbHandler != null) {
+                passwordHandler = (CallbackHandler) passwordCbHandler.newInstance();
+                passwordHandler.handle(cbs);
+                char[] pass = ((javax.security.auth.callback.PasswordCallback) cbs[0]).getPassword();
+                pwdCallback.setPassword(pass);
             } else {
-                cbs = new Callback[]{pwdCallback};
+                if (!this.isAppClient) {
+                    //servlet client: 109
+                    //cannot make callback so return null
+                    return null;
+                }
+                if (this.useXWSSCallbacks) {
+                    RuntimeProperties props = new RuntimeProperties(context);
+                    cbs = new Callback[]{props, pwdCallback};
+                } else {
+                    cbs = new Callback[]{pwdCallback};
+                }
+                _handler.handle(cbs);
             }
-            _handler.handle(cbs);
         } catch (Exception e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0225_FAILED_PASSWORD_VALIDATION_CALLBACK(), e);
             throw new RuntimeException(e);
         }
 
-        if (pwdCallback.getPassword() == null)
+        if (pwdCallback.getPassword() == null) {
             return null;
-                                                                                                                                              
+        }
+
         return new String(pwdCallback.getPassword());
     }
   
