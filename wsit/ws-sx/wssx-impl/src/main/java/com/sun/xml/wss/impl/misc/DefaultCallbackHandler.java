@@ -129,6 +129,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.security.auth.Subject;
+import javax.security.auth.x500.X500Principal;
 import javax.xml.ws.BindingProvider;
 import org.w3c.dom.Element;
 
@@ -1112,10 +1113,13 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         continue;
                     }
                     X509Certificate x509Cert = (X509Certificate) cert;
-                    String thisIssuerName =
-                            RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
+                    
+                    
+                   X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                   X500Principal issuerPrincipal = new X500Principal(issuerName);
+                   
                     BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                    if (thisIssuerName.equals(issuerName)
+                    if (thisIssuerPrincipal.equals(issuerPrincipal)
                             && thisSerialNumber.equals(serialNumber)) {
                         return x509Cert;
                     }
@@ -1213,10 +1217,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     continue;
                 }
                 X509Certificate x509Cert = (X509Certificate) cert;
-                String thisIssuerName =
-                        RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
+                X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
                 BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName)
+                if (thisIssuerPrincipal.equals(issuerPrincipal)
                         && thisSerialNumber.equals(serialNumber)) {
                     //return (PrivateKey) keyStore.getKey(alias, this.keyPassword);
                     return getPrivateKey(runtimeProps, alias);
@@ -1540,9 +1544,9 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Expiration time called");
-        Date current = getCurrentDateTimeAdjustedBy( -1 * maxClockSkew );
-
-        if (expires.before(current)) {
+        Date currentTime =
+                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
+        if (expires.before(currentTime)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1514_ERROR_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The current time is ahead of the expiration time in Timestamp");
@@ -1556,8 +1560,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Creation time called");
-        Date current = getCurrentDateTimeAdjustedBy( -1 * (maxClockSkew + timestampFreshnessLimit) );
-
+        Date current = getFreshnessAndSkewAdjustedDate(maxClockSkew, timestampFreshnessLimit);
 
         if (created.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1515_ERROR_CURRENT_TIME());
@@ -1568,28 +1571,49 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     + " currenttime - timestamp-freshness-limit - max-clock-skew");
         }
 
-       current = getCurrentDateTimeAdjustedBy( maxClockSkew );
-
-        if (current.before(created)) {
+        Date currentTime =
+                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, true);
+        if (currentTime.before(created)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1516_ERROR_CREATION_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The creation time is ahead of the current time.");
         }
     }
 
-    /**
-     * Gets the current date adjusted by milliseconds.
-     * 
-     * @param adjustment
-     * @return
-     */
-    private Date getCurrentDateTimeAdjustedBy( long adjustment ) {
-    	Calendar now = new GregorianCalendar();
-    	now.setTimeInMillis( now.getTimeInMillis() + adjustment );
-  	
-        return now.getTime();
+    private static Date getFreshnessAndSkewAdjustedDate(
+            long maxClockSkew, long timestampFreshnessLimit) {
+        Calendar c = new GregorianCalendar();
+        long offset = c.get(Calendar.ZONE_OFFSET);
+        if (c.getTimeZone().inDaylightTime(c.getTime())) {
+            offset += c.getTimeZone().getDSTSavings();
+        }
+        long beforeTime = c.getTimeInMillis();
+        long currentTime = beforeTime - offset;
+
+        long adjustedTime = currentTime - maxClockSkew - timestampFreshnessLimit;
+        c.setTimeInMillis(adjustedTime);
+
+        return c.getTime();
     }
 
+    private static Date getGMTDateWithSkewAdjusted(
+            Calendar c, long maxClockSkew, boolean addSkew) {
+        long offset = c.get(Calendar.ZONE_OFFSET);
+        if (c.getTimeZone().inDaylightTime(c.getTime())) {
+            offset += c.getTimeZone().getDSTSavings();
+        }
+        long beforeTime = c.getTimeInMillis();
+        long currentTime = beforeTime - offset;
+
+        if (addSkew) {
+            currentTime = currentTime + maxClockSkew;
+        } else {
+            currentTime = currentTime - maxClockSkew;
+        }
+
+        c.setTimeInMillis(currentTime);
+        return c.getTime();
+    }
 
     /**
      *

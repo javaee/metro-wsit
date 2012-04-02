@@ -280,7 +280,6 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
                     X500PrivateCredential cred = (X500PrivateCredential)it.next();
                     X509Certificate x509Cert = cred.getCertificate();
                     BigInteger serialNo = x509Cert.getSerialNumber();  
-                       
                     X500Principal currentIssuerPrincipal = x509Cert.getIssuerX500Principal();
                     X500Principal issuerPrincipal = new X500Principal(issuerName);
                     if (serialNo.equals(cert.getSerialNumber())

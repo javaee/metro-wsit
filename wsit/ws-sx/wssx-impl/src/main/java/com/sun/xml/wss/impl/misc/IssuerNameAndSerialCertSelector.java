@@ -62,6 +62,7 @@ import java.util.Arrays;
 import com.sun.xml.wss.XWSSecurityException;
 
 import java.security.cert.CertificateEncodingException;
+import javax.security.auth.x500.X500Principal;
 
 /**
  *
@@ -99,14 +100,16 @@ public class IssuerNameAndSerialCertSelector implements CertSelector {
         BigInteger serialNumberMatch,
         String issuerNameMatch,
         X509Certificate x509Cert) {
+  
+        
+        X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+        X500Principal issuerPrincipal = new X500Principal(issuerName);
 
-        BigInteger serialNumber = x509Cert.getSerialNumber();
-        String issuerName =
-            com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
-                x509Cert.getIssuerDN().getName());
+        BigInteger thisSerialNumber = x509Cert.getSerialNumber();
+
 
         if (serialNumber.equals(serialNumberMatch)
-            && issuerName.equals(issuerNameMatch)) {
+                && issuerPrincipal.equals(thisIssuerPrincipal)) {
             return true;
         }
         return false;

@@ -50,7 +50,7 @@
 
 package com.sun.xml.wss.util;
 
-import com.sun.org.apache.xml.internal.security.utils.RFC2253Parser;
+
 import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
@@ -79,6 +79,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
+import javax.security.auth.x500.X500Principal;
 
 /**
  *
@@ -147,11 +148,15 @@ public abstract class XWSSUtil {
                     continue;
                 }
                 X509Certificate x509Cert = (X509Certificate) cert;
-                String thisIssuerName =
-                    RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
-                BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName) &&
-                    thisSerialNumber.equals(serialNumber)) {
+                
+                
+                X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
+
+                BigInteger thisSerialNumber = x509Cert.getSerialNumber();              
+               
+                if (thisIssuerPrincipal.equals(issuerPrincipal)
+                        && thisSerialNumber.equals(serialNumber)) {
                     return x509Cert;
                 }
             }
@@ -224,11 +229,14 @@ public abstract class XWSSUtil {
                     continue;
                 }
                 X509Certificate x509Cert = (X509Certificate) cert;
-                String thisIssuerName =
-                    RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
+                
+                X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
+
                 BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName) &&
-                    thisSerialNumber.equals(serialNumber)) {
+
+                if (thisIssuerPrincipal.equals(issuerPrincipal)
+                        && thisSerialNumber.equals(serialNumber)) {
                     return (PrivateKey) keyStore.getKey(alias, keyStorePassword.toCharArray());
                 }
             }
@@ -322,9 +330,10 @@ public abstract class XWSSUtil {
         if (obj instanceof X509Certificate) {
             X509Certificate cert = (X509Certificate) obj;
             if (cert.getSerialNumber().equals(serialNumber)) {
-                String thisIssuerName =
-                        RFC2253Parser.normalize(cert.getIssuerDN().getName());
-                if (thisIssuerName.equals(issuerName)) {
+               
+                X500Principal thisIssuerPrincipal = cert.getIssuerX500Principal();
+                X500Principal issuerPrincipal = new X500Principal(issuerName);
+                if (thisIssuerPrincipal.equals(issuerPrincipal)) {
                     return cert;
                 }
             }
