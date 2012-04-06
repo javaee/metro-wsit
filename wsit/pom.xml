@@ -363,7 +363,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.8</version>
                     <configuration>
                         <minmemory>128m</minmemory>
                         <maxmemory>512m</maxmemory>
@@ -433,6 +432,12 @@
                 <artifactId>resolver</artifactId>
                 <scope>provided</scope>
                 <version>20050927</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.enterprise</groupId>
+                <artifactId>hk2</artifactId>
+                <version>1.6.3</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- required dependencies -->
@@ -656,7 +661,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.7</version>
+                            <version>2.8</version>
                             <configuration>
                                 <minmemory>128m</minmemory>
                                 <maxmemory>512m</maxmemory>
@@ -696,6 +701,10 @@
     </distributionManagement>
     
     <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
         <repository>
             <id>releases.java.net</id>
             <url>https://maven.java.net/content/repositories/releases/</url>
