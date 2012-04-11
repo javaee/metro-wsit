@@ -194,7 +194,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     private String certSelectorClassName;
     private String crlSelectorClassName;
     private String keystoreCertSelectorClassName;
-    private String truststoreCertSelectorClassName;   
+    private String truststoreCertSelectorClassName;
     private String myUsername;
     private String myPassword;
     private KeyStore keyStore;
@@ -244,7 +244,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     private Class keystoreCertSelectorClass;
     private Class truststoreCertSelectorClass;
     private String useXWSSCallbacksStr;
-    private boolean useXWSSCallbacks;     
+    private boolean useXWSSCallbacks;
 
     public DefaultCallbackHandler(String clientOrServer, Properties assertions) throws XWSSecurityException {
 
@@ -292,7 +292,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         this.crlSelectorClassName = properties.getProperty(CERTSTORE_CRLSELECTOR);
 
         this.keystoreCertSelectorClassName = properties.getProperty(KEYSTORE_CERTSELECTOR);
-        this.truststoreCertSelectorClassName = properties.getProperty(TRUSTSTORE_CERTSELECTOR);             
+        this.truststoreCertSelectorClassName = properties.getProperty(TRUSTSTORE_CERTSELECTOR);
 
         String uCBH = properties.getProperty(USERNAME_CBH);
         String pCBH = properties.getProperty(PASSWORD_CBH);
@@ -688,7 +688,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 throw unsupported;
             }
         }
-    }    
+    }
 
     /**
      *
@@ -809,7 +809,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     }
 
     /**
-     * 
+     *
      * @param samlBinding
      * @param context
      * @throws java.io.IOException
@@ -1113,16 +1113,16 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         continue;
                     }
                     X509Certificate x509Cert = (X509Certificate) cert;
-                    
-                    
+
                    X500Principal thisIssuerPrincipal = x509Cert.getIssuerX500Principal();
                    X500Principal issuerPrincipal = new X500Principal(issuerName);
-                   
+
                     BigInteger thisSerialNumber = x509Cert.getSerialNumber();
                     if (thisIssuerPrincipal.equals(issuerPrincipal)
                             && thisSerialNumber.equals(serialNumber)) {
                         return x509Cert;
                     }
+
                 }
             }
         } catch (Exception e) {
@@ -1388,7 +1388,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     }
 
     /**
-     * 
+     *
      * @param request
      * @param context
      * @throws java.io.IOException
@@ -1487,7 +1487,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             // validate timestamp creation and expiration time.
             TimestampValidationCallback.UTCTimestampRequest utcTimestampRequest =
                     (TimestampValidationCallback.UTCTimestampRequest) request;
-            
+
              // Get UTC time zone
             TimeZone utc = TimeZone.getTimeZone( "UTC" );
 
@@ -1498,7 +1498,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             calendarFormatter1.setTimeZone(utc);
             SimpleDateFormat calendarFormatter2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
             calendarFormatter2.setTimeZone(utc);
-            
+
             Date created = null;
             Date expired = null;
 
@@ -1544,9 +1544,9 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Expiration time called");
-        Date currentTime =
-                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
-        if (expires.before(currentTime)) {
+        Date current = getCurrentDateTimeAdjustedBy( -1 * maxClockSkew );
+
+        if (expires.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1514_ERROR_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The current time is ahead of the expiration time in Timestamp");
@@ -1560,7 +1560,8 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throws TimestampValidationCallback.TimestampValidationException {
 
         //System.out.println("Validate Creation time called");
-        Date current = getFreshnessAndSkewAdjustedDate(maxClockSkew, timestampFreshnessLimit);
+        Date current = getCurrentDateTimeAdjustedBy( -1 * (maxClockSkew + timestampFreshnessLimit) );
+
 
         if (created.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1515_ERROR_CURRENT_TIME());
@@ -1571,49 +1572,28 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     + " currenttime - timestamp-freshness-limit - max-clock-skew");
         }
 
-        Date currentTime =
-                getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, true);
-        if (currentTime.before(created)) {
+       current = getCurrentDateTimeAdjustedBy( maxClockSkew );
+
+        if (current.before(created)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1516_ERROR_CREATION_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The creation time is ahead of the current time.");
         }
     }
 
-    private static Date getFreshnessAndSkewAdjustedDate(
-            long maxClockSkew, long timestampFreshnessLimit) {
-        Calendar c = new GregorianCalendar();
-        long offset = c.get(Calendar.ZONE_OFFSET);
-        if (c.getTimeZone().inDaylightTime(c.getTime())) {
-            offset += c.getTimeZone().getDSTSavings();
-        }
-        long beforeTime = c.getTimeInMillis();
-        long currentTime = beforeTime - offset;
-
-        long adjustedTime = currentTime - maxClockSkew - timestampFreshnessLimit;
-        c.setTimeInMillis(adjustedTime);
-
-        return c.getTime();
+    /**
+     * Gets the current date adjusted by milliseconds.
+     * 
+     * @param adjustment
+     * @return
+     */
+    private Date getCurrentDateTimeAdjustedBy( long adjustment ) {
+    	Calendar now = new GregorianCalendar();
+    	now.setTimeInMillis( now.getTimeInMillis() + adjustment );
+  	
+        return now.getTime();
     }
 
-    private static Date getGMTDateWithSkewAdjusted(
-            Calendar c, long maxClockSkew, boolean addSkew) {
-        long offset = c.get(Calendar.ZONE_OFFSET);
-        if (c.getTimeZone().inDaylightTime(c.getTime())) {
-            offset += c.getTimeZone().getDSTSavings();
-        }
-        long beforeTime = c.getTimeInMillis();
-        long currentTime = beforeTime - offset;
-
-        if (addSkew) {
-            currentTime = currentTime + maxClockSkew;
-        } else {
-            currentTime = currentTime - maxClockSkew;
-        }
-
-        c.setTimeInMillis(currentTime);
-        return c.getTime();
-    }
 
     /**
      *
@@ -2391,7 +2371,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     }
 
     /**
-     * 
+     *
      * @param runtimeProps
      * @param alias
      * @return
@@ -2440,4 +2420,4 @@ public class DefaultCallbackHandler implements CallbackHandler {
         return sValidator;
     }
 }
- 
+
