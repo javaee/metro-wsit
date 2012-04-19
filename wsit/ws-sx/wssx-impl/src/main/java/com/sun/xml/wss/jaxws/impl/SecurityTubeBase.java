@@ -440,7 +440,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
         }
         LazyStreamBasedMessage lazyStreamMessage = (LazyStreamBasedMessage) message;
-        AttachmentSet attachSet = lazyStreamMessage.getAttachments();
+        AttachmentSet attachSet = null;
+        if (!lazyStreamMessage.mtomLargeData()) {
+            attachSet = lazyStreamMessage.getAttachments();
+        }
         com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient;
         if (attachSet == null || attachSet.isEmpty()) {
             recipient =
@@ -531,25 +534,36 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         } else {
             ctx = new ProcessingContextImpl(packet.invocationProperties);
         }
+        /* Issue 1081 Move this to Action Header Processor
         if (isSCRenew(packet)) {
             ctx.isExpired(true);
-        }
+        }*/
+        ctx.setAddressingEnabled(this.isAddressingEnabled());
+        ctx.setWsscVer(this.wsscVer);
 
         String action = null;
+        /* Issue 1081 Move this to Action Header Processor
         if (addVer != null) {
             action = getAction(packet);
             ctx.setAction(action);
-        }
+        }*/
+        
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setiterationsForPDK(this.iterationsForPDK);
 
+        /* Issue 1081 Move this to Action Header Processor
         if ((action != null && (action.contains("/RST/SCT") || action.contains("/RSTR/SCT"))) && this.bootStrapAlgoSuite != null) {
             ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
         } else {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        }
+        }*/
+        ctx.setBootstrapAlgoSuite(getAlgoSuite(this.bootStrapAlgoSuite));
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+ 
+
+
         //set the server certificate in the context ;
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
@@ -567,9 +581,12 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         ctx.isInboundMessage(true);
+        /* Issue 1081 Move this to Action Header Processor
         if (isTrustMessage(packet)) {
             ctx.isTrustMessage(true);
-        }
+        }*/
+        ctx.setWsTrustVer(this.wsTrustVer);
+        
         if (tubeConfig.getWSDLPort() != null) {
             ctx.getExtraneousProperties().put(SecurityTubeBase.WSDLPORT, tubeConfig.getWSDLPort());
         }

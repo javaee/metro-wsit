@@ -138,7 +138,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                  throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         "Cannot validate Password Digest since Creation Time was not Specified",
-                        null);
+                        null, true);
         }
         
         if(filter.getNonce() != null || filter.getCreated() != null){ //SP1.3
@@ -154,7 +154,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Authentication of Username Password Token Failed",
-                        null);
+                        null, true);
             }
         } else if (filter.getPassword() != null) {
             authenticated = context.getSecurityEnvironment().authenticateUser(context.getExtraneousProperties(),
@@ -164,7 +164,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Authentication of Username Password Token Failed",
-                        null);
+                        null, true);
                 
             }
         }
@@ -271,7 +271,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Invalid/Repeated Nonce value for Username Token",
-                        ex);
+                        ex, true);
             }
         }
     }

@@ -173,7 +173,19 @@ public class StreamUtil {
                 break;
             }
             case XMLStreamReader.CHARACTERS:{
-                writer.writeCharacters(reader.getTextCharacters(),reader.getTextStart(),reader.getTextLength());
+                //writer.writeCharacters(reader.getTextCharacters(),reader.getTextStart(),reader.getTextLength());
+                char[] buf = new char[2048];
+                int actual= 0;
+                int sourceStart = 0;
+                do {
+                    actual = reader.getTextCharacters(sourceStart, buf, 0, 2048);
+                    if (actual > 0) {
+                        writer.writeCharacters(buf, 0, actual);
+                        sourceStart += actual;
+                    }
+                }while (actual == 2048) ;
+
+
                 break;
             }
             case XMLStreamReader.COMMENT:{

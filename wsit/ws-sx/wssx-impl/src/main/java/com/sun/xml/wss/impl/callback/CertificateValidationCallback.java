@@ -88,7 +88,7 @@ public class CertificateValidationCallback extends XWSSCallback implements Callb
             }
         } catch (CertificateValidationCallback.CertificateValidationException ex) {
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-                        ex.getMessage(), ex);
+                        ex.getMessage(), ex, true);
         } catch (Exception e) {
              throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         e.getMessage(), e);

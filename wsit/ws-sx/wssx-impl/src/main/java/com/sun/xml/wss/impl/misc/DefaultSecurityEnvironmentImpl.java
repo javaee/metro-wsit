@@ -1240,7 +1240,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (created.before(current)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0227_INVALID_OLDER_CREATION_TIME());
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,  "The creation time is older than " +
-                    " currenttime - timestamp-freshness-limit - max-clock-skew", null);
+                    " currenttime - timestamp-freshness-limit - max-clock-skew", null, true);
         }
 
         Date currentTime =
@@ -1248,7 +1248,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (currentTime.before(created)) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0228_INVALID_AHEAD_CREATION_TIME());
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-                    "The creation time is ahead of the current time.", null);
+                    "The creation time is ahead of the current time.", null, true);
         }
     }
 
@@ -1298,7 +1298,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             timestampValidationCallback.getResult();
         } catch (TimestampValidationCallback.TimestampValidationException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0229_FAILED_VALIDATING_TIME_STAMP(), e);
-            throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
+            throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e, true);
         }
     }
 
@@ -1365,7 +1365,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                         expires = calendarFormatter2.parse(expirationTime);
                     } catch (java.text.ParseException e) {
                         log.log(Level.SEVERE, LogStringsMessages.WSS_0394_ERROR_PARSING_EXPIRATIONTIME());
-                        throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
+                        throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e, true);
                     }
                 }
             }
@@ -1375,7 +1375,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                     getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
             if (expires.before(currentTime)) {
                 log.log(Level.SEVERE, LogStringsMessages.WSS_0393_CURRENT_AHEAD_OF_EXPIRES());
-                throw SOAPUtil.newSOAPFaultException(MessageConstants.WSU_MESSAGE_EXPIRED,"The current time is ahead of the expiration time in Timestamp",null);
+                throw SOAPUtil.newSOAPFaultException(MessageConstants.WSU_MESSAGE_EXPIRED,"The current time is ahead of the expiration time in Timestamp",null, true);
             }
         }
 
@@ -1434,7 +1434,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             timestampValidationCallback.getResult();
         } catch (TimestampValidationCallback.TimestampValidationException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0229_FAILED_VALIDATING_TIME_STAMP(), e);
-            throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
+            throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e, true);
         }
     }
 
@@ -1549,7 +1549,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             log.log(Level.SEVERE,LogStringsMessages.WSS_0234_FAILED_VALIDATE_SAML_ASSERTION(), e);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
-                    "Validation failed for SAML Assertion ", e);
+                    "Validation failed for SAML Assertion ", e, true);
         }
     }
 
@@ -1667,7 +1667,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0234_FAILED_VALIDATE_SAML_ASSERTION(), e);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
-                    "Validation failed for SAML Assertion ", e);
+                    "Validation failed for SAML Assertion ", e, true);
         }
     }
 

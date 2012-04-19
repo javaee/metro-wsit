@@ -105,6 +105,8 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.impl.policy.verifier.PolicyVerifierFactory;
 
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+
 /**
  *
  * @author K.Venugopal@sun.com
@@ -238,7 +240,8 @@ public final class SecurityRecipient {
                 if (message.getEventType() == XMLStreamConstants.START_ELEMENT) {
                     this.headers = new HeaderList();
                     // Cache SOAP header blocks
-                    cacheHeaders(message, parentNS);
+                    //cacheHeaders(message, parentNS);
+                    cacheHeaders(message, parentNS, ctx);
 
                 }
                 // Move to soap:Body
@@ -267,7 +270,8 @@ public final class SecurityRecipient {
         }
     }
 
-    private void cacheHeaders(XMLStreamReader reader, Map<String, String> namespaces) throws XMLStreamException, XWSSecurityException {
+    private void cacheHeaders(XMLStreamReader reader, Map<String, String> namespaces
+            ,JAXBFilterProcessingContext ctx) throws XMLStreamException, XWSSecurityException {
 
         creator = new StreamReaderBufferCreator();
         MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
@@ -311,15 +315,21 @@ public final class SecurityRecipient {
                 reader.next();
             }
         }
+
     }
 
     @SuppressWarnings("unchecked")
     private void handleSecurityHeader() throws XWSSecurityException {
         // MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
         try {
+            //TODO: check this does not endup consuming the action header
+            if (context.getAddressingVersion() != null) {
+                String action = headers.getAction(context.getAddressingVersion(), soapVersion);
+                updateContext(action, context);
+            }
             if (message.getEventType() == XMLStreamReader.START_ELEMENT) {
-                if (MessageConstants.WSSE_SECURITY_LNAME.equals(message.getLocalName()) &&
-                        MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
+                if (MessageConstants.WSSE_SECURITY_LNAME.equals(message.getLocalName())
+                        && MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
                     for (int i = 0; i < message.getNamespaceCount(); i++) {
                         securityHeaderNS.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
                     }
@@ -383,8 +393,8 @@ public final class SecurityRecipient {
                     }
                     case BINARYSECURITY_TOKEN_ELEMENT: {
                         String valueType = message.getAttributeValue(null, MessageConstants.WSE_VALUE_TYPE);
-                        if (MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType) ||
-                                MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)) {
+                        if (MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType)
+                                || MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)) {
                             KerberosBinarySecurityToken kbst = new KerberosBinarySecurityToken(message, creator, (HashMap) currentParentNS, staxIF);
                             WSSPolicy policy = kbst.getPolicy();
                             ((TokenValidator) kbst).validate(context);
@@ -404,9 +414,9 @@ public final class SecurityRecipient {
                                     }
                                 }
                             }
-                        } else if (MessageConstants.X509v3_NS.equals(valueType) ||
-                                MessageConstants.X509v1_NS.equals(valueType) ||
-                                valueType == null) /*null takes as X509 BST */ {
+                        } else if (MessageConstants.X509v3_NS.equals(valueType)
+                                || MessageConstants.X509v1_NS.equals(valueType)
+                                || valueType == null) /*null takes as X509 BST */ {
                             X509BinarySecurityToken bst = new X509BinarySecurityToken(message, creator, (HashMap) currentParentNS, staxIF);
                             WSSPolicy policy = bst.getPolicy();
                             ((TokenValidator) bst).validate(context);
@@ -444,7 +454,7 @@ public final class SecurityRecipient {
                                     pendingElement = ek;
                                 }//else{
                                 addSecurityHeader(ek);
-                            //}
+                                //}
                             }
                         } else {
                             addSecurityHeader(ek);
@@ -462,7 +472,7 @@ public final class SecurityRecipient {
 
                     case ENCRYPTED_HEADER_ELEMENT: {
                         throw new XWSSecurityException("wsse11:EncryptedHeader not allowed inside SecurityHeader");
-                    //break;
+                        //break;
                     }
 
                     case REFERENCE_LIST_ELEMENT: {
@@ -529,6 +539,7 @@ public final class SecurityRecipient {
                         if (context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION) == null && samlAssertion.isHOK()) {
                             context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION, samlAssertion);
                         }
+                        context.getInferredSecurityPolicy().append(samlAssertion.getPolicy());
                         if (context.isTrustMessage() && !context.isClient()) {
                             IssuedTokenContext ctx = null;
                             if (context.getTrustContext() == null) {
@@ -542,9 +553,10 @@ public final class SecurityRecipient {
                                     context.setTrustContext(ctx);
                                 }
                             }
-                        } else if (!context.isTrustMessage()) {
-                            context.getInferredSecurityPolicy().append(samlAssertion.getPolicy());
                         }
+//                        } else if (!context.isTrustMessage()) {
+//                            context.getInferredSecurityPolicy().append(samlAssertion.getPolicy());
+//                        }
 
                         break;
                     }
@@ -555,8 +567,8 @@ public final class SecurityRecipient {
                     }
                     default: {
                         // Throw Exception if an unrecognized Security Header is present
-                        if (message.getEventType() == message.START_ELEMENT &&
-                                getSecurityElementType() == -1) {
+                        if (message.getEventType() == message.START_ELEMENT
+                                && getSecurityElementType() == -1) {
                             logger.log(Level.SEVERE, LogStringsMessages.WSS_1613_UNRECOGNIZED_SECURITY_ELEMENT(message.getLocalName()));
                             throw new XWSSecurityException(LogStringsMessages.WSS_1613_UNRECOGNIZED_SECURITY_ELEMENT(message.getLocalName()));
                         }
@@ -1818,4 +1830,58 @@ public final class SecurityRecipient {
         Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, rdr, soapVersion);
         ctx.setPVMessage(msg);
     }
+
+    private void updateContext(String action, JAXBFilterProcessingContext ctx) {
+         if (action != null) {
+            ctx.setAction(action);
+
+            if (isSCRenew(action, ctx)) {
+                ctx.isExpired(true);
+            }
+            
+            if ((action != null && (action.contains("/RST/SCT") || action.contains("/RSTR/SCT")))) {
+                if (ctx.getBootstrapAlgoSuite() != null) {
+                    ctx.setAlgorithmSuite(ctx.getBootstrapAlgoSuite());
+                }
+            }
+
+            if (isTrustMessage(action, ctx)) {
+                ctx.isTrustMessage(true);
+            }
+        }
+
+    }
+    
+    private boolean isSCRenew(String action, JAXBFilterProcessingContext ctx) {
+        if (!ctx.isAddressingEnabled()) {
+            return false;
+        }
+        if (ctx.getWsscVer() == null) {
+            return false;
+        }
+        return ctx.getWsscVer().getSCTRenewResponseAction().equals(action)
+                || ctx.getWsscVer().getSCTRenewRequestAction().equals(action);
+    }
+
+    private boolean isTrustMessage(String action, JAXBFilterProcessingContext ctx) {
+         if (!ctx.isAddressingEnabled()) {
+            return false;
+        }
+        WSTrustVersion wsTrustVer = ctx.getWsTrustVer();
+        if (wsTrustVer == null) {
+            return false;
+        }
+        // Issue
+        if (wsTrustVer.getIssueRequestAction().equals(action) ||
+                wsTrustVer.getIssueFinalResoponseAction().equals(action)) {
+            return true;
+        }
+
+        // Validate
+        return wsTrustVer.getValidateRequestAction().equals(action) ||
+                wsTrustVer.getValidateFinalResoponseAction().equals(action);
+
+    }
+
+
 }

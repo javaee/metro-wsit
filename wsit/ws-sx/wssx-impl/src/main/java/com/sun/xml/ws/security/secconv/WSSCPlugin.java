@@ -46,6 +46,7 @@
 
 package com.sun.xml.ws.security.secconv;
 
+import com.sun.xml.internal.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -440,10 +441,10 @@ public class WSSCPlugin {
             }
         } else {
             try{
-                // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
+                //SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
                 //throw (SOAPFaultException)builder.createException(null, response);
                 throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
-            } catch (SOAPException ex){
+            } catch (Exception ex){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
                 throw new RuntimeException(LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);

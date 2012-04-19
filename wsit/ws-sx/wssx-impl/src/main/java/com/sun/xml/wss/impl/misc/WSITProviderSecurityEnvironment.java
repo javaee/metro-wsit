@@ -914,7 +914,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "Certificate validation failed",
-                        e);
+                        e, true);
             }
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, "Certificate Validation called on certificate " + cert.getSubjectDN());
@@ -930,11 +930,11 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         } catch (CertificateExpiredException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0298_X_509_EXPIRED(), e);
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-                        "X509Certificate Expired", e);
+                        "X509Certificate Expired", e, true);
         } catch (CertificateNotYetValidException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0299_X_509_NOT_VALID(), e);
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-                        "X509Certificate not yet valid", e);
+                        "X509Certificate not yet valid", e, true);
         }
 
         // for self-signed certificate
@@ -2669,7 +2669,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
             throw SOAPUtil.newSOAPFaultException(
                 MessageConstants.WSSE_INVALID_SECURITY,
                 "Creation Time is older than configured Timestamp Freshness Interval!",
-                xwsse);
+                xwsse, true);
         }
             
         Date currentTime = getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkewActual, true);
@@ -2679,7 +2679,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
             throw SOAPUtil.newSOAPFaultException(
                 MessageConstants.WSSE_INVALID_SECURITY,
                 "Creation Time ahead of Current Time!",
-                xwsse);
+                xwsse, true);
         }
 
     }
@@ -2749,7 +2749,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 log.log(Level.SEVERE, LogStringsMessages.WSS_0716_FAILED_VALIDATE_SAML_ASSERTION(), e);
                   throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
-                    "Validation failed for SAML Assertion ", e);
+                    "Validation failed for SAML Assertion ", e, true);
             }
         }
     }

@@ -60,6 +60,9 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.StaticPolicyContext;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 
+import com.sun.xml.ws.security.secconv.WSSCVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+
 import org.w3c.dom.Element;
 
 public class ProcessingContextImpl extends ProcessingContext {
@@ -69,7 +72,13 @@ public class ProcessingContextImpl extends ProcessingContext {
     protected Hashtable issuedTokenContextMap = null;
     
     protected Hashtable scPolicyIDtoSctIdMap = null;
+    
+    protected AlgorithmSuite bootAlgoSuite = null;
+    private WSSCVersion wsscVer;
+    private WSTrustVersion wsTrustVer;
+    private boolean addressingEnabled;
 
+    
     // Security runtime would populate received client creds into it
     // when it is an incoming Trust or SC message
     private static final String TRUST_CLIENT_CREDENTIALS = "TrustClientCredentialHolder";
@@ -158,6 +167,12 @@ public class ProcessingContextImpl extends ProcessingContext {
             ctx1.setWSCInstance(ctx2.getWSCInstance());
             ctx1.setSCPolicyIDtoSctIdMap(ctx2.getSCPolicyIDtoSctIdMap());
             ctx1.setAction(ctx2.getAction());
+            
+            ctx1.setBootstrapAlgoSuite(ctx2.getBootstrapAlgoSuite());
+            ctx1.setWsscVer(ctx2.getWsscVer());
+            ctx1.setWsTrustVer(ctx2.getWsTrustVer());
+            ctx1.setAddressingEnabled(ctx2.isAddressingEnabled());
+
        }else {
            super.copy(ctxx1, ctxx2);
        }
@@ -370,4 +385,61 @@ public class ProcessingContextImpl extends ProcessingContext {
     public String getAction(){
         return this.action;
     }
+    
+    /**
+     * @return the bootAlgoSuite
+     */
+    public AlgorithmSuite getBootstrapAlgoSuite() {
+        return bootAlgoSuite;
+    }
+
+    /**
+     * @param bootAlgoSuite the bootAlgoSuite to set
+     */
+    public void setBootstrapAlgoSuite(AlgorithmSuite bootAlgoSuite) {
+        this.bootAlgoSuite = bootAlgoSuite;
+    }
+
+     /**
+     * @return the wsscVer
+     */
+    public WSSCVersion getWsscVer() {
+        return wsscVer;
+    }
+
+    /**
+     * @param wsscVer the wsscVer to set
+     */
+    public void setWsscVer(WSSCVersion wsscVer) {
+        this.wsscVer = wsscVer;
+    }
+
+    /**
+     * @return the wsTrustVer
+     */
+    public WSTrustVersion getWsTrustVer() {
+        return wsTrustVer;
+    }
+
+    /**
+     * @return the addressingEnabled
+     */
+    public boolean isAddressingEnabled() {
+        return addressingEnabled;
+    }
+
+    /**
+     * @param wsTrustVer the wsTrustVer to set
+     */
+    public void setWsTrustVer(WSTrustVersion wsTrustVer) {
+        this.wsTrustVer = wsTrustVer;
+    }
+
+    /**
+     * @param addressingEnabled the addressingEnabled to set
+     */
+    public void setAddressingEnabled(boolean addressingEnabled) {
+        this.addressingEnabled = addressingEnabled;
+    }
+
 }

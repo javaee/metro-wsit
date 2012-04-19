@@ -81,6 +81,12 @@ public class LazyStreamBasedMessage extends Message{
     private Message message = null;
     AttachmentSet as = null;
     private MutableXMLStreamBuffer buffer = null;
+    
+    private static final boolean MTOM_LARGEDATA;
+    
+    static {
+        MTOM_LARGEDATA= Boolean.getBoolean("MTOM_LARGEDATA");
+    }
     /** Creates a new instance of StreamMessage */
     public LazyStreamBasedMessage(XMLStreamReader message,StreamSOAPCodec codec) {
         this.reader = message;
@@ -535,5 +541,10 @@ public class LazyStreamBasedMessage extends Message{
         return message instanceof StreamMessage ?
                 ((StreamMessage) message).getBodyPrologue() : null;
     }
+    
+    public static boolean mtomLargeData() {
+       return MTOM_LARGEDATA;
+    }
+
 }
 

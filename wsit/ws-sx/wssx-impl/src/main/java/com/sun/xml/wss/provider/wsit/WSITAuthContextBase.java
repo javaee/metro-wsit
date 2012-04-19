@@ -1274,23 +1274,31 @@ public abstract class WSITAuthContextBase  {
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
         String action = null;
+        /* Issue 1081 Move this to Action Header Processor
         if (addVer != null) {
             action = getAction(packet);
             ctx.setAction(action);
         }
         if(isSCRenew(packet)){            
             ctx.isExpired(true);            
-        }
+        }*/
+        ctx.setAddressingEnabled(this.isAddressingEnabled());
+        ctx.setWsscVer(this.wsscVer);
+
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         
         // set the policy, issued-token-map, and extraneous properties
         // try { policy need not be set apriori after moving to new policverification code
-        if((action != null &&(action.contains("/RST/SCT") ||action.contains("/RSTR/SCT"))) && this.bootStrapAlgoSuite != null){
-            ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
-        } else {
-            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        }
+        /* Issue 1081 Move this to Action Header Processor
+        if((action != null &&(action.contains("/RST/SCT") ||action.contains("/RS
+TR/SCT"))) && this.bootStrapAlgoSuite != null){            ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
+        } else {this.
+            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet))
+);
+        }*/
+        ctx.setBootstrapAlgoSuite(getAlgoSuite(this.bootStrapAlgoSuite));
+        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
@@ -1309,9 +1317,12 @@ public abstract class WSITAuthContextBase  {
             }
         }
         ctx.isInboundMessage(true);
+        /*Issue 1081 Move this to Action Header Processor
         if(isTrustMessage(packet)){
             ctx.isTrustMessage(true);
-        }
+        }*/
+        ctx.setWsTrustVer(this.wsTrustVer);
+
         if (pipeConfig.getWSDLPort() != null) {
             ctx.getExtraneousProperties().put(WSITAuthContextBase.WSDLPORT, pipeConfig.getWSDLPort());
         }

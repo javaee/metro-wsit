@@ -206,21 +206,21 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                             throw SOAPUtil.newSOAPFaultException(
                                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
                                     "Empty Password specified, Authentication of Username Password Token Failed",
-                                    null);
+                                    null, true);
                         }                        
                         //SP1.3
                         if(actual.getUseCreated() == true && inferred.getUseCreated() == false ){
                             throw SOAPUtil.newSOAPFaultException(
                                     MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                     "Invalid Username Password Token. Missing Created ",
-                                    null);
+                                    null, true);
                         }
                         
                         if( actual.getUseNonce() == true && inferred.getUseNonce() == false){
                             throw SOAPUtil.newSOAPFaultException(
                                     MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                     "Invalid Username Password Token. Missing Nonce ",
-                                    null);
+                                    null, true);
                         }
                         
                         inferredSecurityPolicy.remove(pol);

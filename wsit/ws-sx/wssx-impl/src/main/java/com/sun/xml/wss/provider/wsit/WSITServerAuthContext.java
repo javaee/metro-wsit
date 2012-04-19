@@ -578,7 +578,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         //  context.setJAXWSMessage(message, soapVersion);
         LazyStreamBasedMessage lazyStreamMessage = (LazyStreamBasedMessage)message;
-        AttachmentSet attachSet = lazyStreamMessage.getAttachments();
+        AttachmentSet attachSet = null;
+        if (!lazyStreamMessage.mtomLargeData()) {
+            attachSet = lazyStreamMessage.getAttachments();
+        }
         SecurityRecipient recipient = null;
         if(attachSet == null || attachSet.isEmpty()){
             recipient = new SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion);

@@ -163,6 +163,20 @@ public class SOAPUtil {
         sfe.initCause(th);
         return sfe;
     }
+    
+     public static WssSoapFaultException newSOAPFaultException(
+            QName faultCode,
+            String faultstring,
+            Throwable th, boolean faultDetail) {
+
+        if (!faultDetail) {
+           return new WssSoapFaultException(MessageConstants.WSSE_INVALID_SECURITY, getLocalizedGenericError(), null, null);
+        }
+        WssSoapFaultException sfe =
+                new WssSoapFaultException(faultCode, faultstring, null, null);
+        sfe.initCause(th);
+        return sfe;
+    }
 
     protected static SOAPFault getSOAPFault(WssSoapFaultException sfe, SOAPFactory soapFactory, SOAPVersion version) {
 

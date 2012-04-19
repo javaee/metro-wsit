@@ -1227,6 +1227,7 @@ public class KeySelectorImpl extends KeySelector {
             }
         } else {
             //Retrive the context from Session Manager's cache
+            System.out.println("context.isExpired >>> " + wssContext.isExpired());
             ctx = ((SessionManager) wssContext.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !wssContext.isExpired());
             URI sctId = null;
             String sctIns = null;

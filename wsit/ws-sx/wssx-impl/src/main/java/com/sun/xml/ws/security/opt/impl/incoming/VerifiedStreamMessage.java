@@ -77,6 +77,7 @@ import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.message.stream.StreamMessage;
+import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -515,6 +516,9 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
         }    // no payload. can be consumed multiple times.
 
         if (reader.getEventType() != XMLStreamReader.START_ELEMENT) {
+            System.out.append("Event Type=" + reader.getEventType() + " name=" + reader.getLocalName());
+            System.out.append("START " + XMLStreamReader.START_ELEMENT);
+            System.out.append("END =" + XMLStreamReader.END_ELEMENT);
             AssertionError error = new AssertionError("StreamMessage has been already consumed. See the nested exception for where it's consumed");
             error.initCause(consumedAt);
             throw error;
@@ -547,7 +551,10 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
     }
 
     private void cacheMessage() {
-
+        //TODO 1081: need to verify this
+        if (LazyStreamBasedMessage.mtomLargeData()) {
+            return;
+        }
         if (buffer == null) {
             try {
                 buffer = new com.sun.xml.stream.buffer.MutableXMLStreamBuffer();
