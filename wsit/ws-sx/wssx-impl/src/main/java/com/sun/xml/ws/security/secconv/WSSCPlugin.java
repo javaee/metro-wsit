@@ -46,7 +46,6 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.internal.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
