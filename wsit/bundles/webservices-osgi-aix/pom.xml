@@ -63,7 +63,7 @@
                 <configuration>
                     <minmemory>128m</minmemory>
                     <maxmemory>768m</maxmemory>
-                    <excludePackageNames>*.msv.*:xsdlib.*:com.sun.xml.ws.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*</excludePackageNames>
+                    <excludePackageNames>*.msv.*:xsdlib.*:*com.sun.xml.ws*:com.sun.tools.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*:*com.sun.istack.tools*</excludePackageNames>
                 </configuration>
                 <version>2.8</version>
                 <executions>
