@@ -57,7 +57,8 @@ public class UsernameTokenProcessor implements StreamFilter{
     String passwordType = null;
     String nonce = null;
     String created = null;
-    String   Iterations ;
+    String   Iteration ;
+    String Iterations;
     String Salt;
     String currentElement = "";
     
@@ -66,7 +67,8 @@ public class UsernameTokenProcessor implements StreamFilter{
     private static String NONCE = "Nonce".intern();
     private static String CREATED = "Created".intern();
     private static String SALT = "Salt".intern();
-    private static String ITERATIONS = "Iteration".intern();
+    private static String ITERATION = "Iteration".intern();
+    private static String ITERATIONS = "Iterations".intern();
     
     /** Creates a new instance of UsernameTokenProcessor */
     public UsernameTokenProcessor() {
@@ -92,6 +94,8 @@ public class UsernameTokenProcessor implements StreamFilter{
             }else if("Salt".equals(reader.getLocalName())){
                 currentElement = SALT;
             }else if("Iteration".equals(reader.getLocalName())){
+                currentElement = ITERATION;
+            }else if("Iterations".equals(reader.getLocalName())){
                 currentElement = ITERATIONS;
             }
         }
@@ -116,10 +120,14 @@ public class UsernameTokenProcessor implements StreamFilter{
             }else if (currentElement == SALT){
                  Salt = reader.getText();
                  currentElement = "";
+            }else if (currentElement == ITERATION){
+                 Iteration = reader.getText();
+                 currentElement = "";
             }else if (currentElement == ITERATIONS){
                  Iterations = reader.getText();
                  currentElement = "";
             }
+
         }
         return true;
     }
@@ -159,7 +167,11 @@ public class UsernameTokenProcessor implements StreamFilter{
      * @return Iterations String
      */
     public String getIterations(){
-        return Iterations;
+        if (Iteration != null) {
+            return Iteration;
+        }
+        else
+            return Iterations;
     }
 }
 

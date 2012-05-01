@@ -95,7 +95,7 @@ import javax.xml.namespace.QName;
     "nonce",
     "created",
     "salt",
-    "iterations",
+    "iteration",
     "any"
 })
 public class UsernameTokenType {
@@ -115,8 +115,8 @@ public class UsernameTokenType {
     @XmlElement(name = "Salt", namespace = "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", required = false)
     protected  AttributedString  salt = null;
     
-    @XmlElement(name ="Iterations",namespace = "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", required = false)
-    protected AttributedString iterations;
+    @XmlElement(name ="Iteration",namespace = "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", required = false)
+    protected AttributedString iteration;
     
     @XmlAnyElement(lax = true)
     protected List<Object> any;
@@ -174,11 +174,11 @@ public class UsernameTokenType {
     public void setCreated(AttributedString value) {
         this.created = value;
     }
-    public AttributedString getIterations() {
-        return iterations;
+    public AttributedString getIteration() {
+        return iteration;
     }
-    public void setIterations(AttributedString value) {
-       this.iterations = value;
+    public void setIteration(AttributedString value) {
+       this.iteration = value;
     }
     public AttributedString getSalt() {
        return salt;

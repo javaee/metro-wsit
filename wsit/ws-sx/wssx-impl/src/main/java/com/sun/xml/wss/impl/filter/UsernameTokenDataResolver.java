@@ -122,7 +122,7 @@ public class UsernameTokenDataResolver {
             AttributedString as =  new AttributedString();
             String iterate = Integer.toString(iterations);
             as.setValue(iterate);
-            unToken.setIterations(as);
+            unToken.setIteration(as);
            
             byte[] salt = null;
             if (unToken.getSalt() == null) {
@@ -134,7 +134,7 @@ public class UsernameTokenDataResolver {
             } else {
                 //Retrieving the salt already there in unToken;
                 String decodeString = unToken.getSalt().getValue();
-                String  iter = unToken.getIterations().getValue();
+                String  iter = unToken.getIteration().getValue();
                 iterations = Integer.parseInt(iter);
                 try {
                     salt = Base64.decode(decodeString);
@@ -204,7 +204,7 @@ public class UsernameTokenDataResolver {
         AttributedString as =  new AttributedString();
         String iterate = Integer.toString(iterations);
         as.setValue(iterate);
-        unToken.setIterations(as);
+        unToken.setIteration(as);
         PasswordDerivedKey pdk = new PasswordDerivedKey();
         byte[] salt = null;
         if (unToken.getSalt() == null) {
@@ -216,7 +216,7 @@ public class UsernameTokenDataResolver {
         } else {
             //Retrieving the salt already there in unToken;
             String decodeString = unToken.getSalt().getValue();
-            String  iter = unToken.getIterations().getValue();
+            String  iter = unToken.getIteration().getValue();
             iterations = Integer.parseInt(iter);
             try {
                 salt = Base64.decode(decodeString);
