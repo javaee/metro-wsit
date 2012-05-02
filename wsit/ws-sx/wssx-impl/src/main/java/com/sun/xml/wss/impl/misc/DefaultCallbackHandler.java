@@ -1720,6 +1720,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         private boolean isTrustedSelfSigned(X509Certificate cert, KeyStore trustStore)
                 throws CertificateValidationCallback.CertificateValidationException {
             if (trustStore == null) {
+                log.log(Level.WARNING, LogStringsMessages.WSS_1541_TRUSTSTORE_NOT_FOUND_CHECK_CONFIG());
                 return false;
             }
             try {
