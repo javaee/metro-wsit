@@ -596,7 +596,7 @@
             <dependency>
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
-                <version>1.4.3</version>
+                <version>1.4.5</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.external</groupId>
@@ -681,15 +681,16 @@
         </profile>
 
         <profile>
-            <id>glassfish-repository-deployment</id>
+            <id>gf-internal-release</id>
             <distributionManagement>
                 <repository>
                     <uniqueVersion>false</uniqueVersion>
-                    <id>rator.sfbay</id>
-                    <url>dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/</url> 
+                    <id>gf-internal-release</id>
+                    <url>http://gf-maven.us.oracle.com/nexus/content/repositories/gf-internal-release</url> 
                 </repository>
             </distributionManagement>            
         </profile>
+
     </profiles>
 
     <distributionManagement>
@@ -728,7 +729,7 @@
 
         <jaxws.ri.version>2.2.7-promoted-b53</jaxws.ri.version>
 
-        <jaxb.ri.release.version>2.2.5</jaxb.ri.release.version><!-- readme.html -->
+        <jaxb.ri.release.version>2.2.6</jaxb.ri.release.version><!-- readme.html -->
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
 
         <jaxws.ri.release.version>2.2.7</jaxws.ri.release.version>
