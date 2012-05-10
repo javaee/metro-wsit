@@ -696,6 +696,10 @@
     
     <repositories>
         <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
             <id>releases.java.net</id>
             <url>https://maven.java.net/content/repositories/releases/</url>
             <layout>default</layout>
@@ -703,11 +707,6 @@
         <repository>
             <id>staging.java.net</id>
             <url>https://maven.java.net/content/groups/staging/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>glassfish</id>
-            <url>http://maven.glassfish.org/content/groups/glassfish/</url>
             <layout>default</layout>
         </repository>
         <repository>
