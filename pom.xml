@@ -721,14 +721,14 @@
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>
 
-        <jaxws.ri.version>2.2.0-1-SNAPSHOT.6-1</jaxws.ri.version>
+        <jaxws.ri.version>2.2.6-1</jaxws.ri.version>
 
-        <jaxb.ri.release.version>2.2.0-1-SNAPSHOT.5-1</jaxb.ri.release.version><!-- readme.html -->
-        <jaxb.spec.version>2.2.0-1-SNAPSHOT</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
+        <jaxb.ri.release.version>2.2.5-1</jaxb.ri.release.version><!-- readme.html -->
+        <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
 
-        <jaxws.ri.release.version>2.2.0-1-SNAPSHOT.6-1</jaxws.ri.release.version>
-        <jaxws.spec.version>2.2.0-1-SNAPSHOT</jaxws.spec.version>
-        
+        <jaxws.ri.release.version>2.2.6-1</jaxws.ri.release.version>
+        <jaxws.spec.version>2.2</jaxws.spec.version>
+
         <metro.release.version>2.2.0-1-SNAPSHOT</metro.release.version>
         
         <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
