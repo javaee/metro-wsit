@@ -257,8 +257,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.1</version>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>1.6</source>
+                        <target>1.6</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
@@ -330,12 +330,6 @@
                         <argLine>
                             -Djava.awt.headless=true -XX:MaxPermSize=256m -Xmx256m
                         </argLine>
-                        <!--includes>
-                            <include>**/*Tests.class</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/Abstract*</exclude>
-                        </excludes-->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -374,6 +368,12 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <inherited>true</inherited>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -383,6 +383,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <inherited>true</inherited>
             </plugin>
         </plugins>
@@ -652,6 +657,38 @@
     </dependencyManagement>
     
     <profiles>
+
+        <profile>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>            
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-property</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>env.JDK6_RT_JAR</property>
+                                            <message>!!! You are compiling Metro with JDK7. Some parts of Metro require JDK6 for compilation. Please set JDK6_RT_JAR property 
+ to point to jdk6 rt.jar on your system. On Mac, the path is usually $JDK6_HOME/Classes/classes.jar</message>
+                                        </requireProperty>
+                                    </rules>  
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <id>release</id>
