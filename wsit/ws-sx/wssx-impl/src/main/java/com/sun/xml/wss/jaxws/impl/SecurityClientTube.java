@@ -507,6 +507,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             WSDLBoundOperation operation = null;
             if (isTrustMessage(packet)) {
                 operation = getWSDLOpFromAction(packet, false);
+                cachedOperation = operation;
             } else {
                 operation = getOperation(packet.getMessage());
             }
