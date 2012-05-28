@@ -135,6 +135,8 @@ import javax.xml.bind.PropertyException;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.wss.impl.MessageConstants;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.rpc.soap.SOAPFaultException;
@@ -874,20 +876,99 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         if (elem != null && elem.getLocalName().equalsIgnoreCase("Fault")) {
             try {
                 QName qname = null;
-                Node codeNode = elem.getFirstChild();
-                Node reasonNode = elem.getLastChild();
-                String reasonText = reasonNode.getFirstChild().getTextContent();
+                Map<String, String> faultMap = null;
                 if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_1_NS)) {
-                        qname = new QName(MessageConstants.SOAP_1_1_NS, elem.getLocalName());
-                        throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createFault(reasonText, qname));
-                    } else if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_2_NS)) {
-                        qname = new QName(MessageConstants.SOAP_1_2_NS, elem.getLocalName());
-                        throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createFault(reasonText, qname));
-                    }
+                    faultMap = getFaultCodeAndReasonForSOAP1_1(elem);
+                    String codeText = faultMap.get("CodeText");
+                    String reasonText = faultMap.get("ReasonText");
+                    codeText = codeText.substring(codeText.indexOf(":") + 1);
+                    qname = new QName(MessageConstants.SOAP_1_1_NS, codeText);
+                    throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createFault(reasonText, qname));
+
+                } else if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_2_NS)) {
+
+                    faultMap = getFaultCodeAndReasonForSOAP1_2(elem);
+                    String codeText = faultMap.get("CodeText");
+                    String reasonText = faultMap.get("ReasonText");
+                    codeText = codeText.substring(codeText.indexOf(":") + 1);
+                    qname = new QName(MessageConstants.SOAP_1_2_NS, codeText);
+                    throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createFault(reasonText, qname));
+                }
 
             } catch (SOAPException se) {
                 throw new RuntimeException(se.getMessage());
             }
         }
+    }
+
+    private Map getFaultCodeAndReasonForSOAP1_1(Element elem) {
+        Map<String, String> faultMap = new HashMap<String, String>(2);
+        Node reasonNode = null;
+        String reasonText = null;        
+        String codeText = null;
+        NodeList nodes = elem.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                continue;
+            }
+            if("faultcode".equals(node.getLocalName())) {
+                codeText = node.getTextContent();
+            }
+            else if("faultstring".equals(node.getLocalName())) {
+                reasonText = node.getTextContent();
+            }
+        }
+        faultMap.put("CodeText", codeText);
+        faultMap.put("ReasonText", reasonText);
+        return faultMap;
+
+    }
+
+    private Map getFaultCodeAndReasonForSOAP1_2(Element elem) {
+        Map<String, String> faultMap = new HashMap<String, String>(2);
+        Node reasonNode = null;
+        String reasonText = null;
+        Node codeNode = null;
+        String codeText = null;
+
+        NodeList nodes = elem.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                continue;
+            }
+            //TODO: subcodes to be extracted later
+            if ("Code".equals(node.getLocalName())) {
+                codeNode = node;
+                NodeList subNodes = codeNode.getChildNodes();
+                for (int j = 0; j < subNodes.getLength(); j++) {
+                    Node subNode = subNodes.item(j);
+                    if (subNode.getNodeType() == Node.TEXT_NODE) {
+                        continue;
+                    }
+                    if ("Value".equals(subNode.getLocalName())) {
+                        codeText = subNode.getTextContent();
+                    }
+                }
+            }
+            else if("Reason".equals(node.getLocalName())) {
+                reasonNode = node;
+                NodeList subNodes = reasonNode.getChildNodes();
+                for (int j = 0; j < subNodes.getLength(); j++) {
+                    Node subNode = subNodes.item(j);
+                    if (subNode.getNodeType() == Node.TEXT_NODE) {
+                        continue;
+                    }
+                    if ("Text".equals(subNode.getLocalName())) {
+                        reasonText = subNode.getTextContent();
+                    }
+                }
+            }
+        }
+        faultMap.put("CodeText", codeText);
+        faultMap.put("ReasonText", reasonText);
+        return faultMap;
+
     }
 }
