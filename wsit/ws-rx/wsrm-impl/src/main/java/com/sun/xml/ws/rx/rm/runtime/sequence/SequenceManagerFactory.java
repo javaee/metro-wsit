@@ -124,7 +124,7 @@ public enum SequenceManagerFactory {
             return;
         }
 
-        if (!listener.canRegisterAtMOM() && !(managedObjectManager instanceof WSEndpointMOMProxy)) {
+        if (!listener.canRegisterAtMOM() && (managedObjectManager instanceof WSEndpointMOMProxy)) {
             // SequenceManager cannot be (un)registered directly so postpone its (un)registration until JMX connection
             // is created
             final WSEndpointMOMProxy endpointMOMProxy = (WSEndpointMOMProxy) managedObjectManager;
