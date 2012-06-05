@@ -880,32 +880,39 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         if (elem != null && elem.getLocalName().equalsIgnoreCase("Fault")) {
             try {
                 QName qname = null;
-                Map faultMap = null;
+                Map<String,Object> faultMap = null;
                 Set<String> subcodeValues = new LinkedHashSet<String>();
 
+                if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_1_NS)) {
+                    faultMap = getFaultCodeAndReasonForSOAP1_1(elem);
+                    String codeText = (String) faultMap.get("CodeText");
+                    String reasonText = (String) faultMap.get("ReasonText");
+                    codeText = codeText.substring(codeText.indexOf(":") + 1);
+                    qname = new QName(MessageConstants.SOAP_1_1_NS, codeText);
+                    throw new javax.xml.ws.soap.SOAPFaultException(SOAPFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createFault(reasonText, qname));
+                } else if (elem.getNamespaceURI().equals(MessageConstants.SOAP_1_2_NS)) {
+
+                    faultMap = getFaultCodeAndReasonForSOAP1_2(elem, "Code", subcodeValues);
+                    String codeText = (String) faultMap.get("CodeText");
+                    String reasonText = (String) faultMap.get("ReasonText");
+
+                    codeText = codeText.substring(codeText.indexOf(":") + 1);
+                    qname = new QName(MessageConstants.SOAP_1_2_NS, codeText);
+                    SOAPFault fault = SOAPFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createFault(reasonText, qname);
 
 
-                faultMap = getFaultCodeAndReasonForSOAP1_2(elem, "Code", subcodeValues);
-                String codeText = (String) faultMap.get("CodeText");
-                String reasonText = (String) faultMap.get("ReasonText");
-
-                codeText = codeText.substring(codeText.indexOf(":") + 1);
-                qname = new QName(MessageConstants.SOAP_1_2_NS, codeText);
-                SOAPFault fault = SOAPFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createFault(reasonText, qname);
-
-
-                List<String> subcodesList = new ArrayList<String>(subcodeValues);
-                Collections.reverse(subcodesList);
-                if ( !subcodesList.isEmpty()) {
-                    for (String subCodeValue : subcodesList) {
-                        subCodeValue = subCodeValue.substring(subCodeValue.indexOf(":") + 1);
-                        QName subcodeqname = new QName(MessageConstants.SOAP_1_2_NS, subCodeValue);
-                        fault.appendFaultSubcode(subcodeqname);
+                    List<String> subcodesList = new ArrayList<String>(subcodeValues);
+                    Collections.reverse(subcodesList);
+                    if (!subcodesList.isEmpty()) {
+                        for (String subCodeValue : subcodesList) {
+                            subCodeValue = subCodeValue.substring(subCodeValue.indexOf(":") + 1);
+                            QName subcodeqname = new QName(MessageConstants.SOAP_1_2_NS, subCodeValue);
+                            fault.appendFaultSubcode(subcodeqname);
+                        }
                     }
+                    throw new javax.xml.ws.soap.SOAPFaultException(fault);
+
                 }
-                throw new javax.xml.ws.soap.SOAPFaultException(fault);
-
-
             } catch (SOAPException se) {
                 throw new RuntimeException(se.getMessage());
             }
@@ -913,7 +920,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     }
 
     private Map getFaultCodeAndReasonForSOAP1_1(Element elem) {
-        Map<String, String> faultMap = new HashMap<String, String>(2);
+        Map<String,String> faultMap = new HashMap(2);
         Node reasonNode = null;
         String reasonText = null;        
         String codeText = null;
@@ -937,7 +944,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     }
 
     private Map getFaultCodeAndReasonForSOAP1_2(Element elem, String codeString, Set<String> subcodeValues) {
-        Map faultMap = new HashMap();
+        Map<String,Object> faultMap = new HashMap();
         Node reasonNode = null;
         String reasonText = null;
         Node codeNode = null;
