@@ -119,6 +119,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.wss.WSITXMLFactory;
 import java.util.TimeZone;
 
 public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
@@ -371,7 +372,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }
         }
-        final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory docFactory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         Document doc = null;
         try{
             doc = docFactory.newDocumentBuilder().newDocument();

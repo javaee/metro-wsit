@@ -75,6 +75,9 @@ import javax.xml.ws.handler.MessageContext;
 //import javax.xml.ws.RespectBinding;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.wss.WSITXMLFactory;
+import com.sun.xml.wss.impl.MessageConstants;
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
@@ -379,7 +382,8 @@ public abstract class BaseSTSImpl implements BaseSTS {
         Element ele = null;
         try{
             DOMResult result = new DOMResult();
-            Transformer tf = TransformerFactory.newInstance().newTransformer();
+            TransformerFactory tfactory = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
+            Transformer tf = tfactory.newTransformer();
             tf.transform(source, result);
 
             Node node = result.getNode();

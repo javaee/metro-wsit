@@ -106,7 +106,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
     
     static {
         Init.init();
-        xpathFactory = XPathFactory.newInstance();
+        xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         
         /**
          * Work-around for the fact that BC currently doesn't support
@@ -891,7 +891,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         } else
             if (type.equals(Target.TARGET_TYPE_VALUE_XPATH)) {
             try {
-                XPathFactory xpathFactory = XPathFactory.newInstance();
+                XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 XPath xpath = xpathFactory.newXPath();
                 
                 xpath.setNamespaceContext(getNamespaceContext());

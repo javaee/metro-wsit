@@ -65,6 +65,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.wss.WSITXMLFactory;
 
 /**
  * SecurityContextToken Implementation
@@ -163,7 +164,7 @@ public class SecurityContextToken extends SecurityContextTokenType implements Se
     
     public Object getTokenValue() {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.newDocument();

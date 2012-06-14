@@ -524,7 +524,7 @@ public class XMLUtil {
         
         try {
             // Assign new debug object
-            dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             //new com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl();
             dbFactory.setValidating(validating);
             dbFactory.setNamespaceAware(true);
@@ -580,7 +580,7 @@ public class XMLUtil {
      *                      document
      */
     public static Document newDocument() throws ParserConfigurationException {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbFactory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         dbFactory.setNamespaceAware(true);
         dbFactory.setValidating(validating);
         

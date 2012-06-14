@@ -40,6 +40,7 @@
 
 package com.sun.xml.wss.impl.transform;
 
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
@@ -101,7 +102,7 @@ public class STRTransformImpl {
             }
         }else if(data instanceof OctetStreamData ){
             try{
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
+                DocumentBuilderFactory factory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 //new com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl();
                 factory.setNamespaceAware(true);
                 Document doc = factory.newDocumentBuilder().parse(((OctetStreamData)data).getOctetStream());

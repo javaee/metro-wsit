@@ -538,4 +538,6 @@ public class MessageConstants {
     public static final String WSENDPOINT="WSEndpoint";
 
     public static final String WSIT_CLIENT_AUTHCONTEXT = "WSITClientAuthContext";
+
+    public static final String DISABLE_XML_SECURITY  = "com.sun.xml.ws.disableXmlSecurity";
 }

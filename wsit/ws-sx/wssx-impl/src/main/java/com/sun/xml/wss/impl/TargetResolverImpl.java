@@ -41,6 +41,7 @@
 package com.sun.xml.wss.impl;
 
 import com.sun.xml.wss.ProcessingContext;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.core.SecurityHeader;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -151,7 +152,7 @@ public class TargetResolverImpl implements TargetResolver{
             if(actualTarget.getType() == Target.TARGET_TYPE_VALUE_XPATH){
                 String val = actualTarget.getValue();
                 try{
-                    XPathFactory xpathFactory = XPathFactory.newInstance();
+                    XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                     XPath xpath = xpathFactory.newXPath();
                     xpath.setNamespaceContext(fpContext.getSecurableSoapMessage().getNamespaceContext());
                     XPathExpression xpathExpr = xpath.compile(val);

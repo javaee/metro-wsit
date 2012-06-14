@@ -44,6 +44,7 @@
 
 package com.sun.xml.wss.impl.filter;
 
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
@@ -158,7 +159,7 @@ public class TeeFilter {
         if (stylesheet == null) {
             templates = null;
         } else {
-            TransformerFactory tf = TransformerFactory.newInstance();
+            TransformerFactory tf = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl();
             try {
                 templates = tf.newTemplates(stylesheet);
@@ -207,7 +208,7 @@ public class TeeFilter {
             } else {
                 if (templates == null) {
                     // Use identity transform
-                    transformer = TransformerFactory.newInstance().newTransformer();
+                    transformer = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newTransformer();
                     //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl()
                     //.newTransformer();
                 } else {

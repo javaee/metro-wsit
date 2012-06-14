@@ -66,16 +66,19 @@ import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
 import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.dsig.NamespaceContextImpl;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.logging.LogStringsMessages;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathFactoryConfigurationException;
 
 
 /**
@@ -229,7 +232,7 @@ public class ResolverId extends ResourceResolverSpi {
       //------------------------
         NodeList elems = null;
         String xpath =  "//*[@wsu:Id='" + id + "']";
-        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         XPath xPATH = xpathFactory.newXPath();
         xPATH.setNamespaceContext(getNamespaceContext(doc));
         XPathExpression xpathExpr;

@@ -40,6 +40,7 @@
 
 package com.sun.xml.wss;
 
+
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import java.io.ByteArrayInputStream;
@@ -98,7 +99,7 @@ public class TokenPolicyMetaData {
         byte[] claimBytes = kb.getClaims();
         if (claimBytes != null) {
             try {
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 dbf.setNamespaceAware(true);
                 DocumentBuilder db = dbf.newDocumentBuilder();
                 Document doc = db.parse(new ByteArrayInputStream(claimBytes));

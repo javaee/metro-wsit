@@ -82,6 +82,7 @@ import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
+import com.sun.xml.wss.WSITXMLFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
@@ -326,7 +327,7 @@ public class WSTrustUtil {
     public static String elemToString(final BaseSTSResponse rstr, final WSTrustVersion wstVer){
         StringWriter writer = new StringWriter();
         try{
-            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            Transformer trans = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newTransformer();
             trans.transform(WSTrustElementFactory.newInstance(wstVer).toSource(rstr), new StreamResult(writer));
         }catch(Exception ex){
             ex.printStackTrace();
@@ -338,7 +339,7 @@ public class WSTrustUtil {
     public static String elemToString(final BaseSTSRequest rst, final WSTrustVersion wstVer){
         StringWriter writer = new StringWriter();
         try{
-            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            Transformer trans = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newTransformer();
             trans.transform(WSTrustElementFactory.newInstance(wstVer).toSource(rst), new StreamResult(writer));
         }catch(Exception ex){
             ex.printStackTrace();
@@ -546,7 +547,7 @@ public class WSTrustUtil {
     public static Document newDocument(){
         Document doc;
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
             doc = db.newDocument();

@@ -53,6 +53,7 @@ import com.sun.xml.ws.security.opt.impl.util.XMLStreamReaderFactory;
 import com.sun.istack.FinalArrayList;
 import com.sun.xml.ws.message.Util;
 import com.sun.xml.ws.security.opt.api.SecuredHeader;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import java.util.HashMap;
@@ -314,7 +315,7 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             // TODO what about in-scope namespaces
             // Not very efficient consider implementing a stream buffer
             // processor that produces a DOM node from the buffer.
-            TransformerFactory tf = TransformerFactory.newInstance();
+            TransformerFactory tf = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             Transformer t = tf.newTransformer();
             XMLStreamBufferSource source = new XMLStreamBufferSource(completeHeader);
             DOMResult result = new DOMResult();

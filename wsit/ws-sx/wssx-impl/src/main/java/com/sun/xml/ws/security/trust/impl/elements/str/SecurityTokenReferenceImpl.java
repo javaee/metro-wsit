@@ -52,6 +52,7 @@ import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.wss.WSITXMLFactory;
 
 
 import java.util.List;
@@ -133,7 +134,7 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
     
     public Object getTokenValue() {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document doc = builder.newDocument();

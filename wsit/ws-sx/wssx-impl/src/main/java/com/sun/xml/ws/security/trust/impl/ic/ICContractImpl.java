@@ -48,6 +48,7 @@ import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.impl.WSTrustContractImpl;
+import com.sun.xml.wss.WSITXMLFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class ICContractImpl extends WSTrustContractImpl{
         if (displayToken){
             // Create RequestedDisplayToken
             try {
-                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                final DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 dbf.setNamespaceAware(true);
                 final DocumentBuilder builder = dbf.newDocumentBuilder();
                 Document doc = builder.newDocument();

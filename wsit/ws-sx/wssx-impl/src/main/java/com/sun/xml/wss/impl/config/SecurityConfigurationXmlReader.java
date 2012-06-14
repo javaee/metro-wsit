@@ -44,6 +44,7 @@
 
 package com.sun.xml.wss.impl.config;
 
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.policy.mls.Parameter;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.spec.XPathFilter2ParameterSpec;
@@ -232,7 +233,7 @@ public class SecurityConfigurationXmlReader implements ConfigurationConstants {
             InputStream xmlStream, PrintStream out)
             throws Exception {
         
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory factory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 //new com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl();
         factory.setAttribute(
                 "http://apache.org/xml/features/validation/dynamic",

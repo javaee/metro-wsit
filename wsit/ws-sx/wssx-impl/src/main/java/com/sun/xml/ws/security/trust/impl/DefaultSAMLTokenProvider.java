@@ -77,6 +77,9 @@ import com.sun.xml.wss.saml.util.SAMLUtil;
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
 import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import com.sun.xml.bind.v2.runtime.JAXBContextImpl;
+import com.sun.xml.bind.v2.util.XmlFactory;
+import com.sun.xml.wss.WSITXMLFactory;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -467,7 +470,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }
         }
-        final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory docFactory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
+        
         Document doc = null;
         try{
             doc = docFactory.newDocumentBuilder().newDocument();

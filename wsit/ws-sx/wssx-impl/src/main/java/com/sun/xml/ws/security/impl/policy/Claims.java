@@ -44,6 +44,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import com.sun.xml.wss.WSITXMLFactory;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
@@ -84,7 +85,7 @@ public class Claims extends PolicyAssertion implements com.sun.xml.ws.security.p
         populate();
         if(claimsElement == null){
             try{
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(new ByteArrayInputStream(claimsBytes));

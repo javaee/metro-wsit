@@ -46,6 +46,7 @@
 
 package com.sun.xml.wss.impl.dsig;
 
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.FilterProcessingContext;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
@@ -706,7 +707,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                     CanonicalizationMethod cm = null;
                     C14NMethodParameterSpec spec = null;
                     try{
-                        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                        Document doc = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newDocumentBuilder().newDocument();
                         Element tp = doc.createElementNS(MessageConstants.WSSE_NS, "wsse:TransformationParameters");
                         Element cem = doc.createElementNS(MessageConstants.DSIG_NS, "ds:CanonicalizationMethod");
                         tp.appendChild(cem);
@@ -845,7 +846,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                     expr = signatureTarget.getValue();
                     
                     try{
-                        XPathFactory xpathFactory = XPathFactory.newInstance();
+                        XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                         XPath xpath = xpathFactory.newXPath();
                         xpath.setNamespaceContext(secureMessage.getNamespaceContext());
                         //              XPathExpression expr = xpath.compile("//*[@wsu:Id]");
@@ -1091,7 +1092,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
             if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST, "\n");
             }
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            Transformer transformer = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             OutputStream baos = new ByteArrayOutputStream();
             transformer.transform(new DOMSource(node), new StreamResult(baos));

@@ -63,6 +63,7 @@ import java.util.ArrayList;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.wss.WSITXMLFactory;
 
 /**
  * $author: JAXWS Development Team
@@ -91,7 +92,7 @@ public class DOMUtil {
 
     public static Node createDOMNode(InputStream inputStream) {
 
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         dbf.setNamespaceAware(true);
         dbf.setValidating(false);
         try {

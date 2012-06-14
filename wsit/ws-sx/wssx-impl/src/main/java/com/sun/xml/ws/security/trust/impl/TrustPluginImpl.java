@@ -136,6 +136,7 @@ import org.w3c.dom.Node;
 import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.security.core.ai.IdentityType;
+import com.sun.xml.wss.WSITXMLFactory;
 import java.security.cert.CertificateEncodingException;
 
 /**
@@ -424,7 +425,7 @@ public class TrustPluginImpl implements TrustPlugin {
 
             // Create the UseKey element in RST
             KeyInfo keyInfo = createKeyInfo(keyPair.getPublic());
-            final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory docFactory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             Document doc = null;
             try{
                 doc = docFactory.newDocumentBuilder().newDocument();
@@ -725,7 +726,7 @@ public class TrustPluginImpl implements TrustPlugin {
         Element ele = null;
         try{                                
             DOMResult result = new DOMResult();
-            Transformer tf = TransformerFactory.newInstance().newTransformer();
+            Transformer tf = WSITXMLFactory.createTransformerFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).newTransformer();
             tf.transform(source, result);
 
             Node node = result.getNode();

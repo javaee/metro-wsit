@@ -67,6 +67,7 @@ import com.sun.xml.rpc.util.localization.LocalizableMessageFactory;
 import com.sun.xml.rpc.processor.model.Port;
 import com.sun.xml.rpc.processor.model.Model;
 import com.sun.xml.rpc.processor.util.IndentingWriter;
+import com.sun.xml.wss.WSITXMLFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -145,7 +146,7 @@ public class SecurityPlugin extends ToolPlugin implements UsageIf, ModelIf,
 
                 /* validate security configuration */
                 DocumentBuilderFactory factory =
-                   new com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl();
+                   WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 factory.setAttribute("http://apache.org/xml/features/validation/dynamic", Boolean.FALSE);                
                 factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage",
                                      "http://www.w3.org/2001/XMLSchema");

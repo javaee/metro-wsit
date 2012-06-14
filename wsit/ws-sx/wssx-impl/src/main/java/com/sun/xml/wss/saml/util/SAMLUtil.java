@@ -43,6 +43,7 @@ package com.sun.xml.wss.saml.util;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.XWSSecurityException;
@@ -151,7 +152,7 @@ public class SAMLUtil {
         } else {
             
             try {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory factory = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 document = builder.newDocument();
             } catch (Exception ex) {
@@ -245,7 +246,7 @@ public class SAMLUtil {
             } catch (IOException ex) {
                 throw new XWSSecurityException("Error occurred while trying to convert SAMLAssertion stream into DOM Element", ex);
             }
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();            
             doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));

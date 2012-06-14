@@ -62,6 +62,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.wss.WSITXMLFactory;
 
 /**
  * SecurityContextToken Implementation
@@ -166,7 +167,7 @@ public class SecurityContextTokenImpl extends SecurityContextTokenType implement
     
     public Object getTokenValue() {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
             dbf.setNamespaceAware(true);
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document doc = builder.newDocument();

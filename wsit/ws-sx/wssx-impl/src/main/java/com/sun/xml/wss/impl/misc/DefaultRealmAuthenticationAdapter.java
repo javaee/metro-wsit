@@ -51,6 +51,7 @@ package com.sun.xml.wss.impl.misc;
 
 
 import com.sun.xml.wss.RealmAuthenticationAdapter;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import java.io.File;
@@ -83,7 +84,7 @@ public class DefaultRealmAuthenticationAdapter extends RealmAuthenticationAdapte
     private CallbackHandler gfCallbackHandler = null;
     private HashMap<String, String> tomcatUsersXML = null;
     
-    private static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    private static DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
     
     private static String classname = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
  

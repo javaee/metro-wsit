@@ -76,6 +76,7 @@ import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.dsig.NamespaceContextImpl;
 import com.sun.xml.wss.logging.LogStringsMessages;
@@ -411,7 +412,7 @@ public class URIResolver extends ResourceResolverSpi {
         Element element = null;
         NodeList elems = null;
         String xpath =  "//*[@wsu:Id='" + id + "']";
-        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         XPath xPATH = xpathFactory.newXPath();
         xPATH.setNamespaceContext(getNamespaceContext(doc));
         XPathExpression xpathExpr;

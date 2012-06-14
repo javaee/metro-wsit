@@ -86,6 +86,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.sun.org.apache.xml.internal.security.c14n.helper.AttrCompare;
 import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
+import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.MessageConstants;
 import javax.xml.crypto.Data;
 import javax.xml.crypto.NodeSetData;
@@ -140,7 +141,7 @@ public class Canonicalizer20010315ExclOmitComments {
     
     static {
         try {
-            nullNode=DocumentBuilderFactory.newInstance().
+            nullNode=WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING).
                     newDocumentBuilder().newDocument().createAttributeNS(Constants.NamespaceSpecNS,XMLNS);
             nullNode.setValue("");
         } catch (Exception e) {

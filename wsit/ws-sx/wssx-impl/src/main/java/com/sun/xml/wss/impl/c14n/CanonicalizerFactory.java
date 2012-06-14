@@ -52,7 +52,6 @@ import javax.mail.internet.ContentType;
 import com.sun.xml.wss.XWSSecurityException;
 
 import com.sun.xml.wss.swa.MimeConstants;
-
 /**
  *
  * @author  XWS-Security Team
