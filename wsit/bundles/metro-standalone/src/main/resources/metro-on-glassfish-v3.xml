@@ -46,6 +46,7 @@
     <property name="as.home" value="${@as.home.env.string@}"/>
     <property name="as.lib.home" value="${as.home}/modules"/>
     <property name="backup.dir" value="${as.home}/.metro-${project.version}"/>
+    <property name="osgi.cache.dir" value="${as.home}/domains/domain1/osgi-cache"/>
 
     <condition property="notInstalled">
         <not>
@@ -99,6 +100,12 @@
         <echo />
         <echo message="  Metro installations via this scripts are not officially supported!"/>
         <echo />
+        <echo message="  This script moves default domain osgi cache directory"/>
+        <echo message="  ${as.home}/domains/domain1/osgi.cache directory under ${backup.dir}."/>
+        <echo message="  If your Glassfish installation consists of different than"/>
+        <echo message="  default domain setup, osgi-cache directory for each of"/>
+        <echo message="  the domains has to be deleted manually before restarting Glassfish."/>
+        <echo />
     </target>
 
     <target name="gfv3-message" unless="glassfish-v3">
@@ -136,6 +143,9 @@
                 <include name="jaxb-api-osgi.jar"/>
             </fileset>
         </copy>
+        <move todir="${backup.dir}" failonerror="false">
+            <fileset dir="${osgi.cache.dir}"/>
+        </move>
         <echo message="...done: You can find the original Metro files stored in ${backup.dir}"/>
         <echo message="To restore the original Metro installation, run this script with 'uninstall' target"/>
     </target>
@@ -217,6 +227,7 @@
         </copy>
 
         <delete dir="${backup.dir}" includeemptydirs="true"/>
+        <delete dir="${osgi.cache.dir}" includeemptydirs="true"/>
 
         <echo message="... uninstall complete."/>
         <echo message="The original Metro installation has been restored."/>
