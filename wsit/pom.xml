@@ -768,7 +768,7 @@
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>
 
-        <jaxws.ri.version>2.2.7-promoted-b111</jaxws.ri.version>
+        <jaxws.ri.version>2.2.7-promoted-b112</jaxws.ri.version>
 
         <jaxb.ri.release.version>2.2.6</jaxb.ri.release.version><!-- readme.html -->
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
