@@ -196,6 +196,7 @@ public final class SecurityRecipient {
         this.bodyEpilogue = bodyEpilogue;
     }
 
+    // Validate Message 
     public Message validateMessage(JAXBFilterProcessingContext ctx) throws XWSSecurityException {
         try {
             this.context = ctx;
