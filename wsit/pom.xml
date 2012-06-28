@@ -394,6 +394,7 @@
     </build>
 
     <modules>
+        <module>bom</module>
         <module>metro-cm</module>
         <module>metro-commons</module>
         <module>metro-config</module>
