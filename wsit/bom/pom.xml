@@ -349,6 +349,19 @@
 
     </dependencyManagement>
  
+    <profiles>
+        <profile>
+            <id>gf-internal-release</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>gf-internal-release</id>
+                    <url>http://gf-maven.us.oracle.com/nexus/content/repositories/gf-internal-release</url> 
+                </repository>
+            </distributionManagement>            
+        </profile>
+    </profiles>
+    
     <properties>
         <glassfish.version>3.2-b06</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
