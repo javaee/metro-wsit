@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,7 +42,7 @@ package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-//import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -56,7 +56,6 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
-import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.parser.PolicyResourceLoader;
 
@@ -97,25 +96,24 @@ public class EndpointFactoryImplTest extends TestCase {
         EndpointFactoryImpl instance = new EndpointFactoryImpl();
         WSEndpoint<String> expResult = endpoint;
         WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-        assertTrue(result instanceof ManagedEndpoint);
-        assertTrue(result.getImplementationClass().equals(expResult.getImplementationClass()));
+        assertNotSame(expResult, result);
     }
 
     /**
      * Test of createEndpoint method, of class EndpointFactoryImpl.
      * @throws Exception 
      */
-//    public void testCreateEndpointNoManagedAssertion() throws Exception {
-//        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/unmanaged.wsdl");
-//        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
-//        final PolicyMap policyMap = wsdlModel.getPolicyMap();
-//        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
-//        EndpointCreationAttributes attributes = null;
-//        EndpointFactoryImpl instance = new EndpointFactoryImpl();
-//        WSEndpoint<String> expResult = endpoint;
-//        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-//        assertSame(expResult, result);
-//    }
+    public void testCreateEndpointNoManagedAssertion() throws Exception {
+        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/managed.wsdl");
+        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
+        final PolicyMap policyMap = wsdlModel.getPolicyMap();
+        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
+        EndpointCreationAttributes attributes = null;
+        EndpointFactoryImpl instance = new EndpointFactoryImpl();
+        WSEndpoint<String> expResult = endpoint;
+        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
+        assertNotSame(expResult, result);
+    }
 
     /**
      * Test of createEndpoint method, of class EndpointFactoryImpl.
@@ -128,7 +126,7 @@ public class EndpointFactoryImplTest extends TestCase {
         EndpointCreationAttributes attributes = null;
         EndpointFactoryImpl instance = new EndpointFactoryImpl();
         WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-        assertTrue(result instanceof ManagedEndpoint);
+        assertFalse(result instanceof ManagedEndpoint);
     }
 
 
