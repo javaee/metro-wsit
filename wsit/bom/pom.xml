@@ -369,7 +369,7 @@
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
         <jaxb.ri.release.version>2.2.7</jaxb.ri.release.version><!-- readme.html -->
         <jaxws.spec.version>2.2</jaxws.spec.version>
-        <jaxws.ri.version>2.2.8-promoted-b126</jaxws.ri.version>
+        <jaxws.ri.version>2.2.8-promoted-b127</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.8</jaxws.ri.release.version>
         <metro.release.version>2.3</metro.release.version>
     </properties>
