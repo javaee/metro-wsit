@@ -166,6 +166,7 @@
                             <instructions>
                                 <Export-Package>
                                     com.sun.istack.ws.*;version=${jaxws.ri.release.version},
+                                    com.sun.istack.localization;version=${jaxb.ri.release.version};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
                                     com.sun.tools.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.wsit.security.*;version=${metro.release.version},
                                     com.sun.xml.messaging.saaj.*;version=1.3,
@@ -202,7 +203,6 @@
                                     org.jvnet.ws.*;version=${jaxws.ri.release.version}
                                 </Export-Package>
                                 <Import-Package>
-                                    com.sun.istack.localization;version=${jaxb.ri.release.version},
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
