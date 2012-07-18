@@ -46,7 +46,6 @@ function _wget() {
     else
         WGET_PROXY=""
     fi
-echo "wget: $WGET_PROXY"
     wget $WGET_PROXY -N $1
 }
 
