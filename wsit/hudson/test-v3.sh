@@ -50,13 +50,16 @@ export WORK_DIR=$WORKSPACE
 export GF_SVN_ROOT=$WORK_DIR/glassfish
 export DTEST_SVN_ROOT=$WORK_DIR/appserv-tests
 
+if [ -z "$M2_LOCAL_REPO" ]; then
+    export M2_LOCAL_REPO=$WORK_DIR/.repository
+fi
+
 #PROXY
 set_proxy
 
 export JAVA_MEMORY_PROP="-Xms256m -Xmx768m -XX:PermSize=256m -XX:MaxPermSize=512m"
 export ANT_OPTS="$JAVA_MEMORY_PROP $JAVA_PROXY_PROP"
-export MAVEN_OPTS="-Dmaven.javadoc.skip=true $JAVA_MEMORY_PROP $JAVA_PROXY_PROP"
-#-Dmaven.repo.local=$M2_LOCAL_REPO
+export MAVEN_OPTS="-Dmaven.repo.local=$M2_LOCAL_REPO -Dmaven.javadoc.skip=true $JAVA_MEMORY_PROP $JAVA_PROXY_PROP"
 
 
 #fallback to defaults if needed
