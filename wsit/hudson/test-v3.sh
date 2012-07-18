@@ -140,6 +140,14 @@ if [ -e "metro.patch" ] ; then
   echo "Removing old patch for GlassFish"
   rm -f metro.patch
 fi
+
+if [ ! -z "$SR_MVN_REPO" ]; then
+    wget -N --no-proxy $SR_MVN_REPO/xpp3/xpp3_min/1.1.3.4.O/xpp3_min-1.1.3.4.O.jar
+    mvn install:install-file -DgroupId=xpp3 -DartifactId=xpp3_min -Dversion=1.1.3.4.O -Dpackaging=jar -Dfile=xpp3_min-1.1.3.4.O.jar -Dmaven.repo.local=$M2_LOCAL_REPO
+    wget -N --no-proxy $SR_MVN_REPO/org/apache/xmlgraphics/batik-xml/1.7/batik-xml-1.7.jar
+    mvn install:install-file -DgroupId=org.apache.xmlgraphics -DartifactId=batik-xml -Dversion=1.7 -Dpackaging=jar -Dfile=batik-xml-1.7.jar -Dmaven.repo.local=$M2_LOCAL_REPO
+fi
+
 popd
 
 
@@ -154,11 +162,9 @@ export ALL=$RESULTS_DIR/test-summary.txt
 rm -f $ALL || true
 touch $ALL
 echo "Tested configuration:" >> $ALL
-echo "JAVA_HOME: $JAVA_HOME" >> $ALL
-echo "" >> $ALL
+echo -e "\nJAVA_HOME: $JAVA_HOME" >> $ALL
 echo "GlassFish: $GF_URL" >> $ALL
-echo "Metro: $METRO_URL" >> $ALL
-echo "" >> $ALL
+echo -e "Metro: $METRO_URL\n" >> $ALL
 
 ./quicklook.sh
 mkdir -p $QL_RESULTS_DIR
@@ -169,14 +175,16 @@ cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $QL_RE
 mv $WORK_DIR/test-quicklook.log.txt $RESULTS_DIR
 
 if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
-    echo "QuickLook tests: OK" >> $ALL
+    echo -e "\nQuickLook tests: OK\n" >> $ALL
 else
-    echo "QuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
+    echo -e "\nQuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
     grep "FAILED:" $RESULTS_DIR/test-quicklook.log.txt >> $ALL
+    cat $ALL
     exit 1
 fi
 if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook.log.txt`" ]; then
     echo "QuickLook tests: build failure" >> $ALL
+    cat $ALL
     exit 1
 fi
 
@@ -194,17 +202,19 @@ mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
 
 if [ "`grep 'Java Result: -1' $RESULTS_DIR/test-devtests.log.txt`" ]; then
     #TODO: break the build after fixing appserv-tests/devtests/webservice/ejb_annotations/ejbwebservicesinwar-2
-    echo "devtests tests: TODO - fix devtests/webservice/ejb_annotations/ejbwebservicesinwar-2" >> $ALL
+    echo -e "\ndevtests tests: TODO - fix devtests/webservice/ejb_annotations/ejbwebservicesinwar-2" >> $ALL
 fi
 if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
-    echo "devtests tests: OK" >> $ALL
+    echo -e "\ndevtests tests: OK\n" >> $ALL
 else
-    echo "devtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
+    echo -e "\ndevtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
     grep ": FAIL" $DEVTESTS_RESULTS_DIR/webservice.output.txt >> $ALL
+    cat $ALL
     exit 1
 fi
 if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then
     echo "devtests tests: build failure" >> $ALL
+    cat $ALL
     exit 1
 fi
 
@@ -218,12 +228,17 @@ mv $WORK_DIR/test-cts-smoke.log.txt $RESULTS_DIR
 popd
 
 if [ ! "`grep 'Failed.' $CTS_RESULTS_DIR/summary.txt`" ]; then
-    echo "CTS-smoke tests: OK" >> $ALL
+    echo -e "\nCTS-smoke tests: OK\n" >> $ALL
 else
-    echo "CTS-smoke tests: `grep -c 'Failed.' $CTS_RESULTS_DIR/summary.txt` failure(s)" >> $ALL
+    echo -e "\nCTS-smoke tests: `grep -c 'Failed.' $CTS_RESULTS_DIR/summary.txt` failure(s)" >> $ALL
+    grep "Failed." $CTS_RESULTS_DIR/summary.txt >> $ALL
+    cat $ALL
+    exit 1
 fi
 if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-cts-smoke.log.txt`" ]; then
     echo "CTS-smoke tests: build failure" >> $ALL
+    cat $ALL
+    exit 1
 fi
 
 cat $ALL
