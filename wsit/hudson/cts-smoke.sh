@@ -179,7 +179,7 @@ popd
 echo "Running GlassFish CTS smoke tests..."
 
 pushd $CTS_WORK_DIR/javaee-smoke/bin/xml
-ant -f smoke.xml smoke | tee $WORK_DIR/test-ctssmoke.log.txt
+ant -f smoke.xml smoke | tee $WORK_DIR/test-cts-smoke.log.txt
 popd
 
 if [ -z "$MAIL_HOST" ]; then
