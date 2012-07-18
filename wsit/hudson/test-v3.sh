@@ -150,6 +150,16 @@ export CTS_RESULTS_DIR=$RESULTS_DIR/cts-smoke
 
 pushd "$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+export ALL=$RESULTS_DIR/test-summary.txt
+rm -f $ALL || true
+touch $ALL
+echo "Tested configuration:" >> $ALL
+echo "JAVA_HOME: $JAVA_HOME" >> $ALL
+echo "" >> $ALL
+echo "GlassFish: $GF_URL" >> $ALL
+echo "Metro: $METRO_URL" >> $ALL
+echo "" >> $ALL
+
 ./quicklook.sh
 mkdir -p $QL_RESULTS_DIR
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
@@ -157,6 +167,17 @@ cp quicklook_summary.txt *.log *.output $QL_RESULTS_DIR
 popd
 cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
 mv $WORK_DIR/test-quicklook.log.txt $RESULTS_DIR
+
+if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
+    echo "QuickLook tests: OK" >> $ALL
+else
+    echo "QuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
+    exit 1
+fi
+if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook.log.txt`" ]; then
+    echo "QuickLook tests: build failure" >> $ALL
+    exit 1
+fi
 
 ./devtests.sh
 mkdir -p $DEVTESTS_RESULTS_DIR
@@ -170,6 +191,17 @@ popd
 cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
 mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
 
+if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
+    echo "devtests tests: OK" >> $ALL
+else
+    echo "devtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
+    exit 1
+fi
+if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then
+    echo "devtests tests: build failure" >> $ALL
+    exit 1
+fi
+
 ./cts-smoke.sh
 mkdir -p $CTS_RESULTS_DIR
 mv $WORK_DIR/test_results-cts/* $CTS_RESULTS_DIR
@@ -178,28 +210,6 @@ cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $CTS_R
 mv $WORK_DIR/test-cts-smoke.log.txt $RESULTS_DIR
 
 popd
-
-export ALL=$RESULTS_DIR/test-summary.txt
-
-rm -f $ALL || true
-touch $ALL
-if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
-    echo "QuickLook tests: OK" >> $ALL
-else
-    echo "QuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
-fi
-if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook.log.txt`" ]; then
-    echo "QuickLook tests: build failure" >> $ALL
-fi
-
-if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
-    echo "devtests tests: OK" >> $ALL
-else
-    echo "devtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
-fi
-if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then
-    echo "devtests tests: build failure" >> $ALL
-fi
 
 if [ ! "`grep 'Failed.' $CTS_RESULTS_DIR/summary.txt`" ]; then
     echo "CTS-smoke tests: OK" >> $ALL
