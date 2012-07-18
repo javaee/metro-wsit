@@ -172,6 +172,7 @@ if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
     echo "QuickLook tests: OK" >> $ALL
 else
     echo "QuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
+    grep "FAILED:" $RESULTS_DIR/test-quicklook.log.txt >> $ALL
     exit 1
 fi
 if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook.log.txt`" ]; then
@@ -191,10 +192,15 @@ popd
 cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
 mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
 
+if [ "`grep 'Java Result: -1' $RESULTS_DIR/test-devtests.log.txt`" ]; then
+    #TODO: break the build after fixing appserv-tests/devtests/webservice/ejb_annotations/ejbwebservicesinwar-2
+    echo "devtests tests: TODO - fix devtests/webservice/ejb_annotations/ejbwebservicesinwar-2" >> $ALL
+fi
 if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
     echo "devtests tests: OK" >> $ALL
 else
     echo "devtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
+    grep ": FAIL" $DEVTESTS_RESULTS_DIR/webservice.output.txt >> $ALL
     exit 1
 fi
 if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then

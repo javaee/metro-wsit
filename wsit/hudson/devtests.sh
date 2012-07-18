@@ -125,6 +125,11 @@ fi
 echo "Re-creating default domain"
 echo "AS_ADMIN_PASSWORD=" > $APS_HOME/config/adminpassword.txt
 create_domain
+if [ ! -e $AS_HOME/domains/domain1/config/glassfish-acc.xml ]; then
+    #in GF SVN r51053 - sun-acc.xml has been replaced by glassfish-acc.xml
+    #this makes sure that devtests in GF trunk will do their job even for GF pre-4.0 releases
+    cp $AS_HOME/domains/domain1/config/sun-acc.xml $AS_HOME/domains/domain1/config/glassfish-acc.xml
+fi
 
 echo "admin.domain=domain1
 admin.domain.dir=\${env.AS_HOME}/domains
