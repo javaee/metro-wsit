@@ -50,9 +50,6 @@ export WORK_DIR=$WORKSPACE
 export GF_SVN_ROOT=$WORK_DIR/glassfish
 export DTEST_SVN_ROOT=$WORK_DIR/appserv-tests
 
-PROXY_HOST=www-proxy.us.oracle.com
-PROXY_PORT=80
-
 #PROXY
 set_proxy
 
