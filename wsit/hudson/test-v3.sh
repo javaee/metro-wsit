@@ -158,6 +158,7 @@ export CTS_RESULTS_DIR=$RESULTS_DIR/cts-smoke
 
 pushd "$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+mkdir -p $RESULTS_DIR
 export ALL=$RESULTS_DIR/test-summary.txt
 rm -f $ALL || true
 touch $ALL
