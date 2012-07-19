@@ -2371,17 +2371,19 @@ WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
                 <listitem>
                     <para>Specifying Handler Chains <example>
                             <programlisting language="xml"
-                                            linenumbering="unnumbered">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+                                            linenumbering="unnumbered">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
            version="2.0"&gt;
     &lt;endpoint name="MyHello"&gt;
-        &lt;handler-chain xmlns="http://java.sun.com/xml/ns/javaee"&gt;
-            &lt;handler-chain-name&gt;somename&lt;/handler-chain-name&gt;
-            &lt;handler&gt;
-                &lt;handler-name&gt;MyHandler&lt;/handler-name&gt;
-                &lt;handler-class&gt;hello.MyHandler&lt;/handler-class&gt;
-            &lt;/handler&gt;
-        &lt;/handler-chain&gt;
+        &lt;handler-chains xmlns="http://java.sun.com/xml/ns/javaee"&gt;
+            &lt;handler-chain&gt;
+                &lt;handler&gt;
+                    &lt;handler-name&gt;MyHandler&lt;/handler-name&gt;
+                    &lt;handler-class&gt;hello.MyHandler&lt;/handler-class&gt;
+                &lt;/handler&gt;
+            &lt;/handler-chain&gt;
+        &lt;handler-chains&gt;
     &lt;/endpoint&gt;
 &lt;/endpoints&gt;    </programlisting>
                         </example></para>
