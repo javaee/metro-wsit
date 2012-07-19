@@ -138,9 +138,9 @@ if [ -z "$METRO_URL" ]; then
     pushd $METRO_SVN_ROOT
     JAXB_VERSION=`mvn dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
-
     METRO_SRC_VERSION=`mvn dependency:tree -Dincludes=org.glassfish.metro:webservices-osgi | grep org.glassfish.metro:webservices-osgi | tail -1 | cut -f4 -d':'`
-    changeVersion.sh $METRO_SRC_VERSION $METRO_VERSION pom.xml
+    echo "Replacing project version $METRO_SRC_VERSION in sources with new promoted version $METRO_VERSION"
+    changeVersion.sh "$METRO_SRC_VERSION" "$METRO_VERSION" pom.xml
     popd
 
     pushd $GF_SVN_ROOT
@@ -199,9 +199,9 @@ echo -e "Metro: $METRO_URL\n" >> $ALL
 ./quicklook.sh
 mkdir -p $QL_RESULTS_DIR
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
-cp quicklook_summary.txt *.log *.output $QL_RESULTS_DIR
+cp quicklook_summary.txt *.output $QL_RESULTS_DIR
 popd
-cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
+cp $GF_WORK_DIR/glassfish3/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
 mv $WORK_DIR/test-quicklook.log.txt $RESULTS_DIR
 
 if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
@@ -227,7 +227,7 @@ cp webservice.output $DEVTESTS_RESULTS_DIR/webservice.output.txt
 cp count.txt $DEVTESTS_RESULTS_DIR
 popd
 popd
-cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
+cp $GF_WORK_DIR/glassfish3/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
 mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
 
 if [ "`grep 'Java Result: -1' $RESULTS_DIR/test-devtests.log.txt`" ]; then
@@ -252,7 +252,7 @@ fi
 mkdir -p $CTS_RESULTS_DIR
 mv $WORK_DIR/test_results-cts/* $CTS_RESULTS_DIR
 rm -rf $WORK_DIR/test_results-cts
-cp $WORK_DIR/tmp-gf/glassfish3/glassfish/domains/domain1/logs/server.log* $CTS_RESULTS_DIR
+cp $GF_WORK_DIR/glassfish3/glassfish/domains/domain1/logs/server.log* $CTS_RESULTS_DIR
 mv $WORK_DIR/test-cts-smoke.log.txt $RESULTS_DIR
 
 popd
