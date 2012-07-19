@@ -138,9 +138,8 @@ if [ -z "$METRO_URL" ]; then
     pushd $METRO_SVN_ROOT
     JAXB_VERSION=`mvn dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
-    METRO_SRC_VERSION=`mvn dependency:tree -Dincludes=org.glassfish.metro:webservices-osgi | grep org.glassfish.metro:webservices-osgi | tail -1 | cut -f4 -d':'`
-    echo "Replacing project version $METRO_SRC_VERSION in sources with new promoted version $METRO_VERSION"
-    changeVersion.sh "$METRO_SRC_VERSION" "$METRO_VERSION" pom.xml
+    echo "Setting project version in sources to new promoted version $METRO_VERSION"
+    mvn versions:set -DnewVersion="$METRO_VERSION" -f bom/pom.xml
     popd
 
     pushd $GF_SVN_ROOT
