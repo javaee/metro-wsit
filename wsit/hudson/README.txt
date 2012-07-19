@@ -41,10 +41,10 @@
 Place containing all hudson job scripts
 most of them are usable also in local environment
 
-GlassFish workspace root refers to folder containing:
+GlassFish workspace root refers to:
     svn co https://svn.java.net/svn/glassfish~svn/trunk/main/
 
-appserv-tests workspace root refers:
+appserv-tests workspace root refers to:
     svn co https://svn.java.net/svn/glassfish~svn/trunk/v2/appserv-tests
   which must contain at least:
     svn co https://svn.java.net/svn/glassfish~svn/trunk/v2/appserv-tests/config
