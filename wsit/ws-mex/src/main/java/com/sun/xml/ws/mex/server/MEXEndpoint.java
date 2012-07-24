@@ -55,7 +55,6 @@ import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.ProblemActionHeader;
 import com.sun.xml.ws.mex.MetadataConstants;
 import com.sun.xml.ws.mex.MessagesMessages;
-import com.sun.xml.ws.server.WSEndpointMOMProxy;
 import com.sun.xml.ws.transport.http.servlet.ServletModule;
 import java.util.List;
 import java.util.logging.Level;
@@ -83,7 +82,6 @@ import javax.xml.ws.soap.Addressing;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_RESPONSE;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 
 @ServiceMode(value=Service.Mode.MESSAGE)
@@ -211,11 +209,7 @@ public class MEXEndpoint implements Provider<Message> {
         String ownerEndpointAddress = null;
         List<BoundEndpoint> boundEndpoints = module.getBoundEndpoints();
         for (BoundEndpoint endpoint : boundEndpoints) {
-            ManagedObjectManager mom = endpoint.getEndpoint().getManagedObjectManager();
-            WSEndpoint wse = (mom instanceof WSEndpointMOMProxy)
-                    ? ((WSEndpointMOMProxy) mom).getWsEndpoint()
-                    : endpoint.getEndpoint();
-            if (wsEndpoint == wse) {
+            if (endpoint.getEndpoint().equalsProxiedInstance(wsEndpoint)) {
                 ownerEndpointAddress = endpoint.getAddress(baseAddress).toString();
                 break;
             }
