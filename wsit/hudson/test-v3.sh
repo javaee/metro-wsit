@@ -43,7 +43,10 @@ source common.sh
 
 ## GF-3.x
 GF_312_URL=http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2.zip
-METRO_MAJOR_VERSION=2.3
+
+if [ -z "$METRO_MAJOR_VERSION" ]; then
+    METRO_MAJOR_VERSION=2.3
+fi
 
 export WORK_DIR=$WORKSPACE
 
