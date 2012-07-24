@@ -2634,6 +2634,7 @@ WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
         &lt;wls:package-name&gt;org.relaxng.*&lt;/wls:package-name&gt;
     &lt;/wls:prefer-application-packages&gt;
     &lt;wls:prefer-application-resources&gt;
+        &lt;wls:resource-name&gt;META-INF/services/javax.xml.ws.*&lt;/wls:resource-name&gt;
         &lt;wls:resource-name&gt;META-INF/services/com.sun.xml.ws.*&lt;/wls:resource-name&gt;
         &lt;wls:resource-name&gt;META-INF/services/com.sun.tools.ws.*&lt;/wls:resource-name&gt;
     &lt;/wls:prefer-application-resources&gt;
