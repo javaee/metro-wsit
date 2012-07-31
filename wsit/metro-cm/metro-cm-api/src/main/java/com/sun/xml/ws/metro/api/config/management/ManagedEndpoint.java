@@ -60,9 +60,11 @@ import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.wsdl.OperationDispatcher;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -70,9 +72,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 
 import org.glassfish.gmbal.ManagedObjectManager;
+import org.w3c.dom.Element;
 
 /**
  * Wraps an existing WSEndpoint instance and provides a method to swap the
@@ -110,11 +114,6 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     public ManagedEndpoint(final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
             this.creationAttributes = attributes;
             this.endpointDelegate = endpoint;
-
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null) {
-                classLoader = getClass().getClassLoader();
-            }
 
             for (ReconfigNotifier notifier : this.reconfigNotifiers) {
                 notifier.sendNotification();
@@ -286,6 +285,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
         disposeThreadPool.schedule(dispose, this.endpointDisposeDelay, TimeUnit.MILLISECONDS);
     }
     
+    @Override
     public boolean equalsProxiedInstance(WSEndpoint endpoint) {
         if (endpointDelegate == null) {
             return (endpoint == null);
@@ -294,5 +294,20 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
             return false;
         }
         return endpointDelegate.equals(endpoint);
+    }
+
+    @Override
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address, String wsdlAddress, Element... referenceParameters) {
+        return endpointDelegate.getEndpointReference(clazz, address, wsdlAddress, referenceParameters);
+    }
+
+    @Override
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address, String wsdlAddress, List<Element> metadata, List<Element> referenceParameters) {
+        return endpointDelegate.getEndpointReference(clazz, address, wsdlAddress, metadata, referenceParameters);
+    }
+
+    @Override
+    public OperationDispatcher getOperationDispatcher() {
+        return endpointDelegate.getOperationDispatcher();
     }
 }
