@@ -58,14 +58,18 @@ import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.parser.PolicyResourceLoader;
+import com.sun.xml.ws.wsdl.OperationDispatcher;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
+import javax.xml.ws.EndpointReference;
 
 import junit.framework.TestCase;
 import org.glassfish.gmbal.ManagedObjectManager;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -227,6 +231,20 @@ public class EndpointFactoryImplTest extends TestCase {
         @Override
         public void closeManagedObjectManager() {
         }
-    }
 
+        @Override
+        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address, String wsdlAddress, Element... referenceParameters) {
+            return null;
+        }
+
+        @Override
+        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address, String wsdlAddress, List<Element> metadata, List<Element> referenceParameters) {
+            return null;
+        }
+
+        @Override
+        public OperationDispatcher getOperationDispatcher() {
+            return null;
+        }
+    }
 }
