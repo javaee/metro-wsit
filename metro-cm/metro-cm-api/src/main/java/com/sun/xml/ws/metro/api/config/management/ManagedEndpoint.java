@@ -286,4 +286,13 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
         disposeThreadPool.schedule(dispose, this.endpointDisposeDelay, TimeUnit.MILLISECONDS);
     }
     
+    public boolean equalsProxiedInstance(WSEndpoint endpoint) {
+        if (endpointDelegate == null) {
+            return (endpoint == null);
+        }
+        if (endpoint instanceof ManagedEndpoint) {
+            return false;
+        }
+        return endpointDelegate.equals(endpoint);
+    }
 }
