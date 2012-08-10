@@ -371,6 +371,28 @@
                 <inherited>true</inherited>
             </plugin>
             <plugin>
+                <groupId>org.glassfish.hk2</groupId>
+                <artifactId>osgiversion-maven-plugin</artifactId>
+                <version>2.1.18</version>
+                <executions>
+                    <!-- Since we don't want qualifier like b05 or SNAPSHOT to appear
+                    in package version attribute, we use the following goal to
+                    populate a project property with an OSGi version which is
+                    equivalent to maven version without qualifier and then use that
+                    property in osgi.bundle while exporting. -->
+                    <execution>
+                        <id>compute-osgi-version</id>
+                        <goals>
+                            <goal>compute-osgi-version</goal>
+                        </goals>
+                        <configuration>
+                            <dropVersionComponent>qualifier</dropVersionComponent>
+                            <versionPropertyName>metro.release.version</versionPropertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <inherited>true</inherited>
