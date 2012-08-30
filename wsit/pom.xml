@@ -57,7 +57,6 @@
     <artifactId>metro-project</artifactId>
     <packaging>pom</packaging>
     <name>Metro Web Services Stack Project</name>
-    <version>2.3-SNAPSHOT</version>
     
     <description>
         Metro is a high-performance, extensible, easy-to-use web service stack.
