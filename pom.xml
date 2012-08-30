@@ -50,7 +50,7 @@
         <groupId>org.glassfish.metro</groupId>
         <artifactId>metro-bom</artifactId>
         <relativePath>bom/pom.xml</relativePath>
-        <version>2.2.1-SNAPSHOT</version>
+        <version>2.2.1-1</version>
     </parent>
 
     <groupId>org.glassfish.metro</groupId>
