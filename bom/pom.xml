@@ -371,7 +371,7 @@
         <jaxws.spec.version>2.2</jaxws.spec.version>
         <jaxws.ri.version>2.2.7</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.7</jaxws.ri.release.version>
-        <metro.release.version>2.2</metro.release.version>
+        <metro.release.version>2.2.1.1</metro.release.version>
     </properties>
     
 </project>
