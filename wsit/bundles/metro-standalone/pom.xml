@@ -267,10 +267,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>webservices-api</artifactId>
             <version>${project.version}</version>
