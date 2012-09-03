@@ -40,23 +40,24 @@
     holder.
 
 -->
+<!ENTITY jaxws.home.uri "$jaxws.home.uri">
 <!ENTITY version "$version">
 <!ENTITY repository "$repository">
 <!ENTITY jax-ws.version "$jax-ws.version">
 
-<!ENTITY experimentalrepository "snapshots">
+<!--<!ENTITY experimentalrepository "snapshots">-->
 
 <!-- Maven maven-war-plugin failOnMissingWebXml Links -->
-<!ENTITY maven-war-plugin.path "http://maven.apache.org/plugins/maven-war-plugin/war-mojo.html">
-<!ENTITY failOnMissingWebXml.path "&maven-war-plugin.path;#failOnMissingWebXml">
-<!ENTITY maven-war-plugin.failOnMissingWebXml "<ulink url='&failOnMissingWebXml.path;'>failOnMissingWebXml</ulink>">
+<!--<!ENTITY maven-war-plugin.path "http://maven.apache.org/plugins/maven-war-plugin/war-mojo.html">-->
+<!--<!ENTITY failOnMissingWebXml.path "&maven-war-plugin.path;#failOnMissingWebXml">-->
+<!--<!ENTITY maven-war-plugin.failOnMissingWebXml "<ulink url='&failOnMissingWebXml.path;'>failOnMissingWebXml</ulink>">-->
 
-<!ENTITY jax-ws.uri.overview "http://jax-ws.java.net/&jax-ws.version;/docs/jaxws-tools.html">
-<!ENTITY jax-ws.uri.wsimport "http://jax-ws.java.net/&jax-ws.version;/docs/wsimport.html">
-<!ENTITY jax-ws.uri.wsimportant "http://jax-ws.java.net/&jax-ws.version;/docs/wsimportant.html">
-<!ENTITY jax-ws.uri.wsgen "http://jax-ws.java.net/&jax-ws.version;/docs/wsgen.html">
-<!ENTITY jax-ws.uri.wsgenant "http://jax-ws.java.net/&jax-ws.version;/docs/wsgenant.html">
-<!ENTITY jax-ws.uri.apt "http://jax-ws.java.net/&jax-ws.version;/docs/apt.html">
+<!ENTITY jax-ws.uri.overview "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools">
+<!ENTITY jax-ws.uri.wsimport "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools-wsimport">
+<!ENTITY jax-ws.uri.wsimportant "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools-wsimport-ant-task">
+<!ENTITY jax-ws.uri.wsgen "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools-wsgen">
+<!ENTITY jax-ws.uri.wsgenant "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools-wsgen-ant-task">
+<!ENTITY jax-ws.uri.apt "&jaxws.home.uri;/&jax-ws.version;/docs/release-documentation.html#tools-apt">
 
 <!ENTITY jax-ws.overview "<link xlink:href='&jax-ws.uri.overview;'>Overview</link>">
 <!ENTITY jax-ws.wsimport "<link xlink:href='&jax-ws.uri.wsimport;'>Wsimport CLI</link>">

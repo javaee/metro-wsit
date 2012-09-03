@@ -217,7 +217,7 @@
                             <artifactId>maven-scm-provider-svnjava</artifactId>
                             <version>1.11</version>
                         </dependency>
-                    </dependencies>                    
+                    </dependencies>
                 </plugin>                
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -571,6 +571,7 @@
         <www.userguide.latest.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/guide</www.userguide.latest.scm.connection.url>
         <www.gettingstarted.scm.connection.url>https://svn.java.net/svn/metro~svn/trunk/www/getting-started</www.gettingstarted.scm.connection.url>
         <www.guide.jaxws.version>${jaxws.ri.version}</www.guide.jaxws.version>
+        <www.guide.jaxws.home.uri>${jaxws.home.uri}</www.guide.jaxws.home.uri>
 
         <findbugs.skip>false</findbugs.skip>
         <findbugs.threshold>Default</findbugs.threshold>
