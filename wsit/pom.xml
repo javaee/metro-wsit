@@ -195,13 +195,13 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.0-beta-4</version>
+                    <version>1.1</version>
                     <configuration>
                         <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
                         <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ssZ}</timestampFormat>
                         <providerImplementations>
                             <svn>javasvn</svn>
-                        </providerImplementations>                            
+                        </providerImplementations>
                     </configuration>
                     <executions>
                         <execution>
@@ -213,9 +213,9 @@
                     </executions>
                     <dependencies>
                         <dependency>
-                            <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
-                            <artifactId>maven-scm-provider-svnjava</artifactId>
-                            <version>1.11</version>
+                            <groupId>org.tmatesoft.svnkit</groupId>
+                            <artifactId>svnkit</artifactId>
+                            <version>1.7.4-v1</version>
                         </dependency>
                     </dependencies>
                 </plugin>                
