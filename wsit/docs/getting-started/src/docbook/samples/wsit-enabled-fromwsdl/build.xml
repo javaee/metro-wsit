@@ -40,7 +40,6 @@
     holder.
 
 -->
-
 <project basedir="." default="help" name="wsit-enabled-fromwsdl">
 
     <property environment="env"/>
@@ -103,7 +102,8 @@
       </condition>
    </fail>
 
-    <condition property="lib.home" value="${catalina.home}/endorsed" else="${as.home}/lib">
+
+    <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
 	<isset property="bld.for.tomcat"/>
     </condition>
 
@@ -124,7 +124,7 @@
     </condition>
 
     <path id="wsit.classpath">
-        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <!-- GF v2 Classpath -->
         <fileset dir="${lib.home}">
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
@@ -140,6 +140,7 @@
         <fileset dir="${modules.home}">
             <include name="gmbal.jar"/>
             <include name="webservices-osgi.jar"/>
+            <include name="ha-api.jar"/>
         </fileset>
         <fileset dir="${modules.endorsed}">
             <include name="jaxb-api-osgi.jar"/>
@@ -202,9 +203,9 @@
             debug="${debug}"
             verbose="${verbose}"
             keep="${keep}"
+            xendorsed="true"
             extension="${extension}"
             destdir="${build.classes.home}"
-            xendorsed="true"
             wsdl="${client.wsdl}">
             <binding dir="${basedir}/etc" includes="${client.binding}"/>
         </wsimport>
@@ -213,6 +214,7 @@
     <target name="client" depends="generate-client">
         <javac
             fork="true"
+            debug="true"
             srcdir="${basedir}/src"
             destdir="${build.classes.home}"
             includes="**/client/**,**/common/**">
@@ -223,6 +225,10 @@
     <target name="run">
         <java fork="true" classname="${client}">
             <jvmarg value="-Djava.endorsed.dirs=${toString:wsit.endorsed}"/>
+            <!--
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"/>
+            -->
             <classpath>
                 <path refid="wsit.classpath"/>
                 <pathelement location="${build.classes.home}"/>

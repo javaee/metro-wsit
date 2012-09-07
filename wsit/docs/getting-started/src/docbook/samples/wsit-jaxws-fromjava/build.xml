@@ -40,7 +40,6 @@
     holder.
 
 -->
-
 <project basedir="." default="help" name="wsit-jaxws-fromjava">
 
     <property environment="env"/>
@@ -79,6 +78,7 @@
              </and>
           </or>
     </condition>
+
     <!--
         Verify that one of the two supported containers is identified
         for use.  If these are not set correctly lib.home and deploy.dir
@@ -103,7 +103,7 @@
    </fail>
 
 
-    <condition property="lib.home" value="${catalina.home}/endorsed" else="${as.home}/lib">
+    <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
         <isset property="bld.for.tomcat"/>
     </condition>
 
@@ -124,7 +124,7 @@
     </condition>
 
     <path id="wsit.classpath">
-        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <!-- GF v2 Classpath -->
         <fileset dir="${lib.home}">
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
@@ -140,6 +140,7 @@
         <fileset dir="${modules.home}">
             <include name="gmbal.jar"/>
             <include name="webservices-osgi.jar"/>
+            <include name="ha-api.jar"/>
         </fileset>
         <fileset dir="${modules.endorsed}">
             <include name="jaxb-api-osgi.jar"/>
@@ -151,10 +152,6 @@
         <pathelement location="${lib.endorsed}"/>
         <pathelement location="${modules.endorsed}"/>
     </path>
-
-    <taskdef name="apt" classname="com.sun.tools.ws.ant.Apt">
-        <classpath refid="wsit.classpath"/>
-    </taskdef>
 
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
         <classpath refid="wsit.classpath"/>
@@ -171,24 +168,23 @@
     </target>
 
     <target name="build-server-java" depends="setup">
-        <apt
+        <javac
             fork="true"
             debug="${debug}"
-        target="1.5"
-       	verbose="${verbose}"
-       	destdir="${build.classes.home}"
-      	sourcedestdir="${build.classes.home}"
-      	sourcepath="${basedir}/src">
+            target="1.5"
+            verbose="${verbose}"
+            destdir="${build.classes.home}"
+            srcdir="${basedir}/src"
+            sourcepath="${basedir}/src">
+
             <classpath>
                 <path refid="wsit.classpath"/>
-                <pathelement location="${basedir}/src"/>
             </classpath>
-            <option key="r" value="${build.home}"/>
-            <source dir="${basedir}/src">
-                <include name="**/server/*.java"/>
-                <include name="**/common/*.java"/>
-            </source>
-        </apt>
+
+            <include name="**/server/*.java" />
+            <include name="**/common/*.java" />
+
+        </javac>
         <!-- copy handlers descriptor file -->
         <copy todir="${build.classes.home}">
             <fileset dir="${basedir}/src">
@@ -213,9 +209,9 @@
             debug="${debug}"
             verbose="${verbose}"
             keep="${keep}"
+            xendorsed="true"
             extension="${extension}"
             destdir="${build.classes.home}"
-            xendorsed="true"
             wsdl="${client.wsdl}">
             <binding dir="${basedir}/etc" includes="${client.binding}"/>
         </wsimport>
@@ -224,6 +220,7 @@
     <target name="client" depends="generate-client">
         <javac
             fork="true"
+            debug="true"
             srcdir="${basedir}/src"
             destdir="${build.classes.home}"
             includes="**/client/**,**/common/**">

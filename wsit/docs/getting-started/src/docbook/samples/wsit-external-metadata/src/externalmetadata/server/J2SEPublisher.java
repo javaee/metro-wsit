@@ -38,36 +38,36 @@
  * holder.
  */
 
-package fromjava.client;
+package externalmetadata.server;
 
-import com.sun.xml.ws.Closeable;
-import java.rmi.RemoteException;
+//import java.net.InetSocketAddress;
+//import java.util.concurrent.Executors;
+//import com.sun.net.httpserver.HttpContext;
+//import com.sun.net.httpserver.HttpServer;
 
-public class AddNumbersClient {
+import javax.xml.ws.Endpoint;
 
-    public static void main (String[] args) {
-
-        AddNumbersImpl port = null;
-        try {
-            port = new AddNumbersImplService().getAddNumbersImplPort();
-            
-            int number1 = 10;
-            int number2 = 20;
-            
-            System.out.printf ("Invoking addNumbers(%d, %d)\n", number1, number2);
-            int result = port.addNumbers (number1, number2);
-            System.out.printf ("The result of adding %d and %d is %d.\n\n", number1, number2, result);
-            
-            number1 = -10;
-            System.out.printf ("Invoking addNumbers(%d, %d)\n", number1, number2);
-            result = port.addNumbers (number1, number2);
-            System.out.printf ("The result of adding %d and %d is %d.\n", number1, number2, result);
-        } catch (AddNumbersException_Exception ex) {
-            System.out.printf ("Caught AddNumbersException_Exception: %s\n", ex.getFaultInfo ().getDetail ());
-        } finally {
-            if (port != null) {
-                ((Closeable)port).close();
-            }
-        }        
+public class J2SEPublisher {
+    
+    public static void main (String[] args) throws Exception {
+        Endpoint.publish (
+            "http://localhost:8080/jaxws-fromjava/addnumbers",
+            new BlackboxImpl());
     }
+    
+//    public static void deployMethod2 () throws Exception {
+//        Endpoint endpoint = Endpoint.create(
+//            new URI (SOAPBinding.SOAP11HTTP_BINDING),
+//            new BlackboxImpl ());
+//        
+//        HttpServer server = HttpServer.create (new InetSocketAddress (8080), 5);
+//        server.setExecutor (Executors.newFixedThreadPool (5));
+//        HttpContext context = server.createContext (
+//            "http",
+//            "/jaxws-fromjava/addnumbers");
+//        
+//        endpoint.publish (context);
+//        server.start ();
+//    }
+    
 }

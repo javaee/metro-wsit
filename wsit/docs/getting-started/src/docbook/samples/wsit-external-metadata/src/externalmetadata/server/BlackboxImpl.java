@@ -38,36 +38,28 @@
  * holder.
  */
 
-package fromjava.client;
+package externalmetadata.server;
 
-import com.sun.xml.ws.Closeable;
-import java.rmi.RemoteException;
+//@WebService
+public class BlackboxImpl {
+    
+    /**
+     * @param number1
+     * @param number2
+     * @return The sum
+     * @throws BlackboxException
+     *             if any of the numbers to be added is negative.
+     */
+    //@WebMethod
+    public int addNumbers(int number1, int number2) throws BlackboxException {
+        if (number1 < 0 || number2 < 0) {
+            throw new BlackboxException("Negative number cant be added!",
+                "Numbers: " + number1 + ", " + number2);
+        }
+        return number1 + number2;
+    }
 
-public class AddNumbersClient {
+    public void doSomething() throws BlackboxException {
 
-    public static void main (String[] args) {
-
-        AddNumbersImpl port = null;
-        try {
-            port = new AddNumbersImplService().getAddNumbersImplPort();
-            
-            int number1 = 10;
-            int number2 = 20;
-            
-            System.out.printf ("Invoking addNumbers(%d, %d)\n", number1, number2);
-            int result = port.addNumbers (number1, number2);
-            System.out.printf ("The result of adding %d and %d is %d.\n\n", number1, number2, result);
-            
-            number1 = -10;
-            System.out.printf ("Invoking addNumbers(%d, %d)\n", number1, number2);
-            result = port.addNumbers (number1, number2);
-            System.out.printf ("The result of adding %d and %d is %d.\n", number1, number2, result);
-        } catch (AddNumbersException_Exception ex) {
-            System.out.printf ("Caught AddNumbersException_Exception: %s\n", ex.getFaultInfo ().getDetail ());
-        } finally {
-            if (port != null) {
-                ((Closeable)port).close();
-            }
-        }        
     }
 }

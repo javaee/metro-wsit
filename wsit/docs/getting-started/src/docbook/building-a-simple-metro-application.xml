@@ -75,7 +75,9 @@
         develop a web service both starting from Java source code and starting
         from an existing WSDL document. For both scenarios, it shows how to
         develop a corresponding client application from the web service's WSDL
-        document. The examples can be found below:</para>
+        document. Additional example shows how to use external web service metadata
+        feature, which is necessary in case we are unable to use java annotations.
+        The examples can be found below:</para>
 
         <itemizedlist role="package">
             <listitem>
@@ -87,6 +89,12 @@
             <listitem>
                 <para><link
                 xlink:href="download/wsit-jaxws-fromwsdl.zip">From-WSDL
+                example</link></para>
+            </listitem>
+
+            <listitem>
+                <para><link
+                xlink:href="download/wsit-external-metadata.zip">External web service metadata
                 example</link></para>
             </listitem>
         </itemizedlist>

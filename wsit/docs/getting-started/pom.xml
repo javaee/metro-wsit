@@ -151,6 +151,7 @@
                         <java-bundle name="wsit-enabled-fromwsdl" />
                         <java-bundle name="wsit-jaxws-fromjava" />
                         <java-bundle name="wsit-jaxws-fromwsdl" />
+                        <java-bundle name="wsit-external-metadata" />
                     </preProcess>
                 </configuration>
                 <executions>

@@ -41,10 +41,10 @@
 
 -->
 
-<project basedir="." default="help" name="wsit-jaxws-fromwsdl">
+<project basedir="." default="help" name="wsit-external-metadata">
 
     <property environment="env"/>
-    <property file="etc/build.properties"/>
+    <property file="etc/build.properties" />
     <property name="build.home" value="${basedir}/build"/>
     <property name="build.classes.home" value="${build.home}/classes"/>
     <property name="build.war.home" value="${build.home}/war"/>
@@ -79,7 +79,6 @@
              </and>
           </or>
     </condition>
-
     <!--
         Verify that one of the two supported containers is identified
         for use.  If these are not set correctly lib.home and deploy.dir
@@ -103,9 +102,8 @@
       </condition>
    </fail>
 
-
     <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
-	    <isset property="bld.for.tomcat"/>
+        <isset property="bld.for.tomcat"/>
     </condition>
 
     <condition property="lib.endorsed" value="${catalina.home}/endorsed" else="${as.home}/lib/endorsed">
@@ -125,7 +123,7 @@
     </condition>
 
     <path id="wsit.classpath">
-        <!-- GF v2 Classpath -->
+        <!--pathelement location="${java.home}/../lib/tools.jar"/-->
         <fileset dir="${lib.home}">
             <include name="webservices-rt.jar"/>
             <include name="webservices-tools.jar"/>
@@ -168,24 +166,30 @@
         <delete dir="${build.home}" includeEmptyDirs="true" />
     </target>
 
-    <target name="build-server-wsdl" depends="setup">
-        <wsimport
-            debug="${debug}"
-            verbose="${verbose}"
-            keep="${keep}"
-            extension="${extension}"
-            destdir="${build.classes.home}"
-            xendorsed="true"
-            wsdl="${basedir}/${server.wsdl}">
-            <binding dir="${basedir}/etc" includes="${server.binding}"/>
-        </wsimport>
+    <target name="build-server-java" depends="setup">
         <javac
             fork="true"
-            srcdir="${basedir}/src"
+            debug="${debug}"
+            target="1.5"
+            verbose="${verbose}"
             destdir="${build.classes.home}"
-            includes="**/server/**,**/common/**">
-            <classpath refid="wsit.classpath"/>
+            srcdir="${basedir}/src"
+            sourcepath="${basedir}/src">
+
+            <classpath>
+                <path refid="wsit.classpath"/>
+            </classpath>
+
+            <include name="**/server/*.java" />
+            <include name="**/common/*.java" />
+
         </javac>
+        <!-- copy handlers descriptor file -->
+        <copy todir="${build.classes.home}">
+            <fileset dir="${basedir}/src">
+                <include name="**/server/**/*.xml"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="create-war">
@@ -204,9 +208,9 @@
             debug="${debug}"
             verbose="${verbose}"
             keep="${keep}"
-            xendorsed="true"
             extension="${extension}"
             destdir="${build.classes.home}"
+            xendorsed="true"
             wsdl="${client.wsdl}">
             <binding dir="${basedir}/etc" includes="${client.binding}"/>
         </wsimport>
@@ -226,7 +230,7 @@
         <java fork="true" classname="${client}">
             <jvmarg value="-Djava.endorsed.dirs=${toString:wsit.endorsed}"/>
             <classpath>
-                <path refid="wsit.classpath"/>               
+                <path refid="wsit.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
@@ -247,7 +251,7 @@
 
         <antcall target="clean" />
 
-        <antcall target="build-server-wsdl" />
+        <antcall target="build-server-java" />
 
         <antcall target="create-war" />
 
