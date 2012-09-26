@@ -83,6 +83,7 @@
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="wsit-example-using-a-web-container-without-netbeans-ide.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="accessing-metro-services-using-wcf-clients.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="data-contracts.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="modular-databinding.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="using-atomic-transactions.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="managing-policies.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="monitoring-and-management.xml" />
