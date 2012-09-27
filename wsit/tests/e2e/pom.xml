@@ -67,7 +67,7 @@
         <!-- IN_VM, LWHS, TOMCAT (requires tomcat.home to be set) -->
         <ws.transport>IN_VM</ws.transport>
         <ws.test>${project.basedir}/testcases</ws.test>
-<!--        <transport.hudson.url></transport.hudson.url>
+        <!--        <transport.hudson.url></transport.hudson.url>
         <wsit.hudson.url></wsit.hudson.url>-->
     </properties>
 
@@ -133,4 +133,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <!-- temporary definition for harness plugin to be found-->
+            <id>temp</id>
+            <url>https://maven.java.net/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <layout>default</layout>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
