@@ -59,9 +59,22 @@
     <name>Metro E2E Tests</name>
     <description>Metro End to End Tests</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>metro-standalone</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-local-transport</artifactId>
+            <version>${jaxws.ri.version}</version>
+        </dependency>
+    </dependencies>
+
     <properties>
         <netbeans.hint.jdkPlatform>JDK_1.6</netbeans.hint.jdkPlatform>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <!-- DEFAULT = JAXB, TOPLINK = MOXy -->
         <ws.databinding>DEFAULT</ws.databinding>
         <!-- IN_VM, LWHS, TOMCAT (requires tomcat.home to be set) -->
@@ -100,6 +113,47 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-ext-libs</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.build.directory}/test-lib</outputDirectory>
+                            <includeArtifactIds>jaxws-local-transport,eclipselink</includeArtifactIds>
+                        </configuration>
+                    </execution>
+<!--                    <execution>
+                        <id>prepare-image</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.build.directory}/image</outputDirectory>
+                            <includeArtifactIds>metro-standalone</includeArtifactIds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unzip-image</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/image</outputDirectory>
+                            <includeArtifactIds>metro-standalone</includeArtifactIds>
+                        </configuration>
+                    </execution>-->
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.glassfish.metro</groupId>
                 <artifactId>harness-maven-plugin</artifactId>
                 <version>0.1-SNAPSHOT</version>
@@ -109,18 +163,12 @@
                             <goal>ws-test</goal>
                         </goals>
                         <configuration>
-                            <endorsedDir>${endorsed.dir}</endorsedDir>
                             <tests>${ws.test}</tests>
                             <version>${project.osgi.version}</version>
                             <databinding>${ws.databinding}</databinding>
                             <transport>${ws.transport}</transport>
                             <imageUrl>${wsit.hudson.url}/wsit/bundles/metro-standalone/target/metro.zip</imageUrl>
-                            <transportUrl>${transport.hudson.url}/jaxws-ri/transports/local/target/jaxws-local-transport.jar</transportUrl>
                             <!--<debug>true</debug>-->
-                            <args>
-                                <!-- TODO: this is unusable for now -->
-                                <arg>-cp:wsit ${project.basedir}/../..</arg>
-                            </args>
                             <vmArgs>
                                 <vmArg>-Xms256m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=256m</vmArg>
                                 <vmArg>-Dhttp.proxyHost=www-proxy.us.oracle.com</vmArg>
