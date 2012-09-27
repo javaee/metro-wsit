@@ -122,6 +122,7 @@
                                 <arg>-cp:wsit ${project.basedir}/../..</arg>
                             </args>
                             <vmArgs>
+                                <vmArg>-Xms256m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=256m</vmArg>
                                 <vmArg>-Dhttp.proxyHost=www-proxy.us.oracle.com</vmArg>
                                 <vmArg>-Dhttp.proxyPort=80</vmArg>
                                 <vmArg>-Dhttps.proxyHost=www-proxy.us.oracle.com</vmArg>
