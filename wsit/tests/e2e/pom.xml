@@ -60,14 +60,18 @@
     <description>Metro End to End Tests</description>
 
     <dependencies>
-	<!--
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>metro-standalone</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
-	-->
+       	-->
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-local-transport</artifactId>
@@ -130,7 +134,7 @@
                             <includeArtifactIds>jaxws-local-transport,eclipselink</includeArtifactIds>
                         </configuration>
                     </execution>
-<!--                    <execution>
+                    <!--                    <execution>
                         <id>prepare-image</id>
                         <phase>validate</phase>
                         <goals>
