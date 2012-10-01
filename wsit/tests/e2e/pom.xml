@@ -60,14 +60,6 @@
     <description>Metro End to End Tests</description>
 
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-standalone</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-       	-->
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
@@ -134,29 +126,6 @@
                             <includeArtifactIds>jaxws-local-transport,eclipselink</includeArtifactIds>
                         </configuration>
                     </execution>
-                    <!--                    <execution>
-                        <id>prepare-image</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.build.directory}/image</outputDirectory>
-                            <includeArtifactIds>metro-standalone</includeArtifactIds>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unzip-image</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/image</outputDirectory>
-                            <includeArtifactIds>metro-standalone</includeArtifactIds>
-                        </configuration>
-                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -205,4 +174,64 @@
             <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
+
+    <profiles>
+        <profile>
+            <id>test-local-image</id>
+            <activation>
+                <property>
+                    <name>image</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-standalone</artifactId>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-image</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <stripVersion>true</stripVersion>
+                                    <outputDirectory>${project.build.directory}/image</outputDirectory>
+                                    <includeArtifactIds>metro-standalone</includeArtifactIds>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unzip-image</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>unpack-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/image</outputDirectory>
+                                    <includeArtifactIds>metro-standalone</includeArtifactIds>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.glassfish.metro</groupId>
+                        <artifactId>harness-maven-plugin</artifactId>
+                        <version>0.1-SNAPSHOT</version>
+                        <configuration>
+                            <localImage>${project.build.directory}/image</localImage>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
