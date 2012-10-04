@@ -165,8 +165,8 @@
                             <excludeDependencies>jaxws-eclipselink-plugin,sdo-eclipselink-plugin</excludeDependencies>
                             <instructions>
                                 <Export-Package>
-                                    com.oracle.xmlns.webservices.api;version=${jaxws.ri.release.version},
-                                    com.oracle.xmlns.webservices.api.message;version=${jaxws.ri.release.version},
+                                    com.oracle.webservices.api;version=${jaxws.ri.release.version},
+                                    com.oracle.webservices.api.message;version=${jaxws.ri.release.version},
                                     com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.ri.release.version},
                                     com.sun.istack.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.istack.localization;version=${jaxb.ri.release.version};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
