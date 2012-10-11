@@ -142,7 +142,7 @@ if [ -z "$METRO_URL" ]; then
     mvn versions:set -DnewVersion="$METRO_VERSION" -f bom/pom.xml
     popd
 
-    pushd $GF_SVN_ROOT
+    pushd $GF_SVN_ROOT/appserver
     echo "Updating webservices.version property in GlassFish main pom.xml to $METRO_VERSION"
     perl -i -pe "s|<webservices.version>.*</webservices.version>|<webservices.version>$METRO_VERSION</webservices.version>|g" pom.xml
     echo "Updating jaxb.version property in GlassFish main pom.xml to $JAXB_VERSION"
@@ -150,11 +150,11 @@ if [ -z "$METRO_URL" ]; then
     echo "Updating jaxb-api.version property in GlassFish main pom.xml to $JAXB_API_VERSION"
     perl -i -pe "s|<jaxb-api.version>.*</jaxb-api.version>|<jaxb-api.version>$JAXB_API_VERSION</jaxb-api.version>|g" pom.xml
     echo "Updating IPS version to: metro_version=\"`echo $METRO_VERSION | cut -d \- -f 1`,0-`echo $METRO_VERSION | cut -d b -f 2`\""
-    pushd appserver/packager/resources/
+    pushd packager/resources/
     sed -in 's/'`grep metro pkg_conf.py`'/metro_version="'`echo $METRO_VERSION | cut -d \- -f 1`',0-'`echo $METRO_VERSION | cut -d b -f 2`'"/g' pkg_conf.py
     popd
     echo "Prepared patch:"
-    svn diff pom.xml appserver/packager/resources/pkg_conf.py
+    svn diff pom.xml packager/resources/pkg_conf.py
     echo "back-uping original pom.xml"
     cp pom.xml pom.xml.orig
     echo "Adding staging repository definition to GlassFish's pom.xml"
@@ -172,7 +172,7 @@ if [ -z "$METRO_URL" ]; then
     done
     echo -e "\nDone building projects\n"
 
-    pushd $GF_SVN_ROOT
+    pushd $GF_SVN_ROOT/appserver
     echo "Restoring GlassFish's pom.xml"
     rm -f pom.xml
     mv pom.xml.orig pom.xml
@@ -273,5 +273,5 @@ fi
 cat $ALL
 
 cd $GF_SVN_ROOT
-svn diff pom.xml appserver/packager/resources/pkg_conf.py > $WORK_DIR/metro.patch
+svn diff appserver/pom.xml appserver/packager/resources/pkg_conf.py > $WORK_DIR/metro.patch
 echo "Patch created!"
