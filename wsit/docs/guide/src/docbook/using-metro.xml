@@ -3255,14 +3255,17 @@ proxy.sayHello("Hello World!");</programlisting>
             JAX-WS, the name of the property is
             <code>com.sun.xml.ws.client.ContentNegotiation</code>. In either
             case, the accepted property values are none (the default) and
-            pessimistic, optimistic.</para>
+            pessimistic, optimistic. Note that due to JDK repackaging, if you 
+            are using JAX-WS implementation directly from JDK you need to use this 
+            property name <code>com.sun.xml.ws.client.ContentNegotiation</code>.
+            </para>
 
             <example>
                 <title>Enabling FastInfoset by configuring proxy</title>
 
                 <programlisting language="java" linenumbering="unnumbered">// Enabling FI in pessimistic mode
 Map&lt;String, Object&gt; ctxt = ((BindingProvider)proxy).getRequestContext();
-ctxt.put(JAXWSProperties.CONTENT_NEGOTIATION_PROPERTY, "pessimistic");</programlisting>
+ctxt.put("com.sun.xml.ws.client.ContentNegotiation", "pessimistic");</programlisting>
             </example>
 
             <programlisting>java -Dcom.sun.xml.ws.client.ContentNegotiation=pessimistic ...</programlisting>
