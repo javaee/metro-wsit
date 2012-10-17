@@ -3257,7 +3257,7 @@ proxy.sayHello("Hello World!");</programlisting>
             case, the accepted property values are none (the default) and
             pessimistic, optimistic. Note that due to JDK repackaging, if you 
             are using JAX-WS implementation directly from JDK you need to use this 
-            property name <code>com.sun.xml.ws.client.ContentNegotiation</code>.
+            property name: <code>com.sun.xml.ws.client.ContentNegotiation</code>.
             </para>
 
             <example>
