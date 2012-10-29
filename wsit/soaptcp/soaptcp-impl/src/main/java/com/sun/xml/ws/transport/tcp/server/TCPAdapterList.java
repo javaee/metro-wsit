@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -57,15 +57,17 @@ import javax.xml.namespace.QName;
  */
 public final class TCPAdapterList extends AbstractList<TCPAdapter> implements AdapterFactory<TCPAdapter> {
     private final List<TCPAdapter> adapters = new ArrayList<TCPAdapter>();
-    private final Map<String, String> addressMap = new HashMap<String, String>();
+    private final Map<PortInfo, String> addressMap = new HashMap<PortInfo, String>();
     
     // TODO: documented because it's used by AS
+    @Override
     public TCPAdapter createAdapter(final String name, final String urlPattern, final WSEndpoint<?> endpoint) {
         final TCPAdapter tcpAdapter = new TCPAdapter(name, urlPattern, endpoint);
         adapters.add(tcpAdapter);
         final WSDLPort port = endpoint.getPort();
         if (port != null) {
-            addressMap.put(port.getName().getLocalPart(), getValidPath(urlPattern));
+            PortInfo portInfo = new PortInfo(port.getOwner().getName(),port.getName().getLocalPart(), endpoint.getImplementationClass());
+            addressMap.put(portInfo, getValidPath(urlPattern));
         }
         return tcpAdapter;
     }
@@ -84,21 +86,64 @@ public final class TCPAdapterList extends AbstractList<TCPAdapter> implements Ad
     /**
      * Creates a PortAddressResolver that maps portname to its address
      */
-    protected PortAddressResolver createPortAddressResolver(final String baseAddress) {
+    protected PortAddressResolver createPortAddressResolver(final String baseAddress, final Class<?> endpointImpl) {
         return new PortAddressResolver() {
-            public String getAddressFor(QName serviceName, @NotNull String portName) {
-                final String urlPattern = addressMap.get(portName);
+            @Override
+            public String getAddressFor(@NotNull QName serviceName, @NotNull String portName) {
+                String urlPattern = addressMap.get(new PortInfo(serviceName,portName, endpointImpl));
+                if (urlPattern == null) {
+                    //if a WSDL defines more ports, urlpattern is null (portName does not match endpointImpl)
+                    //so fallback to the default behaviour where only serviceName/portName is checked
+                    for (Map.Entry<PortInfo, String> e : addressMap.entrySet()) {
+                        if (serviceName.equals(e.getKey().serviceName) && portName.equals(e.getKey().portName)) {
+                                urlPattern = e.getValue();
+                                break;
+                        }
+                    }
+                }
                 return (urlPattern == null) ? null : baseAddress+urlPattern;
             }
         };
     }
     
     
+    @Override
     public TCPAdapter get(final int index) {
         return adapters.get(index);
     }
     
+    @Override
     public int size() {
         return adapters.size();
+    }
+
+    private static class PortInfo {
+        private final QName serviceName;
+        private final String portName;
+        private final Class<?> implClass;
+
+        PortInfo(@NotNull QName serviceName, @NotNull String portName, Class<?> implClass) {
+            this.serviceName = serviceName;
+            this.portName = portName;
+            this.implClass = implClass;
+        }
+
+        @Override
+        public boolean equals(Object portInfo) {
+            if (portInfo instanceof PortInfo) {
+                PortInfo that = (PortInfo)portInfo;
+                if (this.implClass == null) {
+                    return this.serviceName.equals(that.serviceName) && this.portName.equals(that.portName) && that.implClass == null;
+                }
+                return this.serviceName.equals(that.serviceName) && this.portName.equals(that.portName) && this.implClass.equals(that.implClass);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            int retVal = serviceName.hashCode()+portName.hashCode();
+            return implClass != null ? retVal + implClass.hashCode() : retVal;
+        }
     }
 }
