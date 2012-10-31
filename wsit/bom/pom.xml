@@ -146,12 +146,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency><!-- TODO - remove - should be exported from jaxws -->
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-ri</artifactId>
-                <type>zip</type>
-                <version>${jaxws.ri.version}</version>
-            </dependency>
             <dependency>
                 <groupId>javax.security.auth.message</groupId>
                 <artifactId>jmac</artifactId>
@@ -400,7 +394,7 @@
                 <artifactId>metro-standalone</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            
             <!-- Testing -->
             <dependency>
                 <groupId>junit</groupId>
@@ -433,7 +427,7 @@
                     <layout>default</layout>
                 </repository>
                 <repository>
-                    <id>staging.java.net</id>
+                    <id>jvnet-nexus-staging</id>
                     <url>https://maven.java.net/content/groups/staging/</url>
                     <layout>default</layout>
                 </repository>
@@ -463,28 +457,6 @@
             </build>
         </profile>
     </profiles>
-
-    <!--
-    TEMPORARY - REMOVE AFTER SWITCH TO MVN 3.0.4
-    -->
-    <repositories>
-        <repository>
-            <id>releases.java.net</id>
-            <url>https://maven.java.net/content/repositories/releases/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>staging.java.net</id>
-            <url>https://maven.java.net/content/groups/staging/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>eclipse</id>
-            <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    <!-- END TEMPORARY -->    
     
     <properties>
         <glassfish.version>3.2-b06</glassfish.version>
