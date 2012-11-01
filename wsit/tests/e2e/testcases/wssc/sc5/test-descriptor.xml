@@ -40,7 +40,7 @@
 
 -->
 
-<descriptor transport="http">
+<descriptor transport="http" uses="skip-lwhs">
   <description>This is SC5 test </description>
   <client href ="test.bsh"/>
   <service basedir="./server">

@@ -40,7 +40,7 @@
 
 -->
 
-<descriptor transport="http">
+<descriptor transport="http" uses="skip-lwhs">
   <description>S1 e2e test </description>
   <client href ="test.bsh"/>
   <service basedir="./server">
