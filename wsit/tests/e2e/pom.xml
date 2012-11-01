@@ -178,11 +178,6 @@
     <profiles>
         <profile>
             <id>test-local-image</id>
-            <activation>
-                <property>
-                    <name>image</name>
-                </property>
-            </activation>
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
@@ -228,6 +223,14 @@
                         <version>0.1-SNAPSHOT</version>
                         <configuration>
                             <localImage>${project.build.directory}/image</localImage>
+<!--                            <vmArgs>
+                                <vmArg>-Xms256m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=256m</vmArg>
+                                <vmArg>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=6000</vmArg>
+                                <vmArg>-Dhttp.proxyHost=www-proxy.us.oracle.com</vmArg>
+                                <vmArg>-Dhttp.proxyPort=80</vmArg>
+                                <vmArg>-Dhttps.proxyHost=www-proxy.us.oracle.com</vmArg>
+                                <vmArg>-Dhttps.proxyPort=80</vmArg>
+                            </vmArgs>-->
                         </configuration>
                     </plugin>
                 </plugins>
