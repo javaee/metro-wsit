@@ -339,7 +339,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.4.0</version>
+                    <version>2.5.2</version>
                     <configuration>
                         <skip>${findbugs.skip}</skip>
                         <threshold>${findbugs.threshold}</threshold>
@@ -540,10 +540,6 @@
     </distributionManagement>
     
     <repositories>
-        <repository>
-            <id>central</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
         <repository>
             <id>releases.java.net</id>
             <url>https://maven.java.net/content/repositories/releases/</url>
