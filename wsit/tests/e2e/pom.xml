@@ -70,6 +70,18 @@
         <wsit.hudson.url></wsit.hudson.url>-->
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-local-transport</artifactId>
+            <version>${jaxws.ri.version}</version>
+        </dependency>
+    </dependencies>
+    
     <build>
         <plugins>
             <plugin>
@@ -173,15 +185,6 @@
                     <version>${project.version}</version>
                     <type>zip</type>
                 </dependency>
-                <dependency>
-                    <groupId>org.eclipse.persistence</groupId>
-                    <artifactId>eclipselink</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.ws</groupId>
-                    <artifactId>jaxws-local-transport</artifactId>
-                    <version>${jaxws.ri.version}</version>
-                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -234,35 +237,6 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>prepare-image</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <stripVersion>true</stripVersion>
-                                    <outputDirectory>${project.build.directory}/image</outputDirectory>
-                                    <includeArtifactIds>metro-standalone</includeArtifactIds>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>unzip-image</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>unpack-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}/image</outputDirectory>
-                                    <includeArtifactIds>metro-standalone</includeArtifactIds>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.glassfish.metro</groupId>
                         <artifactId>harness-maven-plugin</artifactId>
