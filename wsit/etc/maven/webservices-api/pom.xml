@@ -43,7 +43,7 @@
     <parent>
         <groupId>com.sun.xml.ws</groupId>
         <artifactId>webservices</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
