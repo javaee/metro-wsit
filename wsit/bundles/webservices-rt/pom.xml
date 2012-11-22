@@ -257,19 +257,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <minmemory>128m</minmemory>
-                    <maxmemory>512m</maxmemory>
                     <excludePackageNames>*.msv.*:xsdlib.*:com.sun.xml.ws.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*</excludePackageNames>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin> <!-- remove the generated src dir-->
                 <artifactId>maven-clean-plugin</artifactId>

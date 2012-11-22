@@ -60,20 +60,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
                 <configuration>
-                    <minmemory>128m</minmemory>
-                    <maxmemory>768m</maxmemory>
                     <excludePackageNames>*.msv.*:xsdlib.*:*com.sun.xml.ws*:com.sun.tools.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*:*com.sun.istack.tools*</excludePackageNames>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin> <!-- want to unpack sources from individual modules -->
                 <groupId>org.apache.maven.plugins</groupId>
