@@ -225,6 +225,8 @@
                         <providerImplementations>
                             <svn>javasvn</svn>
                         </providerImplementations>
+                        <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+                        <revisionOnScmFailure>false</revisionOnScmFailure>
                     </configuration>
                     <executions>
                         <execution>
