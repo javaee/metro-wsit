@@ -252,7 +252,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>${project.build.directory}/classes/META-INF/MANIFEST.MF</manifestFile>
+                        <manifestFile>${mf.dir}/META-INF/MANIFEST.MF</manifestFile>
                         <manifestEntries>
                             <probe-provider-class-names>com.sun.xml.ws.transport.http.servlet.JAXWSRIDeploymentProbeProvider,com.sun.xml.ws.transport.http.servlet.JAXWSRIServletProbeProvider</probe-provider-class-names>
                         </manifestEntries>

@@ -68,6 +68,7 @@
         <ws.test>${project.basedir}/testcases</ws.test>
         <!--        <transport.hudson.url></transport.hudson.url>
         <wsit.hudson.url></wsit.hudson.url>-->
+        <ws.jvmOpts></ws.jvmOpts>
     </properties>
 
     <dependencies>
@@ -142,6 +143,7 @@
                             <version>${project.osgi.version}</version>
                             <databinding>${ws.databinding}</databinding>
                             <transport>${ws.transport}</transport>
+                            <extraVmArgs>${ws.jvmOpts}</extraVmArgs>
                             <!--<debug>true</debug>-->
                             <vmArgs>
                                 <vmArg>-Xms256m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=256m</vmArg>
@@ -245,6 +247,59 @@
                             <imageUrl>${wsit.hudson.url}/wsit/bundles/metro-standalone/target/metro.zip</imageUrl>
                             <transportUrl>${transport.hudson.url}/jaxws-ri/transports/local/target/jaxws-local-transport.jar</transportUrl>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <property>
+                    <name>cobertura-build</name>
+                </property>
+            </activation>
+            <properties>
+                <ws.jvmOpts>-Dnet.sourceforge.cobertura.datafile=${basedir}/target/cobertura.ser</ws.jvmOpts>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>copy-ser-file</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <copy todir="target/cobertura" file="${basedir}/target/cobertura.ser" verbose="true" failonerror="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>cobertura-maven-plugin</artifactId>
+                        <configuration>
+                            <forceMojoExecution>true</forceMojoExecution>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>instrument-code</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>instrument</goal>
+                                </goals>
+                                <configuration>
+                                    <attach>true</attach>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
