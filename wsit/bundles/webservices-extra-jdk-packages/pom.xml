@@ -88,18 +88,4 @@
             </plugin>
         </plugins>
     </build>
-
-<!--    <profiles>
-        <profile>
-            <id>coverage</id>
-            <activation>
-                <property>
-                    <name>cobertura-build</name>
-                </property>
-            </activation>
-            <properties>
-                <mf.dir>target/generated-classes/cobertura</mf.dir>
-            </properties>
-        </profile>
-    </profiles>-->
 </project>
