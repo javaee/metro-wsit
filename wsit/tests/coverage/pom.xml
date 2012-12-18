@@ -84,6 +84,22 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>webservices-rt</artifactId>
+            <version>${project.version}</version>
+            <classifier>cobertura</classifier>
+            <type>ser</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>webservices-tools</artifactId>
+            <version>${project.version}</version>
+            <classifier>cobertura</classifier>
+            <type>ser</type>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
