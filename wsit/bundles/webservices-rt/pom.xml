@@ -135,7 +135,7 @@
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>${parent.groupId}</groupId>
+                                    <groupId>${project.parent.groupId}</groupId>
                                     <artifactId>wsit-impl</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>sources</classifier>
@@ -198,7 +198,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>${parent.groupId}:wsit*</include>
+                                    <include>${project.parent.groupId}:wsit*</include>
 
                                     <include>javax.xml:jaxrpc-api</include>
                                     <include>javax.xml.crypto:jsr105-api</include>
@@ -351,12 +351,12 @@
         
         <!-- Shaded dependencies -->
         <dependency>
-            <groupId>${parent.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>wsit-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${parent.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>wsit-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
