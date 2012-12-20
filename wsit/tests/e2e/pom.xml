@@ -244,7 +244,7 @@
                         <artifactId>harness-maven-plugin</artifactId>
                         <version>0.1-SNAPSHOT</version>
                         <configuration>
-                            <imageUrl>${wsit.hudson.url}/wsit/bundles/metro-standalone/target/metro.zip</imageUrl>
+                            <imageUrl>${wsit.hudson.url}</imageUrl>
                             <transportUrl>${transport.hudson.url}/jaxws-ri/transports/local/target/jaxws-local-transport.jar</transportUrl>
                         </configuration>
                     </plugin>
