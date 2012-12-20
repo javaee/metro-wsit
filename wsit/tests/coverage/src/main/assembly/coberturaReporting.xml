@@ -45,7 +45,6 @@
     <!--id is used for classifier in attached artifact-->
     <id>coberturaReporting</id>
     <formats>
-        <format>dir</format>
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
