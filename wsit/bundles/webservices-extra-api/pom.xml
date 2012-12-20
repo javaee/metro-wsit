@@ -111,9 +111,10 @@
                         </goals>
                         <configuration>
                             <artifactSet>
-                                <excludes>
-                                    <!--exclude>junit:junit</exclude-->
-                                </excludes>
+                                <includes>
+                                    <include>javax.xml:jaxrpc-api</include>
+                                    <include>javax.xml:jaxr-api</include>
+                                </includes>
                             </artifactSet>
                             <createSourcesJar>true</createSourcesJar>
                             <transformers>

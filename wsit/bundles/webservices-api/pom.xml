@@ -132,12 +132,12 @@
                         </goals>
                         <configuration>
                             <artifactSet>
-                                <excludes>
-                                    <exclude>javax.xml.stream:stax-api</exclude>
-                                    <exclude>javax.annotation:jsr250-api</exclude>
-                                    <exclude>org.glassfish:javax.annotation</exclude>
-                                    <!--exclude>junit:junit</exclude-->
-                                </excludes>
+                                <includes>
+                                    <include>javax.xml.ws:jaxws-api</include>
+                                    <include>javax.xml.bind:jaxb-api</include>
+                                    <include>javax.xml.soap:saaj-api</include>
+                                    <include>javax.jws:jsr181-api</include>
+                                </includes>
                             </artifactSet>
                             <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
