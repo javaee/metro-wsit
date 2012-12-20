@@ -263,6 +263,55 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <property>
+                    <name>cobertura-build</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>instrument-shaded-jar</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <target>
+                                        <taskdef classpathref="maven.test.classpath" resource="tasks.properties" />
+                                        <property name="metro.instr.dir" location="${project.build.directory}/metro-instrumented"/>
+                                        <property name="metro.instr.full.name" location="${project.build.directory}/metro-instrumented-full.zip"/>
+                                        <unzip src="${project.build.directory}/metro.zip" dest="${metro.instr.dir}"/>
+                                        <cobertura-instrument datafile="${metro.instr.dir}/metro/cobertura/cobertura.ser">
+                                            <ignore regex="org.codehaus.stax2.*|com.ctc.*|javax.xml.crypto.*" />
+                                            <excludeClasses regex="org.codehaus.stax2.*|com.ctc.*|javax.xml.crypto.*" />
+                                            <includeClasses regex=".*" />
+                                            <fileset dir="${metro.instr.dir}/metro/lib">
+                                                <include name="webservices-rt.jar" />
+                                                <include name="webservices-tools.jar" />
+                                                <include name="wstx-services.war" />
+                                                <include name="databinding/*.jar" />
+                                            </fileset>
+                                        </cobertura-instrument>
+                                        <attachartifact file="${metro.instr.dir}/metro/cobertura/cobertura.ser" classifier="cobertura" type="ser"/>
+                                        <zip destfile="${metro.instr.full.name}" basedir="${project.build.directory}/metro-instrumented"/>
+                                        <attachartifact file="${metro.instr.full.name}" classifier="instrumented" type="zip"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencies>

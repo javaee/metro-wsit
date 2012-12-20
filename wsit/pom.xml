@@ -546,7 +546,7 @@
                     <id>gf-internal-release</id>
                     <url>http://gf-maven.us.oracle.com/nexus/content/repositories/gf-internal-release</url> 
                 </repository>
-            </distributionManagement>            
+            </distributionManagement> 
         </profile>
 
         <profile>
@@ -557,7 +557,7 @@
                 </property>
             </activation>
             <modules>
-                <module>tests/e2e</module>
+                <!--<module>tests/e2e</module>-->
                 <module>tests/coverage</module>
             </modules>
             <properties>
