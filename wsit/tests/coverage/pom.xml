@@ -338,7 +338,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <property name="cbt.reporting.dir" value="${project.build.directory}/${project.artifactId}-${project.version}-coberturaReporting"/>
+                                <property name="cbt.reporting.dir" value="${project.build.directory}/${project.artifactId}-coberturaReporting"/>
+                                <mkdir dir="${cbt.reporting.dir}"/>
+                                <unzip src="${project.build.directory}/${project.artifactId}-coberturaReporting.zip" dest="${cbt.reporting.dir}"/>
                                 <ant antfile="${cbt.reporting.dir}/cobertura.xml" dir="${cbt.reporting.dir}" target="create-report">
                                     <property name="coveragereport.dir" location="${project.build.directory}/report"/>
                                     <property name="coveragereport.format" value="${cobertura.report.format}"/>
