@@ -47,261 +47,16 @@
 
     <parent>
         <groupId>org.glassfish.metro</groupId>
-        <artifactId>metro-project</artifactId>
+        <artifactId>wsit-tests</artifactId>
         <version>2.3-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>wsit-coverage</artifactId>
     <packaging>pom</packaging>
 
-    <name>WSIT Unit Tests Coverage</name>
-    <description>WSIT Unit Tests Coverage</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>net.sourceforge.cobertura</groupId>
-            <artifactId>cobertura</artifactId>
-            <version>${cobertura.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>webservices-rt</artifactId>
-            <version>${project.version}</version>
-            <classifier>sources</classifier>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>webservices-tools</artifactId>
-            <version>${project.version}</version>
-            <classifier>sources</classifier>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-
-<!--        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>webservices-rt</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>webservices-tools</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-standalone</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>soaptcp-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>soaptcp-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-cm-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-cm-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-runtime-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-runtime-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-config-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-config-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wssx-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wssx-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsmc-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsmc-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrm-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrm-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrx-commons</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrx-testing</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wstx-api</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wstx-impl</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-commons</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ws-mex</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>xmlfilter</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>
-
-<!--        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-tests-e2e</artifactId>
-            <version>${project.version}</version>
-            <classifier>cobertura</classifier>
-            <type>ser</type>
-            <scope>compile</scope>
-        </dependency>-->
-    </dependencies>
-
-    <properties>
-        <cobertura.report.format>xml</cobertura.report.format>
-    </properties>
+    <name>WSIT Tests Coverage</name>
+    <description>WSIT Tests Coverage</description>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -328,7 +83,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
                 <executions>
                     <execution>
                         <id>generate-cobertura-report</id>
@@ -352,4 +106,233 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>all-tests</id>
+            <activation>
+                <property>
+                    <name>alltests</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsit-tests-e2e</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>test-local-image</id>
+            <activation>
+                <property>
+                    <name>!wsit.hudson.url</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-standalone</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>coverage-unit-deps</id>
+            <activation>
+                <property>
+                    <name>!alltests</name>
+                </property>
+            </activation>
+            <dependencies>
+                <!-- cobertura files-->
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>soaptcp-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>soaptcp-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-cm-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-cm-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-runtime-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-runtime-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-config-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-config-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wssx-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wssx-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsmc-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsmc-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsrm-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsrm-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsrx-commons</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wsrx-testing</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wstx-api</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>wstx-impl</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>metro-commons</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ws-mex</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>xmlfilter</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>cobertura</classifier>
+                    <type>ser</type>
+                    <scope>compile</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

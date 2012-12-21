@@ -64,9 +64,12 @@
         <dependencySet>
             <unpack>false</unpack>
             <outputDirectory>/antjars</outputDirectory>
-            <scope>compile</scope>
+            <scope>test</scope>
             <includes>
                 <include>net.sourceforge.cobertura:cobertura</include>
+                <include>oro:oro</include>
+                <include>asm:asm*</include>
+                <include>log4j:log4j</include>
             </includes>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useTransitiveFiltering>true</useTransitiveFiltering>
