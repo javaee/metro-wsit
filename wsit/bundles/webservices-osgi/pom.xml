@@ -364,5 +364,6 @@
     <properties>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
         <cobertura.skip>true</cobertura.skip>
+        <mf.dir>${project.build.outputDirectory}</mf.dir>
     </properties>
 </project>
