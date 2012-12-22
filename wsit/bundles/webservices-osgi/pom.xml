@@ -363,5 +363,6 @@
     </dependencies>
     <properties>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+        <cobertura.skip>true</cobertura.skip>
     </properties>
 </project>

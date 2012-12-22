@@ -297,7 +297,6 @@
                                             <fileset dir="${metro.instr.dir}/metro/lib">
                                                 <include name="webservices-rt.jar" />
                                                 <include name="webservices-tools.jar" />
-                                                <include name="wstx-services.war" />
                                                 <include name="databinding/*.jar" />
                                             </fileset>
                                         </cobertura-instrument>

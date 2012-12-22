@@ -562,6 +562,7 @@
             <properties>
                 <cobertura.report.format>xml</cobertura.report.format>
                 <cobertura.version>1.9.4.1</cobertura.version>
+                <cobertura.skip>false</cobertura.skip>
                 <net.sourceforge.cobertura.datafile>${basedir}/target/cobertura/cobertura.ser</net.sourceforge.cobertura.datafile>
                 <mf.dir>${project.build.directory}/generated-classes/cobertura</mf.dir>
             </properties>
@@ -639,6 +640,7 @@
                         <inherited>true</inherited>
                         <configuration>
                             <attach>true</attach>
+                            <skip>${cobertura.skip}</skip>
                         </configuration>
                         <executions>
                             <execution>
