@@ -291,8 +291,8 @@
                                         <property name="metro.instr.full.name" location="${project.build.directory}/metro-instrumented-full.zip"/>
                                         <unzip src="${project.build.directory}/metro.zip" dest="${metro.instr.dir}"/>
                                         <cobertura-instrument datafile="${metro.instr.dir}/metro/cobertura/cobertura.ser">
-                                            <ignore regex="org.codehaus.stax2.*|com.ctc.*|javax.xml.(crypto|rpc).*|com.sun.xml.rpc.*" />
-                                            <excludeClasses regex="org.codehaus.stax2.*|com.ctc.*|javax.xml.(crypto|rpc).*|com.sun.xml.rpc.*" />
+                                            <ignore regex="javax.xml.(crypto|rpc).*|com.(ctc|sun.xml.(rpc|registry)).*|org.codehaus.stax2.*" />
+                                            <excludeClasses regex="javax.xml.(crypto|rpc).*|com.(ctc|sun.xml.(rpc|registry)).*|org.codehaus.stax2.*" />
                                             <includeClasses regex=".*" />
                                             <fileset dir="${metro.instr.dir}/metro/lib">
                                                 <include name="webservices-rt.jar" />
