@@ -163,9 +163,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
-        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk-bom/wsit</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk-bom/wsit</developerConnection>
+        <url>https://svn.java.net/svn/wsit~svn/branches/trunk-bom/wsit</url>
     </scm>
     <organization>
         <name>Oracle Corporation</name>
