@@ -48,7 +48,7 @@
         <groupId>org.glassfish.metro</groupId>
         <artifactId>metro-bom</artifactId>
         <relativePath>boms/bom/pom.xml</relativePath>
-        <version>2.3-b01-BOM</version>
+        <version>2.3-b02-BOM-SNAPSHOT</version>
     </parent>
 
     <groupId>org.glassfish.metro</groupId>
@@ -163,10 +163,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/trunk</developerConnection>
-        <tag>HEAD</tag>
-        <url>http://java.net/projects/wsit/sources/svn/show/tags/metro-project-2.3-b01-BOM/trunk</url>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
+        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
     </scm>
     <organization>
         <name>Oracle Corporation</name>

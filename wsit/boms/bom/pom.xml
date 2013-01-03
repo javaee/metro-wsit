@@ -48,7 +48,7 @@
     <artifactId>metro-bom</artifactId>
     <packaging>pom</packaging>
     <name>Metro Web Services Stack Dependency POM</name>
-    <version>2.3-b01-BOM</version>
+    <version>2.3-b02-BOM-SNAPSHOT</version>
 
     <url>http://metro.java.net/</url>
 
@@ -68,10 +68,9 @@
     </organization>
 
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/svn/wsit~svn/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/svn/wsit~svn/trunk</developerConnection>
-        <tag>HEAD</tag>
-        <url>http://java.net/projects/wsit/sources/svn/show/tags/metro-project-2.3-b01-BOM/svn/show/trunk</url>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
+        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
     </scm>
 
     <developers>
