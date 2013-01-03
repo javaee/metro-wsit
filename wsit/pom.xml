@@ -41,16 +41,14 @@
 
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.glassfish.metro</groupId>
         <artifactId>metro-bom</artifactId>
         <relativePath>boms/bom/pom.xml</relativePath>
-        <version>2.3-SNAPSHOT</version>
+        <version>2.3-b01-BOM</version>
     </parent>
 
     <groupId>org.glassfish.metro</groupId>
@@ -165,10 +163,10 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/trunk</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/tags/metro-project-2.3-b01-BOM/trunk</developerConnection>
         <tag>HEAD</tag>
-        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
+        <url>http://java.net/projects/wsit/sources/svn/show/tags/metro-project-2.3-b01-BOM/trunk</url>
     </scm>
     <organization>
         <name>Oracle Corporation</name>
@@ -711,7 +709,7 @@
 
         <findbugs.skip>false</findbugs.skip>
         <findbugs.threshold>Default</findbugs.threshold>
-        <findbugs.exclude></findbugs.exclude>
+        <findbugs.exclude />
 
         <mf.dir>${project.build.outputDirectory}</mf.dir>
     </properties>

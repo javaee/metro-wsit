@@ -47,7 +47,7 @@
     <parent>
         <groupId>org.glassfish.metro</groupId>
         <artifactId>bundles</artifactId>
-        <version>2.3-SNAPSHOT</version>
+        <version>2.3-b01-BOM</version>
     </parent>
 
     <artifactId>metro-standalone</artifactId>
@@ -287,9 +287,9 @@
                                 <configuration>
                                     <target>
                                         <taskdef classpathref="maven.test.classpath" resource="tasks.properties" />
-                                        <property name="metro.instr.dir" location="${project.build.directory}/metro-instrumented"/>
-                                        <property name="metro.instr.full.name" location="${project.build.directory}/metro-instrumented-full.zip"/>
-                                        <unzip src="${project.build.directory}/metro.zip" dest="${metro.instr.dir}"/>
+                                        <property name="metro.instr.dir" location="${project.build.directory}/metro-instrumented" />
+                                        <property name="metro.instr.full.name" location="${project.build.directory}/metro-instrumented-full.zip" />
+                                        <unzip src="${project.build.directory}/metro.zip" dest="${metro.instr.dir}" />
                                         <cobertura-instrument datafile="${metro.instr.dir}/metro/cobertura/cobertura.ser">
                                             <ignore regex="javax.xml.(crypto|rpc).*|com.(ctc|sun.xml.(rpc|registry)).*|org.codehaus.stax2.*" />
                                             <excludeClasses regex="javax.xml.(crypto|rpc).*|com.(ctc|sun.xml.(rpc|registry)).*|org.codehaus.stax2.*" />
@@ -300,9 +300,9 @@
                                                 <include name="databinding/*.jar" />
                                             </fileset>
                                         </cobertura-instrument>
-                                        <attachartifact file="${metro.instr.dir}/metro/cobertura/cobertura.ser" classifier="cobertura" type="ser"/>
-                                        <zip destfile="${metro.instr.full.name}" basedir="${project.build.directory}/metro-instrumented"/>
-                                        <attachartifact file="${metro.instr.full.name}" classifier="instrumented" type="zip"/>
+                                        <attachartifact file="${metro.instr.dir}/metro/cobertura/cobertura.ser" classifier="cobertura" type="ser" />
+                                        <zip destfile="${metro.instr.full.name}" basedir="${project.build.directory}/metro-instrumented" />
+                                        <attachartifact file="${metro.instr.full.name}" classifier="instrumented" type="zip" />
                                     </target>
                                 </configuration>
                             </execution>

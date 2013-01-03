@@ -41,15 +41,13 @@
 
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>docs</artifactId>
         <groupId>org.glassfish.metro</groupId>
-        <version>2.3-SNAPSHOT</version>
+        <version>2.3-b01-BOM</version>
     </parent>
 
     <artifactId>guide</artifactId>
@@ -64,15 +62,15 @@
                     <execution>
                         <configuration>
                             <tasks>
-                                <echo message="Preparing char entities"/>
-                                <mkdir dir="${src.dir}"/>
+                                <echo message="Preparing char entities" />
+                                <mkdir dir="${src.dir}" />
                                 <copy todir="${src.dir}">
-                                    <fileset dir="src/docbook"/>
+                                    <fileset dir="src/docbook" />
                                 </copy>
-                                <replace file="${src.dir}/metro.ent" token="$version" value="${project.version}"/>
-                                <replace file="${src.dir}/metro.ent" token="$repository" value="${javanet.repository.id}"/>
-                                <replace file="${src.dir}/metro.ent" token="$jax-ws.version" value="${www.guide.jaxws.version}"/>
-                                <replace file="${src.dir}/metro.ent" token="$jaxws.home.uri" value="${www.guide.jaxws.home.uri}"/>
+                                <replace file="${src.dir}/metro.ent" token="$version" value="${project.version}" />
+                                <replace file="${src.dir}/metro.ent" token="$repository" value="${javanet.repository.id}" />
+                                <replace file="${src.dir}/metro.ent" token="$jax-ws.version" value="${www.guide.jaxws.version}" />
+                                <replace file="${src.dir}/metro.ent" token="$jaxws.home.uri" value="${www.guide.jaxws.home.uri}" />
                             </tasks>
                         </configuration>
                         <id>process-entities</id>
@@ -235,18 +233,11 @@
                                     <tasks>
                                         <taskdef name="soimp" classname="com.sun.istack.soimp.Soimp" classpathref="maven.plugin.classpath" />
 
-                                        <copy tofile="${project.build.directory}/www/index.html"
-                                                file="${project.build.directory}/metro-standalone/metro/readme.html" />
+                                        <copy tofile="${project.build.directory}/www/index.html" file="${project.build.directory}/metro-standalone/metro/readme.html" />
 
                                         <!-- new version -->
 
-                                        <soimp  dir="${project.build.directory}/www"
-                                                repository="${www.thisversion.scm.connection.url}"
-                                                username="${userguide.scm.username}"
-                                                password="${userguide.scm.password}"
-                                                create="true"
-                                                additionalOptions="--no-auth-cache"
-                                                commitMessage="${project.artifactId}-${project.version}" />
+                                        <soimp dir="${project.build.directory}/www" repository="${www.thisversion.scm.connection.url}" username="${userguide.scm.username}" password="${userguide.scm.password}" create="true" additionalOptions="--no-auth-cache" commitMessage="${project.artifactId}-${project.version}" />
                                     </tasks>
                                 </configuration>
                             </execution>

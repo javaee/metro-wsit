@@ -47,7 +47,7 @@
     <parent>
         <groupId>org.glassfish.metro</groupId>
         <artifactId>bundles</artifactId>
-        <version>2.3-SNAPSHOT</version>
+        <version>2.3-b01-BOM</version>
     </parent>
 
     <artifactId>webservices-rt</artifactId>
@@ -243,7 +243,7 @@
                                 </filter>
                             </filters>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Class-Path>webservices-api.jar webservices-extra.jar webservices-rt_l10n.jar webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar</Class-Path>
