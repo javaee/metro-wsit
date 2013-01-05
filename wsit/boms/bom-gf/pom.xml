@@ -48,7 +48,7 @@
         <groupId>org.glassfish.metro</groupId>
         <artifactId>metro-bom</artifactId>
         <relativePath>../bom/pom.xml</relativePath>
-        <version>2.3-b02-BOM</version>
+        <version>2.3-b03-BOM-SNAPSHOT</version>
     </parent>
 
     <groupId>org.glassfish.metro</groupId>
