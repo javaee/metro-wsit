@@ -68,9 +68,9 @@
     </organization>
 
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
-        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk-bom/wsit/boms/bom</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk-bom/wsit/boms/bom</developerConnection>
+        <url>http://java.net/projects/wsit/sources/svn/show/branches/trunk-bom/wsit/boms/bom</url>
     </scm>
 
     <developers>
@@ -81,15 +81,9 @@
     </developers>
 
     <properties>
-        <glassfish.version>3.2-b06</glassfish.version>
-        <grizzly.version>1.9.36</grizzly.version>
-        <gmbal.version>3.1.0-b001</gmbal.version>
-        <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
-        <jaxb.ri.release.version>2.2.7</jaxb.ri.release.version><!-- readme.html -->
         <jaxws.spec.version>2.2</jaxws.spec.version>
-        <jaxws.ri.version>2.2.8-b03-BOM</jaxws.ri.version>
+        <jaxws.ri.version>2.2.8-b06-BOM</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.8</jaxws.ri.release.version>
-        <jaxws.home.uri>http://jax-ws.java.net</jaxws.home.uri>
     </properties>
         
     <dependencyManagement>
