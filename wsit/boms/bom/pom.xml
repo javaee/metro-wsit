@@ -49,7 +49,8 @@
     <packaging>pom</packaging>
     <name>Metro Web Services Stack Dependency POM</name>
     <version>2.3-b03-BOM-SNAPSHOT</version>
-
+    <description>Metro Web Services Stack Dependency POM</description>
+    
     <url>http://metro.java.net/</url>
 
     <licenses>
