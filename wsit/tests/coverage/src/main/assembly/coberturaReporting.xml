@@ -53,11 +53,6 @@
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
         </file>
-        <file>
-            <source>${basedir}/src/main/coberturaScripts/cobertura.properties</source>
-            <outputDirectory>/</outputDirectory>
-            <filtered>true</filtered>
-        </file>
     </files>
     <dependencySets>
         <dependencySet>
