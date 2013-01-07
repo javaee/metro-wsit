@@ -83,7 +83,6 @@
             <fileset dir="${cobertura.dir}">
                 <include name="*-cobertura.ser" />
             </fileset>
-            <!--<fileset file="${cobertura.ser.file}"/>-->
         </cobertura-merge>
     </target>
 
@@ -97,14 +96,12 @@
             <fileset dir="${cobertura.extra.dir}">
                 <include name="*.ser" />
             </fileset>
-            <!--<fileset file="${cobertura.ser.file}"/>-->
         </cobertura-merge>
     </target>
 
     <target name="create-report"
           description="Generate an html coverage report using the contents of the cobertura.ser file.  Performs clean first."
           depends="init, clean, create-merged-sers-basic, create-merged-sers-extra">
-
 
         <cobertura-report
             format="${coveragereport.format}"
