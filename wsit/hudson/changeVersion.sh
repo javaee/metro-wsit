@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -ex
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
