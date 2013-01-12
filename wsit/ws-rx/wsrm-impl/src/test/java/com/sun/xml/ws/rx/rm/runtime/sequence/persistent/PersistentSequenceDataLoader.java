@@ -47,6 +47,8 @@ import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
@@ -89,6 +91,10 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
 
             public boolean isWrapperFor(Class<?> iface) throws SQLException {
                 throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
 

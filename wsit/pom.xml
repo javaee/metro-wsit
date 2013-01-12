@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -485,38 +485,6 @@
     </reporting>
 
     <profiles>
-
-        <profile>
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>            
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>enforce-property</id>
-                                <goals>
-                                    <goal>enforce</goal>
-                                </goals>
-                                <configuration>
-                                    <rules>
-                                        <requireProperty>
-                                            <property>env.JDK6_RT_JAR</property>
-                                            <message>!!! You are compiling Metro with JDK7. Some parts of Metro require JDK6 for compilation. Please set JDK6_RT_JAR property 
- to point to jdk6 rt.jar on your system. On Mac, the path is usually $JDK6_HOME/Classes/classes.jar</message>
-                                        </requireProperty>
-                                    </rules>  
-                                    <fail>true</fail>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
 
         <profile>
             <id>release</id>
