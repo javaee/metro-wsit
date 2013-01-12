@@ -141,7 +141,7 @@ if [ -z "$METRO_URL" ]; then
     JAXB_VERSION=`mvn dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
     echo "Setting project version in sources to new promoted version $METRO_VERSION"
-    mvn versions:set -DnewVersion="$METRO_VERSION" -f bom/pom.xml
+    mvn versions:set -DnewVersion="$METRO_VERSION" -f bom/pom.xml -s /net/bat-sca/repine/export2/hudson/tools/maven-3.0.3/settings-nexus.xml
     popd
 
     pushd $GF_SVN_ROOT/appserver
