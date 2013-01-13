@@ -155,6 +155,7 @@
                             <instructions>
                                 <Export-Package>
                                     com.oracle.webservices.api;version=${jaxws.ri.release.version},
+                                    com.oracle.webservices.api.databinding;version=${jaxws.ri.release.version},
                                     com.oracle.webservices.api.message;version=${jaxws.ri.release.version},
                                     com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.ri.release.version},
                                     com.sun.istack.ws.*;version=${jaxws.ri.release.version},
