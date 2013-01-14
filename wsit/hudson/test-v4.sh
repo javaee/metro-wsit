@@ -62,6 +62,10 @@ export JAVA_MEMORY_PROP="-Xms256m -Xmx768m -XX:PermSize=256m -XX:MaxPermSize=512
 export ANT_OPTS="$JAVA_MEMORY_PROP $JAVA_PROXY_PROP"
 export MAVEN_OPTS="-Dmaven.repo.local=$M2_LOCAL_REPO -Dmaven.javadoc.skip=true $JAVA_MEMORY_PROP $JAVA_PROXY_PROP"
 
+source setenv.sh
+
+set_common
+print_env
 
 #fallback to defaults if needed
 if [ -z "$MVN_REPO_URL" ]; then
@@ -71,6 +75,7 @@ fi
 if [ -z "$METRO_SVN_REPO" ]; then
     METRO_SVN_REPO="https://svn.java.net/svn/wsit~svn/trunk/wsit"
 fi
+
 
 pushd $WORK_DIR
 
@@ -103,7 +108,6 @@ echo "GF_ZIP: $GF_ZIP"
 echo "METRO_ZIP: $METRO_ZIP"
 echo "CTS_ZIP: $CTS_ZIP"
 echo "Metro SVN root: $METRO_SVN_ROOT"
-
 
 echo "Preparing workspace:"
 #delete old
