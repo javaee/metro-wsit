@@ -2,7 +2,7 @@
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2012 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2012-2013 Oracle and/or its affiliates. All rights reserved.
 #
 # The contents of this file are subject to the terms of either the GNU
 # General Public License Version 2 only ("GPL") or the Common Development
@@ -144,6 +144,7 @@ if [ -z "$METRO_URL" ]; then
     pushd $METRO_SVN_ROOT
     JAXB_VERSION=`mvn dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
+    MIMEPULL_VERSION=`mvn dependency:tree -Dincludes=org.jvnet.mimepull:mimepull | grep org.jvnet.mimepull:mimepull | tail -1 | cut -f4 -d':'`
     echo "Setting project version in sources to new promoted version $METRO_VERSION"
     mvn versions:set -Pstaging -DnewVersion="$METRO_VERSION" -f bom/pom.xml -s /net/bat-sca/repine/export2/hudson/tools/maven-3.0.3/settings-nexus.xml
     popd
@@ -155,12 +156,19 @@ if [ -z "$METRO_URL" ]; then
     perl -i -pe "s|<jaxb.version>.*</jaxb.version>|<jaxb.version>$JAXB_VERSION</jaxb.version>|g" pom.xml
     echo "Updating jaxb-api.version property in GlassFish main pom.xml to $JAXB_API_VERSION"
     perl -i -pe "s|<jaxb-api.version>.*</jaxb-api.version>|<jaxb-api.version>$JAXB_API_VERSION</jaxb-api.version>|g" pom.xml
+
+    pushd $GF_SVN_ROOT/nucleus
+    echo "Updating mimepull.version property in GlassFish nucleus-parent pom.xml to $MIMEPULL_VERSION"
+    perl -i -pe "s|<mimepull.version>.*</mimepull.version>|<mimepull.version>$MIMEPULL_VERSION</mimepull.version>|g" pom.xml
+    popd
+
     echo "Updating IPS version to: metro_version=\"`echo $METRO_VERSION | cut -d \- -f 1`,0-`echo $METRO_VERSION | cut -d b -f 2`\""
     pushd packager/resources/
     sed -in 's/'`grep metro pkg_conf.py`'/metro_version="'`echo $METRO_VERSION | cut -d \- -f 1`',0-'`echo $METRO_VERSION | cut -d b -f 2`'"/g' pkg_conf.py
     popd
+
     echo "Prepared patch:"
-    svn diff pom.xml packager/resources/pkg_conf.py
+    svn diff pom.xml ../nucleus/pom.xml packager/resources/pkg_conf.py
     echo "back-uping original pom.xml"
     cp pom.xml pom.xml.orig
     echo "Adding staging repository definition to GlassFish's pom.xml"
@@ -279,5 +287,5 @@ fi
 cat $ALL
 
 cd $GF_SVN_ROOT
-svn diff appserver/pom.xml appserver/packager/resources/pkg_conf.py > $WORK_DIR/metro.patch
+svn diff appserver/pom.xml nucleus/pom.xml appserver/packager/resources/pkg_conf.py > $WORK_DIR/metro.patch
 echo "Patch created!"
