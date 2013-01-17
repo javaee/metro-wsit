@@ -104,7 +104,8 @@ holder.
                 <note>
                     <para>Kerberos is supported in Metro since 1.1 release.
                     Netbeans support is available for Kerberos from Metro 1.3
-                    and Netbeans 6.5 release.</para>
+                    and Netbeans 6.5 release. Kerberos is NOT supported on AIX 
+                    systems.</para>
                 </note>
             </listitem>
 
