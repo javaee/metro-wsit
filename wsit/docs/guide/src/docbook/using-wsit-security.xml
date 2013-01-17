@@ -3967,7 +3967,7 @@ KerberosServer {
                         <code>disableStreamingSecurity</code> policy
                         assertion. For information on how to do this, refer to
                         <link
-                        xlink:href="http://blogs.sun.com/venu/">http://blogs.sun.com/venu/</link>
+                        xlink:href="https://blogs.oracle.com/ashutosh/entry/custom_security_policy_assertions_in">http://blogs.sun.com/venu/</link>
                         for more information on
                         <code>disableStreamingSecurity</code>.</para>
                     </note>
