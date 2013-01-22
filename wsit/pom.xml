@@ -468,6 +468,7 @@
         <module>xmlfilter</module>
         <module>bundles</module>
         <module>docs</module>
+        <module>tests</module>
         <!-- module>contribs</module -->
     </modules>
 
@@ -524,9 +525,6 @@
                     <name>cobertura-build</name>
                 </property>
             </activation>
-            <modules>
-                <module>tests</module>
-            </modules>
             <properties>
                 <cobertura.report.format>xml</cobertura.report.format>
                 <cobertura.version>1.9.4.1</cobertura.version>
