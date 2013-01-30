@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,6 +43,7 @@ package com.sun.xml.ws.metro.api.config.management;
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.Component;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.Reconfigurable;
@@ -52,6 +53,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.ThrowableContainerPropertySet;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.EndpointComponent;
 import com.sun.xml.ws.api.server.ServiceDefinition;
@@ -274,6 +276,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     private void disposeDelegate(final WSEndpoint<T> endpoint) {
         final Runnable dispose = new Runnable() {
             final WSEndpoint<T> disposableEndpoint = endpoint;
+            @Override
             public void run() {
                 try {
                     disposableEndpoint.dispose();
@@ -309,5 +312,10 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     @Override
     public OperationDispatcher getOperationDispatcher() {
         return endpointDelegate.getOperationDispatcher();
+    }
+
+    @Override
+    public Packet createServiceResponseForException(ThrowableContainerPropertySet tcps, Packet packet, SOAPVersion soapv, WSDLPort wsdlp, SEIModel seim, WSBinding wsb) {
+        return endpointDelegate.createServiceResponseForException(tcps, packet, soapv, wsdlp, seim, wsb);
     }
 }
