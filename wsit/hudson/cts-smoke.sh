@@ -122,7 +122,13 @@ fi
 
 _unzip $GF_ZIP $GF_WORK_DIR
 
-AS_HOME=$GF_WORK_DIR/glassfish3/glassfish
+if [ -d "$GF_WORK_DIR/glassfish4" ]; then
+    SERVER_DIR=glassfish4
+else
+    SERVER_DIR=glassfish3
+fi
+
+AS_HOME=$GF_WORK_DIR/$SERVER_DIR/glassfish
 
 echo "AS_HOME: $AS_HOME"
 echo
