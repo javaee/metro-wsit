@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,16 +46,25 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
@@ -324,6 +333,50 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
         public int getLocalPort() {
             return 0;
         }
+
+        public boolean authenticate(HttpServletResponse hsr) throws IOException, ServletException {
+            return false;
+        }
+
+        public void login(String string, String string1) throws ServletException {}
+
+        public void logout() throws ServletException {}
+        
+        public Collection<Part> getParts() throws IOException, ServletException {
+            return Collections.EMPTY_LIST;
+        }
+
+        public Part getPart(String string) throws IOException, ServletException {
+            return null;
+        }
+
+        public ServletContext getServletContext() {
+            return null;
+        }
+
+        public AsyncContext startAsync() throws IllegalStateException {
+            return null;
+        }
+
+        public AsyncContext startAsync(ServletRequest sr, ServletResponse sr1) throws IllegalStateException {
+            return null;
+        }
+
+        public boolean isAsyncStarted() {
+            return false;
+        }
+
+        public boolean isAsyncSupported() {
+            return false;
+        }
+
+        public AsyncContext getAsyncContext() {
+            return null;
+        }
+
+        public DispatcherType getDispatcherType() {
+            return null;
+        }
     }
     
     public static final class FakeServletHttpResponse implements HttpServletResponse {
@@ -433,6 +486,22 @@ public final class ServletFakeArtifactSet extends DistributedPropertySet {
 
         public Locale getLocale() {
             return null;
+        }
+
+        public int getStatus() {
+            return 0;
+        }
+
+        public String getHeader(String string) {
+            return null;
+        }
+
+        public Collection<String> getHeaders(String string) {
+            return Collections.EMPTY_LIST;
+        }
+
+        public Collection<String> getHeaderNames() {
+            return Collections.EMPTY_LIST;
         }
         
     }
