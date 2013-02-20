@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -179,6 +179,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         ctx.setUnAttachedSecurityTokenReference(samlReference);
     }
 
+    @SuppressWarnings("UnusedAssignment")
     public void isValideToken(IssuedTokenContext ctx) throws WSTrustException {
         WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
         WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
