@@ -524,9 +524,7 @@ public class SecurityServerTube extends SecurityTubeBase {
 
     @Override
     public void preDestroy() {
-        if (super.next != null) {
-            super.next.preDestroy();
-        }
+        super.preDestroy();
         issuedTokenContextMap.clear();
         SessionManager.removeSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
         NonceManager.deleteInstance(wsEndpoint);

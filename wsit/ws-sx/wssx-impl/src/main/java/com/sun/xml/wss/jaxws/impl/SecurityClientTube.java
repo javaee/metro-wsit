@@ -593,9 +593,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     @Override
     public void preDestroy() {
         cancelSecurityContextToken();
-        if (super.next != null) {
-            super.next.preDestroy();
-        }
+        super.preDestroy();
     //issuedTokenContextMap.clear();
     //scPolicyIDtoSctIdMap.clear();
     }
