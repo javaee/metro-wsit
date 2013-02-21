@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -68,40 +68,54 @@ public class LazyStreamCodec implements StreamSOAPCodec{
         this.codec = codec;
     }
     
+    @Override
     public Message decode(XMLStreamReader reader) {
         return new com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage(reader,codec);
     }
     
-    public  @NotNull Message decode(@NotNull XMLStreamReader reader, AttachmentSet att){
+    public  @NotNull@Override
+ Message decode(@NotNull XMLStreamReader reader, AttachmentSet att){
         return new com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage(reader,codec, att);
     }
     
+    @Override
     public String getMimeType() {
         return codec.getMimeType();
     }
     
+    @Override
     public ContentType getStaticContentType(Packet packet) {
         return codec.getStaticContentType(packet);
     }
     
+    @Override
     public ContentType encode(Packet packet, OutputStream outputStream) throws IOException {
         return codec.encode(packet,outputStream);
     }
     
+    @Override
     public ContentType encode(Packet packet, WritableByteChannel writableByteChannel) {
         return codec.encode(packet,writableByteChannel);
     }
     
+    @Override
     public Codec copy() {
         return this;
     }
     
+    @Override
     public void decode(InputStream inputStream, String string, Packet packet) throws IOException {
         XMLStreamReader reader = XMLStreamReaderFactory.create(null, inputStream,true);
         packet.setMessage(decode(reader));
     }
     
+    @Override
     public void decode(ReadableByteChannel readableByteChannel, String string, Packet packet) {
         throw new UnsupportedOperationException();
-    }    
+    }
+    
+    @Override
+    public void decode(InputStream in, int contentLength, String contentType, Packet packet) throws IOException {
+        decode(in, contentType, packet);
+    }
 }

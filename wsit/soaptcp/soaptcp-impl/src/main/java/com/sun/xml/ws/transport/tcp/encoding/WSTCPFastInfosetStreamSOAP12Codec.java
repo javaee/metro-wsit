@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -49,7 +49,10 @@ import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamHeader12;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetMIMETypes;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
 
 /**
@@ -66,14 +69,17 @@ public class WSTCPFastInfosetStreamSOAP12Codec extends WSTCPFastInfosetStreamCod
         super(that);
     }
 
+    @Override
     public Codec copy() {
         return new WSTCPFastInfosetStreamSOAP12Codec(this);
     }
 
+    @Override
     protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
         return new StreamHeader12(reader, mark);
     }
     
+    @Override
     protected ContentType getContentType(String soapAction) {
         if (soapAction == null) {
             return _defaultContentType;
@@ -81,5 +87,10 @@ public class WSTCPFastInfosetStreamSOAP12Codec extends WSTCPFastInfosetStreamCod
             return new ContentTypeImpl(
                     _defaultContentType.getContentType() + ";action=\""+soapAction+"\"");
         }
+    }
+
+    @Override
+    public void decode(InputStream in, int contentLength, String contentType, Packet packet) throws IOException {
+        decode(in, contentType, packet);
     }
 }
