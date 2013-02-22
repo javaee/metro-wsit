@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -203,6 +203,7 @@
                                     <include>javax.xml:jaxrpc-api</include>
                                     <include>javax.xml.crypto:jsr105-api</include>
                                     <include>com.sun.org.apache.xml.internal:resolver</include>
+                                    <include>com.sun.xml.bind:jaxb-core</include>
                                     <include>com.sun.xml.bind:jaxb-impl</include>
                                     <include>com.sun.xml.fastinfoset:FastInfoset</include>
                                     <include>com.sun.xml.messaging.saaj:saaj-impl</include>
