@@ -203,6 +203,7 @@
                                     <include>javax.xml:jaxrpc-api</include>
                                     <include>javax.xml.crypto:jsr105-api</include>
                                     <include>com.sun.org.apache.xml.internal:resolver</include>
+                                    <include>com.sun.xml.bind:jaxb-core</include>
                                     <include>com.sun.xml.bind:jaxb-impl</include>
                                     <include>com.sun.xml.fastinfoset:FastInfoset</include>
                                     <include>com.sun.xml.messaging.saaj:saaj-impl</include>
