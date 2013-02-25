@@ -49,10 +49,7 @@ import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamHeader12;
 import com.sun.xml.ws.transport.tcp.encoding.WSTCPFastInfosetStreamReaderRecyclable.RecycleAwareListener;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetMIMETypes;
-import java.io.IOException;
-import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
 
 /**
@@ -89,8 +86,4 @@ public class WSTCPFastInfosetStreamSOAP12Codec extends WSTCPFastInfosetStreamCod
         }
     }
 
-    @Override
-    public void decode(InputStream in, int contentLength, String contentType, Packet packet) throws IOException {
-        decode(in, contentType, packet);
-    }
 }
