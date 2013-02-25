@@ -73,6 +73,13 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.codehaus.woodstox</groupId>
+                                    <artifactId>stax2-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.codehaus.woodstox</groupId>
                                     <artifactId>woodstox-core-asl</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
