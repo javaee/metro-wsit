@@ -114,8 +114,4 @@ public class LazyStreamCodec implements StreamSOAPCodec{
         throw new UnsupportedOperationException();
     }
     
-    @Override
-    public void decode(InputStream in, int contentLength, String contentType, Packet packet) throws IOException {
-        decode(in, contentType, packet);
-    }
 }
