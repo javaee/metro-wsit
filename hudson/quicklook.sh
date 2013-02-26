@@ -2,7 +2,7 @@
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2012 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2012-2013 Oracle and/or its affiliates. All rights reserved.
 #
 # The contents of this file are subject to the terms of either the GNU
 # General Public License Version 2 only ("GPL") or the Common Development
@@ -98,14 +98,20 @@ fi
 
 _unzip $GF_ZIP $GF_WORK_DIR
 
-if [ ! -z "$METRO_ZIP" ]; then
-    install_metro $GF_WORK_DIR/glassfish3/glassfish
+if [ -d "$GF_WORK_DIR/glassfish4" ]; then
+    SERVER_DIR=glassfish4
+else
+    SERVER_DIR=glassfish3
+fi
+
+ if [ ! -z "$METRO_ZIP" ]; then
+    install_metro $GF_WORK_DIR/$SERVER_DIR/glassfish
 fi
 
 echo "Running GlassFish QuickLook tests..."
 
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
-mvn -Dglassfish.home=$GF_WORK_DIR/glassfish3/glassfish test | tee $WORK_DIR/test-quicklook.log.txt
+mvn -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook.log.txt
 popd
 
 echo "Done."
