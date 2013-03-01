@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,7 +43,7 @@ package com.sun.xml.ws.tx.at;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.api.tx.at.Transactional;
@@ -496,8 +496,8 @@ public class WSATHelper<T> {
      */
     public String getWSATTidFromWebServiceContextHeaderList(WebServiceContext context) {
         javax.xml.ws.handler.MessageContext messageContext = context.getMessageContext();
-        HeaderList headerList =
-                (HeaderList) messageContext.get(com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+        MessageHeaders headerList =
+                (MessageHeaders) messageContext.get(com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
         Iterator<Header> headers = headerList.getHeaders(WSATConstants.TXID_QNAME, false);
         if (!headers.hasNext()) {
             throw new WebServiceException("txid does not exist in header");
@@ -513,8 +513,8 @@ public class WSATHelper<T> {
      */
     public String getBQualFromWebServiceContextHeaderList(WebServiceContext context) {
         javax.xml.ws.handler.MessageContext messageContext = context.getMessageContext();
-        HeaderList headerList =
-                (HeaderList) messageContext.get(com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+        MessageHeaders headerList =
+                (MessageHeaders) messageContext.get(com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
         Iterator<Header> headers = headerList.getHeaders(WSATConstants.BRANCHQUAL_QNAME, false);
         if (!headers.hasNext())
             throw new WebServiceException("branchqual does not exist in header"); //WSATFaultFactory.throwContextRefusedFault();

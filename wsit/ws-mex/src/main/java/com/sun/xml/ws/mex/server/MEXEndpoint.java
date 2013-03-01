@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,9 +44,10 @@ import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -105,12 +106,12 @@ public class MEXEndpoint implements Provider<Message> {
         SOAPVersion soapVersion = wsEndpoint.getBinding().getSOAPVersion();
 
         // try w3c version of ws-a first, then member submission version
-        final HeaderList headers = requestMsg.getHeaders();
+        final MessageHeaders headers = requestMsg.getHeaders();
 
-        String action = headers.getAction(AddressingVersion.W3C, soapVersion);
+        String action = AddressingUtils.getAction(headers, AddressingVersion.W3C, soapVersion);
         AddressingVersion wsaVersion = AddressingVersion.W3C;
         if (action == null) {
-            action = headers.getAction(AddressingVersion.MEMBER, soapVersion);
+            action = AddressingUtils.getAction(headers, AddressingVersion.MEMBER, soapVersion);
             wsaVersion = AddressingVersion.MEMBER;
         }
 
@@ -119,7 +120,7 @@ public class MEXEndpoint implements Provider<Message> {
             throw new WebServiceException("No wsa:Action specified");
         }
         else if (action.equals(GET_REQUEST)) {
-            final String toAddress = headers.getTo(wsaVersion, soapVersion);
+            final String toAddress = AddressingUtils.getTo(headers, wsaVersion, soapVersion);
             return processGetRequest(requestMsg, toAddress, wsaVersion, soapVersion);
         }
         else if (action.equals(GET_MDATA_REQUEST)) {
@@ -160,7 +161,7 @@ public class MEXEndpoint implements Provider<Message> {
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
 
-                HeaderList headers = responseMessage.getHeaders();
+                MessageHeaders headers = responseMessage.getHeaders();
                 //headers.add(Headers.create(new QName(wsaVersion.nsUri, "To"), "http://www.w3.org/2005/08/addressing/anonymous"));
                 headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), GET_RESPONSE));
                 //headers.add(Headers.create(new QName(wsaVersion.nsUri, "MessageID"), "uuid:" + UUID.randomUUID().toString()));

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
@@ -216,10 +217,11 @@ public class TargetResolverImpl implements TargetResolver {
     private String getElementById(String id) {
         SecurityContext sc = ((JAXBFilterProcessingContext) ctx).getSecurityContext();
 
-        HeaderList headers = sc.getNonSecurityHeaders();
+        MessageHeaders headers = sc.getNonSecurityHeaders();
         // look in non-security headers
-        if (headers != null && headers.size() > 0) {
-            Iterator<Header> listItr = headers.listIterator();
+        // FIXME: RJE -- remove cast when MessageContext support hasHeaders
+        if (headers != null && ((HeaderList) headers).size() > 0) {
+            Iterator<Header> listItr = headers.getHeaders();
             while (listItr.hasNext()) {
                 GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
                 if (header.hasID(id)) {
@@ -256,7 +258,8 @@ public class TargetResolverImpl implements TargetResolver {
 
         SecurityContext sc = ((JAXBFilterProcessingContext) ctx).getSecurityContext();
 
-        HeaderList headers = sc.getNonSecurityHeaders();
+        // FIXME: RJE - Remove cast once MessageContext supports asList(), hasHeaders()
+        HeaderList headers = (HeaderList) sc.getNonSecurityHeaders();
         // look in non-security headers
         if (headers != null && headers.size() > 0) {
             Iterator<Header> listItr = headers.listIterator();

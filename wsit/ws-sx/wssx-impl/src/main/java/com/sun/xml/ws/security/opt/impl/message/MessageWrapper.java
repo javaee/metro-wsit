@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,8 +45,10 @@ import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import java.util.List;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -72,7 +74,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
     private boolean isOneWay = false;
     private SecuredMessage sm;
     private List headers;
-    private HeaderList hl = new HeaderList();
+    private MessageHeaders hl = new HeaderList();
     private MutableXMLStreamBuffer bufferedMsg = null;
     public MessageWrapper(SecuredMessage sm,boolean oneWay){
         this.sm = sm;
@@ -88,7 +90,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
         }
     }
     
-    public MessageWrapper(MutableXMLStreamBuffer msg,boolean oneWay,HeaderList hdrs,SecuredMessage sm){
+    public MessageWrapper(MutableXMLStreamBuffer msg,boolean oneWay,MessageHeaders hdrs,SecuredMessage sm){
         this.bufferedMsg = msg;
         this.sm = sm;
         this.hl = hdrs;
@@ -102,7 +104,8 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *      true if headers are present.
      */
     public boolean hasHeaders(){
-        return (hl.size() > 0);
+        // FIXME: RJE -- remove cast when MessageHeaders supports hasHeaders()
+        return (((HeaderList)hl).size() > 0);
     }
     
     /**
@@ -111,7 +114,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      * <h3>Implementation Note</h3>
      * <p>
      * {@link Message} implementation is allowed to defer
-     * the construction of {@link HeaderList} object. So
+     * the construction of {@link MessageHeaders} object. So
      * if you only want to check for the existence of any header
      * element, use {@link #hasHeaders()}.
      *
@@ -119,7 +122,8 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *      always return the same non-null object.
      */
     public HeaderList getHeaders(){       
-        return hl;
+        // FIXME: remove cast
+        return (HeaderList) hl;
     }
     
     /**
@@ -194,7 +198,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
         if ("EncryptedData".equals(localPart)) {
             if (hl != null) {
                 try {
-                    action = hl.getAction(AddressingVersion.W3C, sm.getSOAPVersion());
+                    action = AddressingUtils.getAction(hl, AddressingVersion.W3C, sm.getSOAPVersion());
                 } catch (Exception e) {
                 }
             }

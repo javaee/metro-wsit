@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,9 +41,11 @@
 package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.protocol.soap.VersionMismatchException;
@@ -149,7 +151,7 @@ public final class SecurityRecipient {
     // for future use
     private XMLInputFactory staxIF = null;
     private JAXBFilterProcessingContext context = null;
-    private HeaderList headers = null;
+    private MessageHeaders headers = null;
     private TagInfoset headerTag = null;
     private TagInfoset envelopeTag = null;
     private ArrayList processedHeaders = new ArrayList(2);
@@ -325,7 +327,7 @@ public final class SecurityRecipient {
         try {
             //TODO: check this does not endup consuming the action header
             if (context.getAddressingVersion() != null) {
-                String action = headers.getAction(context.getAddressingVersion(), soapVersion);
+                String action = AddressingUtils.getAction(headers, context.getAddressingVersion(), soapVersion);
                 updateContext(action, context);
             }
             if (message.getEventType() == XMLStreamReader.START_ELEMENT) {
@@ -904,14 +906,15 @@ public final class SecurityRecipient {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Not Buffering Payload from incomming message");
             }
-            streamMsg = new StreamMessage(envelopeTag, headerTag, as, headers, bodyTag, message, soapVersion);
+            // FIXME: RJE -- remove cast once StreamMessage constr can take MessageHeaders
+            streamMsg = new StreamMessage(envelopeTag, headerTag, as, (HeaderList) headers, bodyTag, message, soapVersion);
         }
         context.setMessage(streamMsg);
         boolean scCancel = false;
         /*if(streamMsg.isFault())
         return streamMsg;*/
         if (context.getAddressingVersion() != null) {
-            String action = streamMsg.getHeaders().getAction(context.getAddressingVersion(), context.getSOAPVersion());
+            String action = AddressingUtils.getAction(streamMsg.getHeaders(), context.getAddressingVersion(), context.getSOAPVersion());
 
             if (MessageConstants.MEX_GET.equals(action)) {
                 return streamMsg;
@@ -1111,8 +1114,9 @@ public final class SecurityRecipient {
         }
 
         // look in non-security headers
-        if (headers != null && headers.size() > 0) {
-            Iterator<Header> listItr = headers.listIterator();
+        // FIXME: RJE -- remove cast when MessageHeaders supports hasHeaders
+        if (headers != null && ((HeaderList)headers).size() > 0) {
+            Iterator<Header> listItr = headers.getHeaders();
             while (listItr.hasNext()) {
                 GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
                 if (header.hasID(uri)) {
@@ -1540,7 +1544,7 @@ public final class SecurityRecipient {
             String id = refList.get(i);
             boolean found = false;
 
-            Iterator<Header> listItr = headers.listIterator();
+            Iterator<Header> listItr = headers.getHeaders();
             while (listItr.hasNext()) {
                 GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
                 String localPart = (header != null) ? (header.getLocalPart()) : null;
@@ -1555,8 +1559,10 @@ public final class SecurityRecipient {
                     }
                     edList.remove(id);
                     context.setEdIdforEh(null);
-                    int index = headers.indexOf(header);
-                    headers.set(index, processedHeader);
+                    // FIXME: RJE -- remove cast when MessageContext supports replace()
+                    HeaderList h = (HeaderList) headers;
+                    int index = h.indexOf(header);
+                    h.set(index, processedHeader);
                     found = true;
                     break;
                 }
@@ -1786,9 +1792,9 @@ public final class SecurityRecipient {
 
     private boolean areHeadersSecured(SignaturePolicy sp) {
         ArrayList list = ((SignaturePolicy.FeatureBinding) sp.getFeatureBinding()).getTargetBindings();
-        List headerList = headers;
-        for (int hl = 0; hl < headerList.size(); hl++) {
-            Header hdr = (Header) headerList.get(hl);
+        Iterator<Header> hit = headers.getHeaders();
+        while (hit.hasNext()) {
+            Header hdr = hit.next();
             String localName = hdr.getLocalPart();
             String uri = hdr.getNamespaceURI();
             boolean found = false;
@@ -1828,7 +1834,8 @@ public final class SecurityRecipient {
         if (bodyTag == null) {
             bodyTag = new TagInfoset(rdr);
         }
-        Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, rdr, soapVersion);
+        // FIXME: RJE -- remove cast once StreamMessage constr can take MessageHeaders
+        Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), (HeaderList) headers, bodyTag, rdr, soapVersion);
         ctx.setPVMessage(msg);
     }
 

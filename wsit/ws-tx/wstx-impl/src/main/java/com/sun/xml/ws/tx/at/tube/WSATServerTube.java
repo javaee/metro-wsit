@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -119,7 +119,7 @@ public class WSATServerTube extends AbstractFilterTubeImpl implements WSATConsta
       TransactionalAttribute tx = WSATTubeHelper.getTransactionalAttribute(m_transactionalFeature, request, m_port);
       tx.setSoapVersion(m_context.getEndpoint().getBinding().getSOAPVersion());
       request.invocationProperties.put(WSATATTRIBUTE, tx);
-      HeaderList headers = request.getMessage().getHeaders();
+      MessageHeaders headers = request.getMessage().getHeaders();
       m_wsatServerHelper.doHandleRequest(headers, tx);
       return super.processRequest(request);
     }

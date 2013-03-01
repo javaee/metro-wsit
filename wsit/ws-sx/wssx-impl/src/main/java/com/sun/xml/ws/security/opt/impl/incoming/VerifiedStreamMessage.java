@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
@@ -108,7 +109,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
     // lazily created
     private 
     @Nullable
-    HeaderList headers;
+    MessageHeaders headers;
     private final String payloadLocalName;
     private final String payloadNamespaceURI;
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN,
@@ -140,7 +141,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
      *      if there's no payload)
      */
     public VerifiedStreamMessage(
-            @Nullable HeaderList headers, 
+            @Nullable MessageHeaders headers, 
             @NotNull AttachmentSet attachmentSet, 
             @NotNull XMLStreamReader reader, 
             @NotNull SOAPVersion soapVersion,  Map<String, String> bodyEnvNs) {
@@ -185,7 +186,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
      * and the complete infoset of the SOAP envelope.
      *
      * <p>
-     * See {@link #StreamMessage(HeaderList, AttachmentSet, XMLStreamReader, SOAPVersion)} for
+     * See {@link #StreamMessage(MessageHeaders, AttachmentSet, XMLStreamReader, SOAPVersion)} for
      * the description of the basic parameters.
      *
      * @param headerTag
@@ -196,7 +197,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
             @NotNull TagInfoset envelopeTag, 
             @Nullable TagInfoset headerTag, 
             @NotNull AttachmentSet attachmentSet, 
-            @Nullable HeaderList headers, 
+            @Nullable MessageHeaders headers, 
             @NotNull TagInfoset bodyTag, 
             @NotNull XMLStreamReader reader, 
             @NotNull SOAPVersion soapVersion,  Map<String, String> bodyEnvNs) {
@@ -208,14 +209,16 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
     }
 
     public boolean hasHeaders() {
-        return headers != null && !headers.isEmpty();
+        // FIXME: RJE -- remove cast when MessageHeaders supports hasHeaders
+        return headers != null && !((HeaderList)headers).isEmpty();
     }
 
     public HeaderList getHeaders() {
         if (headers == null) {
             headers = new HeaderList();
         }
-        return headers;
+        // FIXME: RJE -- remove cast once getHeaders returns MessageContext
+        return (HeaderList) headers;
     }
 
     @Override
@@ -361,7 +364,8 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
         envelopeTag.writeStart(writer);
 
         //write headers
-        HeaderList hl = getHeaders();
+        // FIXME: RJE -- remove cast
+        HeaderList hl = (HeaderList) getHeaders();
         if (hl.size() > 0) {
             headerTag.writeStart(writer);
             for (Header h : hl) {
@@ -463,7 +467,8 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
                 clonedReader = reader;
             }
 
-            return new VerifiedStreamMessage(envelopeTag, headerTag, attachmentSet, HeaderList.copy(headers), bodyTag, clone, soapVersion, this.bodyEnvNs);
+            // FIXME: RJE -- remove cast once HeaderList.copy() can handle MessageContext
+            return new VerifiedStreamMessage(envelopeTag, headerTag, attachmentSet, HeaderList.copy((HeaderList)headers), bodyTag, clone, soapVersion, this.bodyEnvNs);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message", e);
         }
@@ -488,7 +493,8 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
         envelopeTag.writeStart(contentHandler);
         headerTag.writeStart(contentHandler);
         if (hasHeaders()) {
-            HeaderList headerList = getHeaders();
+            // FIXME: remove cast
+            HeaderList headerList = (HeaderList) getHeaders();
             int len = headerList.size();
             for (int i = 0; i < len; i++) {
                 // shouldn't JDK be smart enough to use array-style indexing for this foreach!?

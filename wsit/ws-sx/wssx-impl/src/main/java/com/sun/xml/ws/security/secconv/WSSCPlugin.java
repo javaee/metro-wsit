@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,10 +47,11 @@
 package com.sun.xml.ws.security.secconv;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Engine;
@@ -798,8 +799,8 @@ public class WSSCPlugin {
     }
     
     private Packet addAddressingHeaders(final Packet packet, final WSDLPort wsdlPort, final WSBinding binding, final String action, final AddressingVersion addVer)throws WSSecureConversationException {
-        final HeaderList list = packet.getMessage().getHeaders();
-        list.fillRequestAddressingHeaders(packet, addVer,binding.getSOAPVersion(),false,action);
+        final MessageHeaders list = packet.getMessage().getHeaders();
+        AddressingUtils.fillRequestAddressingHeaders(list, packet, addVer,binding.getSOAPVersion(),false,action);
         
         return packet;
     }

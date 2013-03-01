@@ -552,7 +552,8 @@ public class SignedInfoProcessor {
      * @return Object
      */
     private Object getMessagePart(String id){
-        HeaderList headers = securityContext.getNonSecurityHeaders();
+        // FIXME : RJE - Remove cast once MessageHeaders supports asList(), hasHeaders()
+        HeaderList headers = (HeaderList) securityContext.getNonSecurityHeaders();
         if(headers != null && headers.size() >0){
             Iterator<Header> listItr = headers.listIterator();
             boolean found = false;

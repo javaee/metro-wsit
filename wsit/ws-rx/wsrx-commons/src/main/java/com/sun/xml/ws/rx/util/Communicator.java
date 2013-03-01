@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,8 +46,9 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -178,7 +179,8 @@ public final class Communicator {
         Packet packet = new Packet(message);
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
-        message.getHeaders().fillRequestAddressingHeaders(
+        AddressingUtils.fillRequestAddressingHeaders(
+                message.getHeaders(),
                 packet,
                 addressingVersion,
                 soapVersion,
@@ -192,9 +194,9 @@ public final class Communicator {
         if (originalRequestPacket != null) { // server side request transferred as a response
             Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction, false);
 
-            final HeaderList requestHeaders = request.getMessage().getHeaders();
+            final MessageHeaders requestHeaders = request.getMessage().getHeaders();
             if (expectReply) { // attach wsa:ReplyTo header from the original request
-                final String endpointAddress = originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion);
+                final String endpointAddress = AddressingUtils.getTo(originalRequestPacket.getMessage().getHeaders(), addressingVersion, soapVersion);
                 requestHeaders.add(createReplyToHeader(endpointAddress));
             }
             requestHeaders.remove(addressingVersion.relatesToTag);
@@ -259,7 +261,7 @@ public final class Communicator {
             Packet response = createRequestPacket(jaxbElement, responseWsaAction, false);
             response.getMessage().getHeaders().add(new RelatesToHeader(
                     addressingVersion.relatesToTag,
-                    requestPacket.getMessage().getHeaders().getMessageID(addressingVersion, soapVersion)));
+                    AddressingUtils.getMessageID(requestPacket.getMessage().getHeaders(), addressingVersion, soapVersion)));
             return response;
         }
     }
@@ -334,7 +336,8 @@ public final class Communicator {
     public final Packet setEmptyRequestMessage(Packet request, String wsaAction) {
         Message message = Messages.createEmpty(soapVersion);
         request.setMessage(message);
-        message.getHeaders().fillRequestAddressingHeaders(
+        AddressingUtils.fillRequestAddressingHeaders(
+                message.getHeaders(),
                 request,
                 addressingVersion,
                 soapVersion,
@@ -372,7 +375,7 @@ public final class Communicator {
             return null;
         }
 
-        return packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
+        return AddressingUtils.getAction(packet.getMessage().getHeaders(), addressingVersion, soapVersion);
     }
 
     /**
@@ -387,7 +390,7 @@ public final class Communicator {
             return null;
         }
 
-        return packet.getMessage().getHeaders().getTo(addressingVersion, soapVersion);
+        return AddressingUtils.getTo(packet.getMessage().getHeaders(), addressingVersion, soapVersion);
     }
 
     /**

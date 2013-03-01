@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
@@ -73,9 +73,9 @@ public class WSATServerHelper implements WSATServer {
     private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
     Xid xidToResume; //todo should not rely on tube member vars, use context map instead
 
-    public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
+    public void doHandleRequest(MessageHeaders headers, TransactionalAttribute tx) {
         if (WSATHelper.isDebugEnabled())
-            debug("processRequest HeaderList:" + headers + " TransactionalAttribute:" + tx + " isEnabled:" + tx.isEnabled());
+            debug("processRequest MessageHeaders:" + headers + " TransactionalAttribute:" + tx + " isEnabled:" + tx.isEnabled());
         CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers, tx.getVersion());
         if (ccBuilder != null) {
             while(!WSATGatewayRM.isReadyForRuntime) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -49,9 +49,10 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -281,8 +282,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
                     isTrustMsg = true;
                     String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
-                    HeaderList headers = packet.getMessage().getHeaders();
-                    headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
+                    MessageHeaders headers = packet.getMessage().getHeaders();
+                    AddressingUtils.fillRequestAddressingHeaders(headers, packet, addVer, soapVersion, false, action);
                 }
 
                 //set the isTrustProperty into MessageInfo

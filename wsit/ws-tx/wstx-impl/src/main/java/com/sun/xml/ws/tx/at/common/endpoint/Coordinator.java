@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,7 +46,8 @@ import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.AddressingUtils;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.WSATException;
 import com.sun.xml.ws.tx.at.WSATHelper;
@@ -164,9 +165,9 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @return WSATXAResource
      */
      WSATXAResource createWSATXAResourceForXidFromReplyTo(Xid xid) {
-        HeaderList headerList = (HeaderList) context.getMessageContext().get(
+        MessageHeaders headerList = (MessageHeaders) context.getMessageContext().get(
                         com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
-        WSEndpointReference wsReplyTo = headerList.getReplyTo(AddressingVersion.W3C, SOAPVersion.SOAP_12);
+        WSEndpointReference wsReplyTo = AddressingUtils.getReplyTo(headerList, AddressingVersion.W3C, SOAPVersion.SOAP_12);
         EndpointReference replyTo = wsReplyTo.toSpec();
         return new WSATXAResource(version.getVersion(), replyTo, xid, true);
     }

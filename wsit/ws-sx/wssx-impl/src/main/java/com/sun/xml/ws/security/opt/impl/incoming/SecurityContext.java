@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.security.opt.impl.attachment.AttachmentSetImpl;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
@@ -57,7 +57,7 @@ public class SecurityContext {
     
     private ArrayList processedSecurityHeaders = new ArrayList(2);
     private ArrayList bufferedSecurityHeaders = null;
-    private HeaderList nonSecurityHeaders = null;
+    private MessageHeaders nonSecurityHeaders = null;
     private HashMap<String,String> shND = null;
     private HashMap<String,String> envND = null;
     private AttachmentSet attachments = null; 
@@ -116,11 +116,11 @@ public class SecurityContext {
         return bufferedSecurityHeaders;
     }
     
-    public HeaderList getNonSecurityHeaders(){
+    public MessageHeaders getNonSecurityHeaders(){
         return nonSecurityHeaders;
     }
     
-    public void setNonSecurityHeaders(HeaderList list){
+    public void setNonSecurityHeaders(MessageHeaders list){
         this.nonSecurityHeaders = list;
     }
     

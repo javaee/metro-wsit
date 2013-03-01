@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -48,8 +48,9 @@ import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -120,17 +121,17 @@ public class MetadataServerPipe extends AbstractFilterTubeImpl {
         }
         
         // try w3c version of ws-a first, then member submission version
-        final HeaderList headers = request.getMessage().getHeaders();
-        String action = headers.getAction(AddressingVersion.W3C, soapVersion);
+        final MessageHeaders headers = request.getMessage().getHeaders();
+        String action = AddressingUtils.getAction(headers, AddressingVersion.W3C, soapVersion);
         AddressingVersion adVersion = AddressingVersion.W3C;
         if (action == null) {
-            action = headers.getAction(AddressingVersion.MEMBER, soapVersion);
+            action = AddressingUtils.getAction(headers, AddressingVersion.MEMBER, soapVersion);
             adVersion = AddressingVersion.MEMBER;
         }
         
         if (action != null) {
             if (action.equals(GET_REQUEST)) {
-                final String toAddress = headers.getTo(adVersion, soapVersion);
+                final String toAddress = AddressingUtils.getTo(headers, adVersion, soapVersion);
                 return doReturnWith(processGetRequest(request, toAddress, adVersion));
             } else if (action.equals(GET_MDATA_REQUEST)) {
                 final Message faultMessage = Messages.create(GET_MDATA_REQUEST,

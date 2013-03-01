@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,10 +53,12 @@ import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+
+import com.sun.xml.ws.api.message.AddressingUtils;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -262,8 +264,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         // Add Action header to trust message
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
             String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
-            HeaderList headers = packet.getMessage().getHeaders();
-            headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
+            MessageHeaders headers = packet.getMessage().getHeaders();
+            AddressingUtils.fillRequestAddressingHeaders(headers, packet, addVer, soapVersion, false, action);
         }
 
         // keep the message

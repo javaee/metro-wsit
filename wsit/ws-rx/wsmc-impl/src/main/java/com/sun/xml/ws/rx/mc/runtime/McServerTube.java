@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,8 +40,9 @@
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -120,11 +121,11 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
         private void storeResponse(Packet response) {
             if (response.getMessage() != null) {
-                final HeaderList headers = response.getMessage().getHeaders();
+                final MessageHeaders headers = response.getMessage().getHeaders();
                 headers.remove(configuration.getAddressingVersion().toTag);
                 headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getRuntimeVersion().getAnonymousAddress(clientUID)));
 
-                JaxwsMessage responseMessage = new JaxwsMessage(response, headers.getMessageID(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+                JaxwsMessage responseMessage = new JaxwsMessage(response, AddressingUtils.getMessageID(headers, configuration.getAddressingVersion(), configuration.getSoapVersion()));
                 responseStorage.store(responseMessage, clientUID);
             }
         }
@@ -314,7 +315,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
             } else {
                 Message message = response.getMessage();
                 if (message != null) {
-                    HeaderList headers = message.getHeaders();
+                    MessageHeaders headers = message.getHeaders();
                     headers.add(Headers.create(
                             configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()),
                             new MessagePendingElement(Boolean.valueOf(selectionUID != null && responseStorage.hasPendingResponse(selectionUID)))));
@@ -360,7 +361,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
     }
 
     private boolean isMakeConnectionRequest(final Packet request) {
-        return configuration.getRuntimeVersion().protocolVersion.wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+        return configuration.getRuntimeVersion().protocolVersion.wsmcAction.equals(AddressingUtils.getAction(request.getMessage().getHeaders(), configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     private Packet createEmptyResponse(Packet request) {

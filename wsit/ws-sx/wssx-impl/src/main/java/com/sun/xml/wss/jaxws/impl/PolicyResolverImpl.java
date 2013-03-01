@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,8 +40,9 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
@@ -290,8 +291,8 @@ public class PolicyResolverImpl implements PolicyResolver {
 
     private String getAction(Message msg) {
         if (addVer != null) {
-            HeaderList hl = msg.getHeaders();
-            String retVal = hl.getAction(addVer, tubeConfig.getBinding().getSOAPVersion());
+            MessageHeaders hl = msg.getHeaders();
+            String retVal = AddressingUtils.getAction(hl, addVer, tubeConfig.getBinding().getSOAPVersion());
             return retVal;
         }
         return "";

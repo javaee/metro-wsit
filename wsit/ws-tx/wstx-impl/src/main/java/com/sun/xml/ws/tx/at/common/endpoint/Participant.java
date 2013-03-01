@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,8 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.AddressingUtils;
+import com.sun.xml.ws.api.message.MessageHeaders;
 import com.sun.xml.ws.api.message.Header;
 
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
@@ -224,11 +225,11 @@ public class Participant<T> implements ParticipantIF<T> {
      * @return CoordinatorIF
      */
     CoordinatorIF<T> getCoordinatorPortTypeForReplyTo() {
-            HeaderList headerList =
-                    (HeaderList) m_context.getMessageContext().get(
+            MessageHeaders headerList =
+                    (MessageHeaders) m_context.getMessageContext().get(
                             com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
           AddressingVersion av = m_version.getAddressingVersion();
-          WSEndpointReference wsReplyTo = headerList.getReplyTo(av, m_version.getSOPAVersion());
+          WSEndpointReference wsReplyTo = AddressingUtils.getReplyTo(headerList, av, m_version.getSOPAVersion());
             if(wsReplyTo != null && !wsReplyTo.isNone() &&wsReplyTo.isAnonymous()){
               Header header = headerList.get(av.fromTag, true);
               if(header!=null)

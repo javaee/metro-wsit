@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,6 +45,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
@@ -182,7 +183,7 @@ public abstract class WsrmProtocolHandler {
     }
 
     protected final String getWsaAction(@NotNull Message message) {
-        return message.getHeaders().getAction(addressingVersion, soapVersion);
+        return AddressingUtils.getAction(message.getHeaders(), addressingVersion, soapVersion);
     }
 
     protected final JAXBRIContext getJaxbContext() {
