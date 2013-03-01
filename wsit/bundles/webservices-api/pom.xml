@@ -80,7 +80,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>javax.xml.soap</groupId>
-                                    <artifactId>saaj-api</artifactId>
+                                    <artifactId>javax.xml.soap-api</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -135,7 +135,7 @@
                                 <includes>
                                     <include>javax.xml.ws:jaxws-api</include>
                                     <include>javax.xml.bind:jaxb-api</include>
-                                    <include>javax.xml.soap:saaj-api</include>
+                                    <include>javax.xml.soap:javax.xml.soap-api</include>
                                     <include>javax.jws:jsr181-api</include>
                                 </includes>
                             </artifactSet>
@@ -183,7 +183,7 @@
         </dependency>
         <dependency>
             <groupId>javax.xml.soap</groupId>
-            <artifactId>saaj-api</artifactId>            
+            <artifactId>javax.xml.soap-api</artifactId>            
             <exclusions>
                 <exclusion>
                     <groupId>javax.activation</groupId>
