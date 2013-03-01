@@ -70,12 +70,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>com.sun.org.apache.xml.internal</groupId>
-                <artifactId>resolver</artifactId>
-                <scope>provided</scope>
-                <version>20050927</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.enterprise</groupId>
                 <artifactId>hk2</artifactId>
                 <version>1.6.3</version>
