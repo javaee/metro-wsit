@@ -456,6 +456,7 @@
         <glassfish.version>3.2-b06</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>
+        <saaj.spec.version>1.3</saaj.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
         <jaxb.ri.release.version>2.2.7</jaxb.ri.release.version><!-- readme.html -->
         <jaxws.spec.version>2.2</jaxws.spec.version>

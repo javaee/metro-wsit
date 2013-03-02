@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -75,7 +75,7 @@
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                    <includes>javax\/jws\/*,javax\/xml\/ws\/*</includes>
+                                    <includes>javax\/jws\/*,javax\/xml\/ws\/*,javax\/xml\/soap\/*</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -107,7 +107,8 @@
                     <instructions>
                         <Export-Package>
                             javax.jws.*;version=2.0,
-                            javax.xml.ws.*;version=${jaxws.spec.version}
+                            javax.xml.ws.*;version=${jaxws.spec.version},
+                            javax.xml.soap.*;version=${saaj.spec.version}
                         </Export-Package>
                         <Import-Package>
                             javax.xml.bind;version=${jaxb.spec.version},

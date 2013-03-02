@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -158,7 +158,7 @@
                                     com.oracle.webservices.api.databinding;version=${jaxws.ri.release.version},
                                     com.oracle.webservices.api.message;version=${jaxws.ri.release.version},
                                     com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.ri.release.version},
-                                    com.sun.istack.ws.*;version=${jaxws.ri.release.version},
+                                    com.sun.istack.ws.*;version=${jaxb.ri.release.version},
                                     com.sun.istack.localization;version=${jaxb.ri.release.version};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
                                     com.sun.tools.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.wsit.security.*;version=${metro.release.version},
@@ -196,6 +196,7 @@
                                     org.jvnet.ws.*;version=${jaxws.ri.release.version}
                                 </Export-Package>
                                 <Import-Package>
+                                    com.sun.istack.*;version=${jaxb.ri.release.version},
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
@@ -224,6 +225,7 @@
                                     javax.ejb;resolution:=optional;version=3.0,
                                     javax.jws;version=2.0,
                                     javax.jws.soap;version=2.0,
+                                    javax.xml.soap.*;version=${saaj.spec.version},
                                     javax.xml.ws.*;version=${jaxws.spec.version},
                                     javax.xml.bind.*;version=${jaxb.spec.version},
                                     org.apache.coyote;resolution:=optional,
