@@ -312,8 +312,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxr-api</artifactId>
+            <groupId>javax.xml.registry</groupId>
+            <artifactId>javax.xml.registry-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
