@@ -72,8 +72,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>javax.xml</groupId>
-                                    <artifactId>jaxr-api</artifactId>
+                                    <groupId>javax.xml.registry</groupId>
+                                    <artifactId>javax.xml.registry-api</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -154,8 +154,8 @@
             <artifactId>jaxrpc-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxr-api</artifactId>
+            <groupId>javax.xml.registry</groupId>
+            <artifactId>javax.xml.registry-api</artifactId>
         </dependency>
 
         <!-- Non shaded dependencies -->
