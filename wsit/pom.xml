@@ -681,6 +681,8 @@
         <findbugs.exclude />
 
         <mf.dir>${project.build.outputDirectory}</mf.dir>
+
+        <netbeans.hint.jdkPlatform>JDK_1.6</netbeans.hint.jdkPlatform>
     </properties>
     
     <dependencyManagement>
