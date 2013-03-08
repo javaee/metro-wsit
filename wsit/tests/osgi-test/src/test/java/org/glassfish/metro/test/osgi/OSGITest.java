@@ -136,8 +136,8 @@ public class OSGITest {
                 mavenBundle().groupId("javax.resource").artifactId("javax.resource-api").version("1.7-b03"),
                 mavenBundle().groupId("javax.enterprise.deploy").artifactId("javax.enterprise.deploy-api").version("1.6"),
                 mavenBundle().groupId("org.glassfish.main.deployment").artifactId("dol").version(GF_VERSION),
-                mavenBundle().groupId("javax.xml").artifactId("jaxrpc-api-osgi").version("1.1-b01"),
-                mavenBundle().groupId("javax.xml").artifactId("jaxr-api-osgi").version("1.0-b01"),
+                mavenBundle().groupId("javax.xml.rpc").artifactId("javax.xml.rpc-api").version("1.1"),
+                mavenBundle().groupId("javax.xml.registry").artifactId("javax.xml.registry-api").version("1.0.4"),
                 mavenBundle("com.sun.mail", "javax.mail", "1.4.5"),
                 
                 

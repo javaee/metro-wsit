@@ -206,8 +206,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>${project.parent.groupId}:wsit*</include>
-
-                                    <include>javax.xml:jaxrpc-api</include>
+                                    <include>javax.xml.rpc:javax.xml.rpc-api</include>
                                     <include>javax.xml.crypto:jsr105-api</include>
                                     <include>com.sun.org.apache.xml.internal:resolver</include>
                                     <include>com.sun.xml.bind:jaxb-core</include>
@@ -394,8 +393,8 @@
             <artifactId>jaxr-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxrpc-api</artifactId>
+            <groupId>javax.xml.rpc</groupId>
+            <artifactId>javax.xml.rpc-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.rpc</groupId>

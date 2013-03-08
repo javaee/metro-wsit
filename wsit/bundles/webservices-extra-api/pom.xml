@@ -78,6 +78,13 @@
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.xml.rpc</groupId>
+                                    <artifactId>javax.xml.rpc-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -112,7 +119,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>javax.xml:jaxrpc-api</include>
+                                    <include>javax.xml.rpc:javax.xml.rpc-api</include>
                                     <include>javax.xml.registry:javax.xml.registry-api</include>
                                 </includes>
                             </artifactSet>
@@ -150,8 +157,8 @@
     <dependencies>
         <!-- Shaded dependencies -->
         <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxrpc-api</artifactId>
+            <groupId>javax.xml.rpc</groupId>
+            <artifactId>javax.xml.rpc-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.xml.registry</groupId>
