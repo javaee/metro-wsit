@@ -59,7 +59,6 @@
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <forceCreation>true</forceCreation>
                     <archive>
                         <manifestFile>${mf.dir}/META-INF/MANIFEST.MF</manifestFile>
                         <manifestEntries>
@@ -108,14 +107,41 @@
                         <goals>
                             <goal>manifest</goal>
                         </goals>
+                        <configuration>
+                            <manifestLocation>${manifest.folder}/META-INF</manifestLocation>
+                            <instructions>
+                                <Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
+                            </instructions>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <instructions>                        
-                        <Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
-                    </instructions>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-manifest</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${manifest.folder}</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${mf.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <manifest.folder>${project.build.directory}/generated-manifest</manifest.folder>
+    </properties>
 </project>
