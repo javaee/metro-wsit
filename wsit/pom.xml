@@ -754,11 +754,6 @@
                 <version>1.0-rev-1</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.crypto</groupId>
-                <artifactId>jsr105-api</artifactId>
-                <version>1.0.1</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.xml.security</groupId>
                 <artifactId>jsr105-impl</artifactId>
                 <version>1.0.2</version>
