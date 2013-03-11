@@ -306,13 +306,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <excludePackageNames>com.sun.xml.ws.*:*javanet*:*ctc*:*glassfish*</excludePackageNames>
-                </configuration>
-            </plugin>
             <plugin> <!-- remove the generated src dir-->
                 <artifactId>maven-clean-plugin</artifactId>
                 <executions>
