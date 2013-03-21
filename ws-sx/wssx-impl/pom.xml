@@ -130,10 +130,6 @@
             <artifactId>jmac</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.crypto</groupId>
-            <artifactId>jsr105-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.security</groupId>
             <artifactId>jsr105-impl</artifactId>
         </dependency>

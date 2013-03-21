@@ -50,19 +50,31 @@
     </parent>
 
     <artifactId>webservices-api-osgi</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>Metro Web Services API OSGi Bundle</name>
     <description>Metro Web Services API OSGi Bundle</description>
 
     <build>
         <plugins>
-            <plugin> <!-- want to unpack sources from individual modules -->
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>unpack-classes</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeTransitive>true</excludeTransitive>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            <includes>javax\/jws\/**,javax\/xml\/ws\/**,javax\/xml\/soap\/**</includes>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>unpack-sources</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -75,7 +87,7 @@
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                    <includes>javax\/jws\/*,javax\/xml\/ws\/*,javax\/xml\/soap\/*</includes>
+                                    <includes>javax\/jws\/**,javax\/xml\/ws\/**,javax\/xml\/soap\/**</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -103,20 +115,61 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                        <configuration>
+                            <manifestLocation>${manifest.folder}/META-INF</manifestLocation>
+                            <instructions>
+                                <Export-Package>
+                                    javax.jws.*;version=2.0,
+                                    javax.xml.ws.*;version=${jaxws.spec.version},
+                                    javax.xml.soap.*;version=${saaj.spec.version}
+                                </Export-Package>
+                                <Import-Package>
+                                    javax.xml.bind;version=${jaxb.spec.version},
+                                    javax.xml.bind.*;version=${jaxb.spec.version},
+                                    *
+                                </Import-Package>
+                                <DynamicImport-Package>org.glassfish.hk2.osgiresourcelocator</DynamicImport-Package>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-manifest</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${manifest.folder}</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${mf.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <instructions>
-                        <Export-Package>
-                            javax.jws.*;version=2.0,
-                            javax.xml.ws.*;version=${jaxws.spec.version},
-                            javax.xml.soap.*;version=${saaj.spec.version}
-                        </Export-Package>
-                        <Import-Package>
-                            javax.xml.bind;version=${jaxb.spec.version},
-                            javax.xml.bind.*;version=${jaxb.spec.version},
-                            *
-                        </Import-Package>
-                        <DynamicImport-Package>org.glassfish.hk2.osgiresourcelocator</DynamicImport-Package>
-                    </instructions>
+                    <archive>
+                        <manifestFile>${mf.dir}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin> <!-- remove the generated src dir-->
@@ -133,6 +186,9 @@
                             <filesets>
                                 <fileset>
                                     <directory>${generated.sources.dir}</directory>
+                                </fileset>
+                                <fileset>
+                                    <directory>${mf.dir}</directory>
                                 </fileset>
                             </filesets>
                         </configuration>
@@ -153,5 +209,6 @@
 
     <properties>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+        <manifest.folder>${project.build.directory}/generated-manifest</manifest.folder>
     </properties>
 </project>
