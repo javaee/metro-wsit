@@ -142,7 +142,7 @@ public class OSGITest {
                 
                 
                 //Metro APIs
-                mavenBundle("javax.xml.bind", "jaxb-api-osgi", JAXB_SPEC_VERSION),
+                mavenBundle("javax.xml.bind", "jaxb-api", JAXB_SPEC_VERSION),
                 mavenBundle("org.glassfish.metro", "webservices-api-osgi", METRO_VERSION),
                 //Metro OSGi bundles
                 mavenBundle("com.sun.xml.bind", "jaxb-osgi", JAXB_IMPL_VERSION),
