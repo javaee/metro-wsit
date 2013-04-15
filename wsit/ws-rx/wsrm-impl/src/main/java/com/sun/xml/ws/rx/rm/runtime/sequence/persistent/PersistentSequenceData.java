@@ -411,6 +411,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     private <T> T getFieldData(Connection con, FieldInfo<T> fi) throws PersistenceException {
+        T returnValue = null;
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT " +
@@ -433,7 +434,19 @@ final class PersistentSequenceData implements SequenceData {
                         "Duplicate sequence records detected for a sequence with id [ %s ]", sequenceId)));
             }
 
-            return fi.javaClass.cast(rs.getObject(fi.columnName));
+            String javaClassName = fi.javaClass.getName();
+
+            if (javaClassName.equals(Integer.class.getName())) {
+                returnValue = fi.javaClass.cast(rs.getInt(fi.columnName));
+            } else if (javaClassName.equals(Long.class.getName())) {
+                returnValue = fi.javaClass.cast(rs.getLong(fi.columnName));
+            } else if (javaClassName.equals(String.class.getName())) {
+                returnValue = fi.javaClass.cast(rs.getString(fi.columnName));
+            } else {
+                returnValue = fi.javaClass.cast(rs.getObject(fi.columnName));
+            }
+
+            return returnValue;
         } catch (SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Loading %s column data on a sequence with id = [ %s ]  failed: " +
