@@ -57,11 +57,14 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Transmits standalone protocol messages over the wire. Provides also some additional 
@@ -86,9 +89,16 @@ public final class Communicator {
         private AddressingVersion addressingVersion = AddressingVersion.W3C;
         private SOAPVersion soapVersion = SOAPVersion.SOAP_12;
         private JAXBRIContext jaxbContext;
+        private Container container;
 
         private Builder(String name) {
             this.name = name;
+        }
+
+        public Builder container(final Container value) {
+            this.container = value;
+
+            return this;
         }
 
         public Builder addressingVersion(AddressingVersion value) {
@@ -129,7 +139,7 @@ public final class Communicator {
                 throw new IllegalStateException("Cannot create communicator instance: JAXB context has not been set.");
             }
 
-            return new Communicator(name, tubelineHead, scInitiator, addressingVersion, soapVersion, jaxbContext);
+            return new Communicator(name, tubelineHead, scInitiator, addressingVersion, soapVersion, jaxbContext, container);
         }
     }
 
@@ -145,7 +155,9 @@ public final class Communicator {
     private final AddressingVersion addressingVersion;
     private final SOAPVersion soapVersion;
     private final JAXBRIContext jaxbContext;
+    private final Container container;
     //
+    private BindingProvider proxy;
     private FiberExecutor fiberExecutor;
     private volatile EndpointAddress destinationAddress;
 
@@ -155,7 +167,8 @@ public final class Communicator {
             @Nullable SecureConversationInitiator scInitiator,
             @NotNull AddressingVersion addressingVersion,
             @NotNull SOAPVersion soapVersion,
-            @NotNull JAXBRIContext jaxbContext) {
+            @NotNull JAXBRIContext jaxbContext,
+            @NotNull Container container) {
         this.destinationAddress = null;
         this.fiberExecutor = new FiberExecutor(name, tubeline);
         this.scInitiator = scInitiator;
@@ -163,6 +176,7 @@ public final class Communicator {
         this.soapVersion = soapVersion;
         this.soapMustUnderstandAttributeName = new QName(soapVersion.nsUri, "mustUnderstand");
         this.jaxbContext = jaxbContext;
+        this.container = container;
     }
 
     public final Packet createRequestPacket(Object jaxbElement, String wsaAction, boolean expectReply) {
@@ -176,9 +190,8 @@ public final class Communicator {
             throw new IllegalStateException("Destination address is not defined in this communicator instance");
         }
 
-        Packet packet = new Packet(message);
-        packet.endpointAddress = destinationAddress;
-        packet.expectReply = expectReply;
+        final Packet packet = createPacket(message, expectReply);
+
         AddressingUtils.fillRequestAddressingHeaders(
                 message.getHeaders(),
                 packet,
@@ -223,11 +236,7 @@ public final class Communicator {
             throw new IllegalStateException("Destination address is not defined in this communicator instance");
         }
 
-        Packet packet = new Packet();
-        packet.endpointAddress = destinationAddress;
-        packet.expectReply = expectReply;
-
-        return packet;
+        return createPacket(null, expectReply);
     }
 
     /**
@@ -320,9 +329,23 @@ public final class Communicator {
             requestPacket.transportBackChannel.close();
         }
 
-        Packet emptyReturnPacket = new Packet();
-        emptyReturnPacket.invocationProperties.putAll(requestPacket.invocationProperties);
-        return emptyReturnPacket;
+        final Packet packet = createPacket(null);
+        packet.invocationProperties.putAll(requestPacket.invocationProperties);
+        return packet;
+    }
+
+    private Packet createPacket(final Message message) {
+        final Packet packet = message == null ? new Packet() : new Packet(message);
+        packet.component = container;
+        packet.proxy = proxy;
+        return packet;
+    }
+
+    private Packet createPacket(final Message message, final boolean expectReply) {
+        final Packet packet = createPacket(message);
+        packet.endpointAddress = destinationAddress;
+        packet.expectReply = expectReply;
+        return packet;
     }
 
     /**
@@ -471,8 +494,15 @@ public final class Communicator {
         this.destinationAddress = newValue;
     }
 
+    // This is called by RM and MC when they start a session.
     public void setDestinationAddressFrom(Packet packet) {
         this.destinationAddress = packet.endpointAddress;
+        // The proxy needs to be set so upper layers can get Container/Component.
+        if (this.proxy == null) {
+            this.proxy = packet.proxy;
+        } else if (this.proxy != packet.proxy) {
+            throw new WebServiceException("internal error: proxy should be the same");
+        }
     }
 
     public AddressingVersion getAddressingVersion() {
