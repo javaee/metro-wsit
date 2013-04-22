@@ -58,7 +58,7 @@
 
     <properties>
         <netbeans.hint.jdkPlatform>JDK_1.6</netbeans.hint.jdkPlatform>
-        <metro.dep.classifier>jar</metro.dep.classifier>
+        <metro.dep.classifier></metro.dep.classifier>
         <!-- DEFAULT = JAXB, TOPLINK = MOXy -->
         <ws.databinding>DEFAULT</ws.databinding>
         <!-- IN_VM, LWHS, TOMCAT (requires tomcat.home to be set) -->
