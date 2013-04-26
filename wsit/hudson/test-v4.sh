@@ -86,7 +86,7 @@ fi
 
 METRO_BUNDLE="org/glassfish/metro/metro-standalone"
 if [ -z "$METRO_VERSION" ]; then
-    LATEST_METRO_BUILD=`curl -s -k $MVN_REPO_URL/$METRO_BUNDLE/maven-metadata.xml | grep "<version>$METRO_MAJOR_VERSION-b[1-9]" | cut -d ">" -f2,2 | cut -d "<" -f1,1 | tail -1 | cut -d "b" -f2,2`
+    LATEST_METRO_BUILD=`curl -s -k $MVN_REPO_URL/$METRO_BUNDLE/maven-metadata.xml | grep "<version>$METRO_MAJOR_VERSION-b[0-9]" | cut -d ">" -f2,2 | cut -d "<" -f1,1 | tail -1 | cut -d "b" -f2,2`
     METRO_VERSION="$METRO_MAJOR_VERSION-b$LATEST_METRO_BUILD"
     echo "Latest metro build: " $LATEST_METRO_BUILD
     echo "Metro version: " $METRO_VERSION
