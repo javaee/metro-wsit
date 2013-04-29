@@ -158,6 +158,15 @@ if [ -z "$METRO_URL" ]; then
     echo "Updating jaxb-api.version property in GlassFish main pom.xml to $JAXB_API_VERSION"
     perl -i -pe "s|<jaxb-api.version>.*</jaxb-api.version>|<jaxb-api.version>$JAXB_API_VERSION</jaxb-api.version>|g" pom.xml
 
+    echo "!!! TODO !!! REMOVE ME AFTER FIRST JAXB-API 2.2.9 INTEGRATION !!!"
+    cd ..
+    for file in `find . -name pom.xml`
+    do
+        perl -i -pe "s|<artifactId>jaxb-api-osgi</artifactId>|<artifactId>jaxb-api</artifactId>|g" $file
+    done
+    echo "!!! TODO !!! REMOVE ME AFTER FIRST JAXB-API 2.2.9 INTEGRATION"
+    cd appserver
+
     pushd $GF_SVN_ROOT/nucleus
     echo "Updating mimepull.version property in GlassFish nucleus-parent pom.xml to $MIMEPULL_VERSION"
     perl -i -pe "s|<mimepull.version>.*</mimepull.version>|<mimepull.version>$MIMEPULL_VERSION</mimepull.version>|g" pom.xml
