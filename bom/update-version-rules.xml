@@ -43,7 +43,7 @@
          xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
     <rules>
-        <rule groupId="com.sun.xml.ws" comparisonMethod="maven">
+        <rule groupId="com.sun.xml.ws" artifactId="jaxws-ri-bom" comparisonMethod="maven">
             <ignoreVersions>
                 <ignoreVersion type="regex">2.2.8</ignoreVersion>
             </ignoreVersions>
