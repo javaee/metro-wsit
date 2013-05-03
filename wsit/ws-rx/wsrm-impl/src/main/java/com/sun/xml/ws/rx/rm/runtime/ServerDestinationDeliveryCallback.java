@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -95,11 +95,12 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
                 } else {
                     LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
-                    RedeliveryTaskExecutor.INSTANCE.register(
+                    RedeliveryTaskExecutor.register(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.destinationMessageHandler);
+                            rc.destinationMessageHandler,
+                            response.component);
                     return;
                 }
 
@@ -131,11 +132,12 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                 try {
                     HaContext.initFrom(request.getPacket());
 
-                    RedeliveryTaskExecutor.INSTANCE.register(
+                    RedeliveryTaskExecutor.register(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.destinationMessageHandler);
+                            rc.destinationMessageHandler,
+                            request.getPacket().component);
 
                 } finally {
                     HaContext.clear();

@@ -71,7 +71,9 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
@@ -101,8 +103,12 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
 //     Delay before dispose is called on a replaced endpoint delegate. Defaults to 2 minutes.
     private static final long ENDPOINT_DISPOSE_DELAY_DEFAULT = 120000l;
     private long endpointDisposeDelay = ENDPOINT_DISPOSE_DELAY_DEFAULT;
-    private final ScheduledExecutorService disposeThreadPool = Executors.newScheduledThreadPool(1);
+    private volatile ScheduledExecutorService executorService;
     private final EndpointCreationAttributes creationAttributes;
+
+    private boolean useContainerSpi = true;
+
+    private final AtomicBoolean isClosed;
             
     /**
      * Initializes this endpoint.
@@ -116,7 +122,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     public ManagedEndpoint(final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
             this.creationAttributes = attributes;
             this.endpointDelegate = endpoint;
-
+            this.isClosed = new AtomicBoolean(false);
             for (ReconfigNotifier notifier : this.reconfigNotifiers) {
                 notifier.sendNotification();
             }
@@ -166,7 +172,10 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
 
     @Override
     synchronized public void dispose() {
-        this.disposeThreadPool.shutdown();
+        if (useContainerSpi) return; //nothing to dispose if we got thread pool from container
+        if (this.executorService == null) return;
+        this.isClosed.compareAndSet(false, true);
+        this.executorService.shutdown();
         if (this.endpointDelegate != null) {
             this.endpointDelegate.dispose();
         }
@@ -285,7 +294,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
                 }
             }
         };
-        disposeThreadPool.schedule(dispose, this.endpointDisposeDelay, TimeUnit.MILLISECONDS);
+        getExecutorService().schedule(dispose, this.endpointDisposeDelay, TimeUnit.MILLISECONDS);
     }
     
     @Override
@@ -317,5 +326,39 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     @Override
     public Packet createServiceResponseForException(ThrowableContainerPropertySet tcps, Packet packet, SOAPVersion soapv, WSDLPort wsdlp, SEIModel seim, WSBinding wsb) {
         return endpointDelegate.createServiceResponseForException(tcps, packet, soapv, wsdlp, seim, wsb);
+    }
+    
+    /**
+     * Return the appropriate ScheduledExecutorService - on initial access, check for container.getSPI
+     * NOTE - THIS METHOD IS A COPY OF {@link com.sun.xml.ws.commons.AbstractTaskManager#getExecutorService() AbstractTaskManager.getExecutorService() } IN metro-commons!!!
+     * IF A SUITABLE COMMON LOCATION CAN BE FOUND IT MUST BE REMOVED FROM HERE!
+     * @return
+     * 
+     */
+    private ScheduledExecutorService getExecutorService() {
+        if (executorService == null) {
+            synchronized (this) {
+                if (executorService == null) {
+                    if (getContainer() != null) {
+                        executorService = getContainer().getSPI(ScheduledExecutorService.class);
+                    }
+                    if (executorService == null) {
+                        //container did not return an SPI - create our own thread pool
+                        LOGGER.finer("Container did not return SPI for ScheduledExecutorService - creating thread pool for dispose");
+                        executorService = Executors.newScheduledThreadPool(getThreadPoolSize());
+                        useContainerSpi = false;
+                    } else {
+                        LOGGER.finer("Using Container SPI for ScheduledExecutorService for dispose");
+                        useContainerSpi = true;
+                    }
+                    this.isClosed.set(false);
+                }
+            }
+        }
+        return executorService;
+    }
+
+    private int getThreadPoolSize() {
+        return 1;
     }
 }

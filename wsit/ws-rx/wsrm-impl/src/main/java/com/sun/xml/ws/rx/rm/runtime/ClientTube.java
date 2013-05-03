@@ -140,7 +140,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 context.getAddress().getURI().toString(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
-                rc.configuration);
+                rc.configuration,
+                context.getContainer());
         rc.setSequenceManager(sequenceManager);
 
         // TODO P3 we should also take into account addressable clients
@@ -339,7 +340,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         createSequences(request);
 
         ClientAckRequesterTask cart = new ClientAckRequesterTask(rc, outboundSequenceId.value);
-        MaintenanceTaskExecutor.INSTANCE.register(cart, cart.getExecutionDelay(), cart.getExecutionDelayTimeUnit());
+        MaintenanceTaskExecutor.register(cart, cart.getExecutionDelay(), cart.getExecutionDelayTimeUnit(), request.component);
     }
 
     private void closeRmSession() {

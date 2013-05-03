@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,6 +40,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.RxRuntimeException;
@@ -117,7 +118,7 @@ public final class PersistentSequenceManager extends AbstractMOMRegistrationAwar
      */
     private volatile boolean disposed = false;
 
-    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration) {
+    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration, Container container) {
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
@@ -129,10 +130,11 @@ public final class PersistentSequenceManager extends AbstractMOMRegistrationAwar
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
 
-        MaintenanceTaskExecutor.INSTANCE.register(
+        MaintenanceTaskExecutor.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
                 configuration.getRmFeature().getSequenceManagerMaintenancePeriod(),
-                TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS,
+                container);
     }
 
     /**

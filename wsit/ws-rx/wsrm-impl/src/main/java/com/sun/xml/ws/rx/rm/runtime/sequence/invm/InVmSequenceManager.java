@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,6 +42,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.commons.ha.HaContext;
@@ -138,7 +139,7 @@ public final class InVmSequenceManager extends AbstractMOMRegistrationAware impl
     private final String loggerProlog;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
+    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container) {
         this.loggerProlog = "[" + uniqueEndpointId + "_SEQUENCE_MANAGER]: ";
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
@@ -185,10 +186,10 @@ public final class InVmSequenceManager extends AbstractMOMRegistrationAware impl
 
         this.unackedMessageStore = HighlyAvailableMap.create(uniqueEndpointId + "_UNACKED_MESSAGES_MAP", unackedMsgRM);
 
-        MaintenanceTaskExecutor.INSTANCE.register(
+        MaintenanceTaskExecutor.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
                 configuration.getRmFeature().getSequenceManagerMaintenancePeriod(),
-                TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS, container);
     }
 
     /**

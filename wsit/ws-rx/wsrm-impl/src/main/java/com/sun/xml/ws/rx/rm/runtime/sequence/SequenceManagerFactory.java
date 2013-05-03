@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.commons.WSEndpointCollectionBasedMOMListener;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
@@ -82,13 +83,13 @@ public enum SequenceManagerFactory {
      * @param managedObjectManager object manager managing the newly created {@link SequenceManager} instance
      * @return newly created {@link SequenceManager} instance
      */
-    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
+    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container) {
         synchronized (INSTANCE) {
             SequenceManager result;
             if (persistent) {
-                result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+                result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container);
             } else {
-                result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+                result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container);
             }
             
             ManagedObjectManager mom = configuration.getManagedObjectManager();

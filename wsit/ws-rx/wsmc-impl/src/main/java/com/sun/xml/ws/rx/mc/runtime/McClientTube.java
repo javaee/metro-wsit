@@ -53,6 +53,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
@@ -79,7 +80,7 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
     private final MakeConnectionSenderTask mcSenderTask;
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
-    McClientTube(McConfiguration configuration, Tube tubelineHead) throws RxRuntimeException {
+    McClientTube(McConfiguration configuration, Tube tubelineHead, Container container) throws RxRuntimeException {
         super(tubelineHead);
 
         this.configuration = configuration;
@@ -89,6 +90,7 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
                 .addressingVersion(configuration.getAddressingVersion())
                 .soapVersion(configuration.getSoapVersion())
                 .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .container(container)
                 .build();
         
         final String wsmcAnonymousAddress = configuration.getRuntimeVersion().getAnonymousAddress(UUID.randomUUID().toString());

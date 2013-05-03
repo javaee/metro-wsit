@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -106,11 +106,12 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             try {
                 HaContext.initFrom(request.getPacket());
 
-                RedeliveryTaskExecutor.INSTANCE.register(
+                RedeliveryTaskExecutor.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
-                        rc.sourceMessageHandler);
+                        rc.sourceMessageHandler,
+                        request.getPacket().component);
             } finally {
                 HaContext.clear();
             }
@@ -159,11 +160,12 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                         return;
                     }
 
-                    RedeliveryTaskExecutor.INSTANCE.register(
+                    RedeliveryTaskExecutor.register(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.sourceMessageHandler);
+                            rc.sourceMessageHandler,
+                            response.component);
                 }
             } catch (RxRuntimeException ex) {
                 onCompletion(ex);
@@ -185,11 +187,12 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 try {
                     HaContext.initFrom(request.getPacket());
 
-                    RedeliveryTaskExecutor.INSTANCE.register(
+                    RedeliveryTaskExecutor.register(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.sourceMessageHandler);
+                            rc.sourceMessageHandler,
+                            request.getPacket().component);
 
                 } finally {
                     HaContext.clear();
@@ -248,11 +251,12 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (Utilities.isResendPossible(error)) {
-                RedeliveryTaskExecutor.INSTANCE.register(
+                RedeliveryTaskExecutor.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
-                        rc.sourceMessageHandler);
+                        rc.sourceMessageHandler,
+                        request.getPacket().component);
             } else {
                 resumeParentFiber(error);
             }

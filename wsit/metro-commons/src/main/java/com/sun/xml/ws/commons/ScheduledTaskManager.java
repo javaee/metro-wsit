@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,9 +45,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.Component;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -62,7 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class ScheduledTaskManager {
+public final class ScheduledTaskManager extends AbstractTaskManager {
     private static final Logger LOGGER = Logger.getLogger(ScheduledTaskManager.class);
     private static final AtomicInteger instanceNumber = new AtomicInteger(1);
 
@@ -70,18 +73,20 @@ public final class ScheduledTaskManager {
     private static final long PERIOD = 100;
     //
     private final String name;
-    private final ScheduledExecutorService executorService;
     private final Queue<ScheduledFuture<?>> scheduledTaskHandles;
+    private final Component component;
+    private final String threadNamePrefix;
+    
     /**
      * TODO javadoc
      */
-    public ScheduledTaskManager(String name) {
+    public ScheduledTaskManager(String name, Component component) {
+        super();
         this.name = name.trim();
-
+        this.component = component;
+        
         // make all lowercase, replace all occurences of subsequent empty characters with a single dash and append some info
-        String threadNamePrefix = this.name.toLowerCase().replaceAll("\\s+", "-") + "-scheduler-" + instanceNumber.getAndIncrement();
-
-        this.executorService = Executors.newScheduledThreadPool(1, new NamedThreadFactory(threadNamePrefix));
+        this.threadNamePrefix = this.name.toLowerCase().replaceAll("\\s+", "-") + "-scheduler-" + instanceNumber.getAndIncrement();
         this.scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
     }
 
@@ -97,18 +102,8 @@ public final class ScheduledTaskManager {
      */
     public void shutdown() {
         stopAllTasks();
-
-        executorService.shutdown();
-        if (!executorService.isTerminated()) {
-            try {
-                Thread.sleep(DELAY);
-            } catch (InterruptedException ex) {
-                LOGGER.fine("Interrupted while waiting for a scheduler to shut down.", ex);
-            }
-            if (!executorService.isTerminated()) {
-                executorService.shutdownNow();
-            }
-        }
+        //force close after waiting for period given by DELAY
+        close(true, DELAY);
     }
 
     /**
@@ -119,7 +114,7 @@ public final class ScheduledTaskManager {
      * @param period the period between successive executions (in milliseconds)
      */
     public ScheduledFuture<?> startTask(Runnable task, long initialDelay, long period) {
-        final ScheduledFuture<?> taskHandle = executorService.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+        final ScheduledFuture<?> taskHandle = getExecutorService().scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
             // TODO L10N
             LOGGER.warning(String.format("Unable to store handle for task of class [ %s ]", task.getClass().getName()));
@@ -134,5 +129,30 @@ public final class ScheduledTaskManager {
      */
     public ScheduledFuture<?> runOnce(Runnable task) {
         return startTask(task, DELAY, PERIOD);
+    }
+    
+    @Override
+    protected ThreadFactory createThreadFactory() {
+        return new NamedThreadFactory(threadNamePrefix);
+    }
+    
+    @Override
+    protected String getThreadPoolName() {
+        return threadNamePrefix;
+    }
+    
+    @Override
+    protected int getThreadPoolSize() {
+        return 1;
+    }
+
+    @Override
+    protected Component getComponent() {
+        return component;
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

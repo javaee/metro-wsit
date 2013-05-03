@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,6 +41,7 @@
 package com.sun.xml.ws.commons;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import java.util.concurrent.TimeUnit;
 
@@ -48,20 +49,20 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum MaintenanceTaskExecutor {
-    INSTANCE;
+public class MaintenanceTaskExecutor {  
+    private static volatile DelayedTaskManager delayedTaskManager = null;
 
-    private DelayedTaskManager delayedTaskManager;
+    private MaintenanceTaskExecutor() {}
 
-    private MaintenanceTaskExecutor() {
-        this.delayedTaskManager = DelayedTaskManager.createManager("maintenance-task-executor", 5);
-    }
-
-    public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
+    public static boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit, Component component) {
+        if (delayedTaskManager == null) {
+            synchronized(MaintenanceTaskExecutor.class) {
+                if (delayedTaskManager == null) {
+                    delayedTaskManager = DelayedTaskManager.createManager("maintenance-task-executor", 5, component);
+                }
+            }
+        }
         return delayedTaskManager.register(task, delay, timeUnit);
     }
 
-    public boolean isClosed() {
-        return delayedTaskManager.isClosed();
-    }   
 }

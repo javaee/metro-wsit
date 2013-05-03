@@ -52,6 +52,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -138,13 +139,19 @@ public class McServerTube extends AbstractFilterTubeImpl {
     private final ResponseStorage responseStorage;
     private final Communicator communicator;
 
-    McServerTube(McConfiguration configuration, Tube tubelineHead) {
+    McServerTube(McConfiguration configuration, Tube tubelineHead, Container container) {
         super(tubelineHead);
 
         this.configuration = configuration;
         this.fiberExecutor = new FiberExecutor("McServerTubeCommunicator", tubelineHead);
         this.responseStorage = new ResponseStorage(configuration.getUniqueEndpointId());
-        this.communicator = Communicator.builder("mc-server-tube-communincator").soapVersion(configuration.getSoapVersion()).addressingVersion(configuration.getAddressingVersion()).tubelineHead(super.next).jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())).build();
+        this.communicator = Communicator.builder("mc-server-tube-communincator")
+                .soapVersion(configuration.getSoapVersion())
+                .addressingVersion(configuration.getAddressingVersion())
+                .tubelineHead(super.next)
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .container(container)
+                .build();
     }
 
     McServerTube(McServerTube original, TubeCloner cloner) {

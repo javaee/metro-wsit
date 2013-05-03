@@ -43,6 +43,7 @@ package com.sun.xml.ws.rx.util;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -523,5 +524,9 @@ public final class Communicator {
 
     public boolean isClosed() {
         return this.fiberExecutor == null;
+    }
+
+    public Component getContainer() {
+        return container;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -119,7 +119,13 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         RuntimeContext.Builder rcBuilder = RuntimeContext.builder(
                 configuration,
-                Communicator.builder("rm-server-tube-communicator").tubelineHead(super.next).addressingVersion(configuration.getAddressingVersion()).soapVersion(configuration.getSoapVersion()).jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())).build());
+                Communicator.builder("rm-server-tube-communicator")
+                .tubelineHead(super.next)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .container(context.getEndpoint().getContainer())
+                .build());
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -140,7 +146,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 context.getEndpoint().getServiceName() + "::" + context.getEndpoint().getPortName(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
-                configuration);
+                configuration,
+                context.getEndpoint().getContainer());
 
         this.rc.setSequenceManager(sequenceManager);
     }

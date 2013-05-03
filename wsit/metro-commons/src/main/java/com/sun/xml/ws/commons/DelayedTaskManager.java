@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,33 +42,30 @@ package com.sun.xml.ws.commons;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import com.sun.xml.ws.api.Component;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class DelayedTaskManager {
+public final class DelayedTaskManager extends AbstractTaskManager {
 
     private static final Logger LOGGER = Logger.getLogger(DelayedTaskManager.class);
-
+    private final Component component;
+    private final String threadPoolName;
+    private final int coreThreadPoolSize;
+    
     public static interface DelayedTask {
         public String getName();
 
         public void run(DelayedTaskManager manager);
     }
 
-    public static DelayedTaskManager createSingleThreadedManager(String name){
-        return new DelayedTaskManager(Executors.newSingleThreadScheduledExecutor(createThreadFactory(name)));
-    }
-
-    public static DelayedTaskManager createManager(String name, int coreThreadPoolSize){
-        return new DelayedTaskManager(Executors.newScheduledThreadPool(coreThreadPoolSize, createThreadFactory(name)));
+    public static DelayedTaskManager createManager(String name, int coreThreadPoolSize, Component component){
+        return new DelayedTaskManager(name, coreThreadPoolSize, component);
     }
 
     private static final ThreadFactory createThreadFactory(String name) {
@@ -105,34 +102,49 @@ public final class DelayedTaskManager {
             }
         }
     }
-    //
-    private final ScheduledExecutorService executorService;
-    private final AtomicBoolean isClosed;
+    //   
 
-    private DelayedTaskManager(ScheduledExecutorService executorService) {
-        this.executorService = executorService;
-        this.isClosed = new AtomicBoolean(false);
+    private DelayedTaskManager(String name, int coreThreadPoolSize, Component component) {
+        super();
+        this.threadPoolName = name;
+        this.coreThreadPoolSize = coreThreadPoolSize;
+        this.component = component;
     }
 
     public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
-        if (isClosed.get()) {
+        if (isClosed()) {
             LOGGER.finer(String.format("Attempt to register a new task has failed. This '%s' instance has already been closed", this.getClass().getName()));
             return false;
         }
 
         assert task != null;
-        executorService.schedule(new Worker(task), delay, timeUnit);
-
-        return true;
+        
+        getExecutorService().schedule(new Worker(task), delay, timeUnit);
+        return true; 
     }
 
-    public void close() {
-        if (isClosed.compareAndSet(false, true)) {
-            executorService.shutdown();
-        }
+    @Override
+    protected Component getComponent() {
+        return component;
     }
 
-    public boolean isClosed() {
-        return isClosed.get();
+    @Override
+    protected String getThreadPoolName() {
+        return threadPoolName;
+    }
+
+    @Override
+    protected ThreadFactory createThreadFactory() {
+        return createThreadFactory(threadPoolName);
+    }
+
+    @Override
+    protected int getThreadPoolSize() {
+        return coreThreadPoolSize;
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

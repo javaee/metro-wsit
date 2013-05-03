@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,8 @@ public class OutboundSequenceTest extends TestCase {
             "0987654321",
             SequenceTestUtils.getDeliveryQueueBuilder(),
             SequenceTestUtils.getDeliveryQueueBuilder(),
-            SequenceTestUtils.getConfiguration());
+            SequenceTestUtils.getConfiguration(),
+            Container.NONE);
     private Sequence sequence;
 
     public OutboundSequenceTest(String testName) {
