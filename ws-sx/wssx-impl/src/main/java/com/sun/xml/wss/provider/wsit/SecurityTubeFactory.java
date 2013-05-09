@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -114,11 +114,15 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     // private static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
     private static final String WSDL_MODEL = "WSDL_MODEL";
     private static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
-
+    private static final String DISABLE_METRO_CLIENT_SECURITY="disable.metro.client.security";
     private static final boolean disable;
+    private static final boolean disableClientSecurity;
+
     private static long maxNonceAge;
     static  {
        disable = Boolean.getBoolean("DISABLE_XWSS_SECURITY");
+       disableClientSecurity = Boolean.getBoolean(DISABLE_METRO_CLIENT_SECURITY);
+
        maxNonceAge = SecurityConfigProvider.INSTANCE.getMaxNonceAge();
        if(maxNonceAge == MessageConstants.MAX_NONCE_AGE){ //if max nonce age is not set in domain.xml
            String maxNAge = System.getProperty("MAX_NONCE_AGE");
@@ -128,7 +132,9 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
 
     public void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            context.setCodec(createSecurityCodec(context.getBinding()));
+            if (!disableClientSecurity) {
+                context.setCodec(createSecurityCodec(context.getBinding()));
+            }
         }
     }
 
@@ -234,6 +240,12 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     }
 
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
+        if (disableClientSecurity) {
+            log.log(Level.INFO, "Client Security Tube is being Skipped from the Client Side Tubeline due to property " + 
+                    DISABLE_METRO_CLIENT_SECURITY);
+            return context.getTubelineHead();    
+        }
+        
         ClientPipelineHook hook = null;
         ClientPipelineHook[] hooks = getClientTublineHooks(context);
        if (context.getSEIModel() != null) {
