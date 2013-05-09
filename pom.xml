@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -49,7 +49,7 @@
     <artifactId>metro-project</artifactId>
     <packaging>pom</packaging>
     <name>Metro Web Services Stack Project</name>
-    <version>2.1</version>
+    <version>2.1.0-1</version>
     <description>
         Metro is a high-performance, extensible, easy-to-use web service stack.
         It is a one-stop shop for all your web service needs, from the simplest
@@ -145,8 +145,8 @@
             <post>cvs@wsit.java.net</post>
         </mailingList>
     </mailingLists>
-    <!--developers></developers-->
-    <!--contributors></contributors-->
+    <developers></developers>
+    <contributors></contributors>
     <licenses>
         <license>
             <name>
@@ -248,7 +248,7 @@
                 <plugin>
                     <groupId>com.sun.istack</groupId>
                     <artifactId>maven-istack-commons-plugin</artifactId>
-                    <version>0.1</version>
+                    <version>0.1-SNAPSHOT</version>
                     <executions>
                         <execution>
                             <phase>generate-sources</phase>
@@ -398,14 +398,12 @@
         <!-- module>contribs</module -->
     </modules>
 
-
     <distributionManagement>
-        <repository>
+        <snapshotRepository>
+            <id>jvnet-nexus-snapshots</id>
             <uniqueVersion>false</uniqueVersion>
-            <id>java.net-maven2-repository</id>
-            <name>java.net-maven2-repository</name>
-            <url>java-net:/maven2-repository~svn/trunk/repository/</url> 
-        </repository>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
     
     <repositories>
@@ -779,7 +777,7 @@
 
         <jaxws.api.version>2.2.3</jaxws.api.version>
         <jaxws.ri.release.version>2.2.3</jaxws.ri.release.version>
-        <jaxws.ri.version>2.2.3</jaxws.ri.version>
+        <jaxws.ri.version>2.2.3-1</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.1</metro.release.version>
