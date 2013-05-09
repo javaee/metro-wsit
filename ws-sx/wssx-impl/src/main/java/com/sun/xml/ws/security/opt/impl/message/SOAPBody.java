@@ -44,7 +44,6 @@ import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.message.saaj.SAAJMessage;
 import com.sun.xml.ws.message.source.PayloadSourceMessage;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
@@ -159,17 +158,14 @@ public class SOAPBody{
         }
     }
     
-    public void writeTo(XMLStreamWriter writer) throws XMLStreamException {
-        if (message instanceof SAAJMessage) {
-            ((SAAJMessage)message).writeBodyTo(writer);
-        } else {
-            writer.writeStartElement(Message.PREFIX, BODY, this.soapVersion.nsUri);
-        }
-        if (wsuId != null) {
+    public void writeTo(XMLStreamWriter writer) throws XMLStreamException{
+        writer.writeStartElement(BODY_PREFIX,BODY,this.soapVersion.nsUri);
+        if(wsuId != null){
             writer.writeAttribute("wsu",MessageConstants.WSU_NS,"Id",wsuId);
         }
         writePayload(writer);
         writer.writeEndElement();
+        //writer.flush();
     }
     
     public String getPayloadNamespaceURI(){
