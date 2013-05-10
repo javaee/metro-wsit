@@ -44,7 +44,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java</groupId>
+        <artifactId>jvnet-parent</artifactId>
+        <version>3</version>
+        <relativePath/>
+    </parent>
+
     <groupId>org.glassfish.metro</groupId>
     <artifactId>metro-project</artifactId>
     <packaging>pom</packaging>
@@ -381,7 +390,18 @@
         </extensions>
     </build>
 
-    <!-- profiles /-->
+    <profiles>
+        <profile>
+            <id>gf-internal-release</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>gf-internal-release</id>
+                    <url>http://gf-maven.us.oracle.com/nexus/content/repositories/gf-internal-release</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
     <modules>
         <module>metro-cm</module>
@@ -741,31 +761,6 @@
         </dependencies>
     </dependencyManagement>
     
-    <profiles>
-        <profile>
-            <id>local-deployment</id>
-            <distributionManagement>
-                <repository>
-                    <uniqueVersion>false</uniqueVersion>
-                    <id>java.net-m2-dist-repository</id>
-                    <name>java.net-m2-repository</name>
-                    <url>file:///${user.home}/local-javanet-repo/</url>
-                </repository>
-            </distributionManagement>            
-        </profile>
-
-        <profile>
-            <id>glassfish-repository-deployment</id>
-            <distributionManagement>
-                <repository>
-                    <uniqueVersion>false</uniqueVersion>
-                    <id>rator.sfbay</id>
-                    <url>dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/</url> 
-                </repository>
-            </distributionManagement>            
-        </profile>
-    </profiles>
-
     <properties>
         <glassfish.version>3.1-b31</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
@@ -780,7 +775,7 @@
         <jaxws.ri.version>2.2.3-1</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
-        <metro.release.version>2.1</metro.release.version>
+        <metro.release.version>2.1.0-1</metro.release.version>
         
         <policy.version>2.2.2</policy.version>
         

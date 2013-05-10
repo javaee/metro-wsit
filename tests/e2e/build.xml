@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -221,11 +221,10 @@
     
     <target name="get-metro-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="metro-image"/>
-        <get src="http://sysifos-sol.czech.sun.com/hudson/job/metro-main-trunk/lastSuccessfulBuild/artifact/wsit/bundles/metro-standalone/target/metro.zip"
-             dest="metro-image/metro.zip"/>
+        <property name="metro.zip" value="http://prg10044.cz.oracle.com/hudson/job/metro-2.1.0-1-continuous/lastSuccessfulBuild/artifact/wsit/bundles/metro-standalone/target/metro.zip"/>
+        <get src="${metro.zip}" dest="metro-image/metro.zip"/>
         <unzip src="metro-image/metro.zip" dest="metro-image"/>
     </target>
-
 
     <target name="overwrite-test-harness-lib" unless="test.harness.uptodate">
         <echo message="Test harness not up-to-date, updating..." />
