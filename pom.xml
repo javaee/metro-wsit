@@ -295,10 +295,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>2.9</version>
                     <configuration>
                         <minmemory>128m</minmemory>
                         <maxmemory>512m</maxmemory>
+                        <sourcepath>${project.build.sourceDirectory}:target/generated-sources/rsrc-gen</sourcepath>
                     </configuration>
                     <executions>
                         <execution>
@@ -391,6 +392,27 @@
     </build>
 
     <profiles>
+
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+                
         <profile>
             <id>gf-internal-release</id>
             <distributionManagement>

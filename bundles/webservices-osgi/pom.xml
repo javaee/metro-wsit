@@ -57,6 +57,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>*codemodel*:*resolver-comsun*:*relaxng-datatype*:*istack-commons*:*dtdparser*:*.msv.*:xsdlib.*:*com.sun.xml.ws*:com.sun.tools.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*:*com.sun.istack.tools*</excludePackageNames>
+                </configuration>
+            </plugin>
             <plugin> <!-- want to unpack sources from individual modules -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

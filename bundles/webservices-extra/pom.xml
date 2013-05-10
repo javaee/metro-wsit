@@ -60,6 +60,61 @@
 
     <build>
         <plugins>
+            <plugin> <!-- want to unpack sources from individual modules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sun.grizzly</groupId>
+                                    <artifactId>grizzly-framework-http</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.security.auth.message</groupId>
+                                    <artifactId>jmac</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.mail</groupId>
+                                    <artifactId>mail</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${generated.sources.dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -79,6 +134,7 @@
                                     <include>javax.mail:mail</include>
                                 </includes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -90,7 +146,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
@@ -99,6 +154,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-unpacked-src-dir</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${generated.sources.dir}</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin-->
         </plugins>
     </build>
 
@@ -124,5 +199,7 @@
             <artifactId>mail</artifactId>
         </dependency>
     </dependencies>
-
+    <properties>
+        <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+    </properties>
 </project>

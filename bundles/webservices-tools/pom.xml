@@ -61,6 +61,37 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>*ant*</excludePackageNames>
+                </configuration>
+            </plugin>
+            <plugin> <!-- want to unpack sources from individual modules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.ws</groupId>
+                                    <artifactId>jaxws-tools</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
@@ -118,4 +149,7 @@
             <version>${project.version}</version>
         </dependency-->
     </dependencies>
+    <properties>
+        <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+    </properties>
 </project>

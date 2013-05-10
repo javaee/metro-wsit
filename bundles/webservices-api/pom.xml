@@ -59,6 +59,51 @@
 
     <build>
         <plugins>
+            <plugin> <!-- want to unpack sources from individual modules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax.jws</groupId>
+                                    <artifactId>jsr181-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.xml.soap</groupId>
+                                    <artifactId>saaj-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.xml.bind</groupId>
+                                    <artifactId>jaxb-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.xml.ws</groupId>
+                                    <artifactId>jaxws-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -121,4 +166,7 @@
             <artifactId>jsr250-api</artifactId>
         </dependency-->
     </dependencies>
+    <properties>
+        <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+    </properties>    
 </project>

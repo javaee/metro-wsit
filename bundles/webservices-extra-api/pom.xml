@@ -59,6 +59,30 @@
 
     <build>
         <plugins>
+            <plugin> <!-- want to unpack sources from individual modules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax.xml</groupId>
+                                    <artifactId>jaxr-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -99,4 +123,7 @@
         <!-- Non shaded dependencies -->
         <!-- NONE -->
     </dependencies>
+    <properties>
+        <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
+    </properties>
 </project>

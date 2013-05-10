@@ -59,6 +59,50 @@
 
     <build>
         <plugins>
+            <plugin> <!-- want to unpack sources from individual modules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.parent.groupId}</groupId>
+                                    <artifactId>wsit-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-sources-jaxr</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.registry</groupId>
+                                    <artifactId>jaxr-impl</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir.jaxr}</outputDirectory>
+                                    <includes>java/**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -269,5 +313,6 @@
         <build.id>2.1.0u1</build.id>
         <build.version>Metro/2.1.0-1 (tags/2.1.0-1-7544; 2013-05-10T15:42:55+0200) JAXWS-RI/2.2.3-1 JAXWS/2.2</build.version>
         <major.version>2.1.0-1</major.version>
+        <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
     </properties>    
 </project>
