@@ -771,11 +771,14 @@
         <jaxb.spec.version>2.2.2</jaxb.spec.version>
 
         <jaxws.api.version>2.2.3</jaxws.api.version>
-        <jaxws.ri.release.version>2.2.3</jaxws.ri.release.version>
+        <jaxws.ri.release.version>2.2.3-1</jaxws.ri.release.version>
+        <jaxws.ri.osgi.version>2.2.3</jaxws.ri.osgi.version>
+
         <jaxws.ri.version>2.2.3-1</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.1.0-1</metro.release.version>
+        <metro.osgi.version>2.1.0</metro.osgi.version>
         
         <policy.version>2.2.2</policy.version>
         
