@@ -267,7 +267,7 @@
     
     <properties>
         <build.id>2.1.0u1</build.id>
-        <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS/${jaxws.spec.version}</build.version>
-        <major.version>${metro.release.version}</major.version>
+        <build.version>Metro/2.1.0-1 (tags/2.1.0-1-7544; 2013-05-10T15:42:55+0200) JAXWS-RI/2.2.3-1 JAXWS/2.2</build.version>
+        <major.version>2.1.0-1</major.version>
     </properties>    
 </project>
