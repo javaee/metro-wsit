@@ -42,11 +42,13 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -279,13 +281,23 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(TerminateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
-        if (data.getBoundSequenceId() != null) { // send back terminate sequence
+        if (data.getBoundSequenceId() != null) { 
+            // Send terminate sequence. RM v1.0 does not define TerminateSequenceResponse. 
             TerminateSequenceData tsData = TerminateSequenceData
                     .getBuilder(data.getBoundSequenceId(), data.getBoundSequenceLastMessageId())
                     .acknowledgementData(data.getAcknowledgementData())
                     .build();
 
-            return toPacket(tsData, requestPacket);
+            Packet packet = toPacket(tsData, requestPacket);
+
+            if (!clientSideResponse) {
+                // Add relatesTo. See https://java.net/jira/browse/WSIT-1669
+                packet.getMessage().getHeaders().add(new RelatesToHeader(
+                        addressingVersion.relatesToTag,
+                        AddressingUtils.getMessageID(requestPacket.getMessage().getHeaders(), addressingVersion, soapVersion)));
+            }
+
+            return packet;
         } else {
             requestPacket.transportBackChannel.close();
             return communicator.createNullResponsePacket(requestPacket);            
