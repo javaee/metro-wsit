@@ -513,16 +513,13 @@ holder.
                     </row>
 
                     <row>
-                        <entry>Atomic Transactions (OASIS
-                        submissions)<?linebreak ?> Note: Metro does
-                        <emphasis>not</emphasis> implement the<?linebreak ?>
-                        standard versions of these specifications.</entry>
+                        <entry>Atomic Transactions (OASIS standards)</entry>
 
-                        <entry>since v1.0 : <link
-                        xlink:href="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">WS-AtomicTransaction
-                        v1.0</link> <?linebreak ?> since v1.0 : <link
-                        xlink:href="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">WS-Coordination
-                        v1.0</link> <?linebreak ?></entry>
+                        <entry>since v2.1 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-tx/wstx-wsat-1.2-spec-os.pdf">WS-AtomicTransaction
+                        v1.2</link> <?linebreak ?> since v2.1 : <link
+                        xlink:href="http://docs.oasis-open.org/ws-tx/wstx-wscoor-1.2-spec-os.pdf">WS-Coordination
+                        v1.2</link> <?linebreak ?></entry>
                     </row>
 
                     <row>
