@@ -172,10 +172,14 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
 
     @Override
     synchronized public void dispose() {
-        if (useContainerSpi) return; //nothing to dispose if we got thread pool from container
-        if (this.executorService == null) return;
         this.isClosed.compareAndSet(false, true);
-        this.executorService.shutdown();
+        //no need to dispose thread pool if we got thread pool from container
+        if (!useContainerSpi) {
+            if (this.executorService != null) {
+                this.executorService.shutdown();
+            }
+        }
+        //either way we should dispose the endpoint delegate
         if (this.endpointDelegate != null) {
             this.endpointDelegate.dispose();
         }
