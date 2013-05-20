@@ -42,6 +42,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
@@ -255,8 +256,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setId(message.getSequenceId());
         sequenceHeaderElement.setMessageNumber(message.getMessageNumber());
-
-        sequenceHeaderElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
+        final String muTrue = SOAPVersion.SOAP_12.equals(soapVersion) ? "true" : "1";
+        sequenceHeaderElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, muTrue);
         jaxwsMessage.getHeaders().add(createHeader(sequenceHeaderElement));
     }
 
