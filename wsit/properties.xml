@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2012 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2013 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -68,7 +68,7 @@
     
     <property name="release.impl.version" value="1.6.3"/>
     <property name="release.underscore.version" value="1_6_3"/>
-    <property name="release.impl.version.suffix" value="SNAPSHOT"/>
+    <property name="release.impl.version.suffix" value=""/>
     <tstamp>
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
     </tstamp>
