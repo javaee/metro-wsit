@@ -179,7 +179,7 @@
     <target name="integrate-jaxws-hudson"
             description="integrates latest JAX-WS 2.1.8 bits in WSIT, meant for internal consumption only">
 
-        <integrate-jaxws jaxws.base.url="http://sysifos-sol.cz.oracle.com/hudson/job/jaxws-ri-2.1.x/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://prg10044.cz.oracle.com/hudson/job/jaxws-ri-2.1.x-release/lastSuccessfulBuild"/>
         
     </target>
 
@@ -192,7 +192,7 @@
     
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson-sca.us.oracle.com/job/jaxb-ri-2.1/793/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
+        <get src="http://prg10044.cz.oracle.com/hudson/job/jaxb-ri-2.1-pushtomaven/lastSuccessfulBuild/artifact/jaxb-ri/dist/osgi/jaxb-osgi.jar"
              dest="${lib.osgi.dir}/jaxb.jar" />
     </target>
 
