@@ -111,7 +111,7 @@ fi
 echo "Running GlassFish QuickLook tests..."
 
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
-mvn -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook.log.txt
+mvn -s $MVN_SETTINGS -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook.log.txt
 popd
 
 echo "Done."

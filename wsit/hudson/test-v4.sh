@@ -127,9 +127,9 @@ fi
 
 if [ ! -z "$SR_MVN_REPO" ]; then
     wget -N --no-proxy $SR_MVN_REPO/xpp3/xpp3_min/1.1.3.4.O/xpp3_min-1.1.3.4.O.jar
-    mvn install:install-file -DgroupId=xpp3 -DartifactId=xpp3_min -Dversion=1.1.3.4.O -Dpackaging=jar -Dfile=xpp3_min-1.1.3.4.O.jar -Dmaven.repo.local=$M2_LOCAL_REPO
+    mvn -s $MVN_SETTINGS install:install-file -DgroupId=xpp3 -DartifactId=xpp3_min -Dversion=1.1.3.4.O -Dpackaging=jar -Dfile=xpp3_min-1.1.3.4.O.jar -Dmaven.repo.local=$M2_LOCAL_REPO
     wget -N --no-proxy $SR_MVN_REPO/org/apache/xmlgraphics/batik-xml/1.7/batik-xml-1.7.jar
-    mvn install:install-file -DgroupId=org.apache.xmlgraphics -DartifactId=batik-xml -Dversion=1.7 -Dpackaging=jar -Dfile=batik-xml-1.7.jar -Dmaven.repo.local=$M2_LOCAL_REPO
+    mvn -s $MVN_SETTINGS install:install-file -DgroupId=org.apache.xmlgraphics -DartifactId=batik-xml -Dversion=1.7 -Dpackaging=jar -Dfile=batik-xml-1.7.jar -Dmaven.repo.local=$M2_LOCAL_REPO
 fi
 
 popd
@@ -142,9 +142,9 @@ if [ -z "$METRO_URL" ]; then
         svn --non-interactive -q co -r $METRO_REVISION "$METRO_SVN_REPO" $METRO_SVN_ROOT
     fi
     pushd $METRO_SVN_ROOT
-    JAXB_VERSION=`mvn dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
-    JAXB_API_VERSION=`mvn dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
-    MIMEPULL_VERSION=`mvn dependency:tree -Dincludes=org.jvnet.mimepull:mimepull | grep org.jvnet.mimepull:mimepull | tail -1 | cut -f4 -d':'`
+    JAXB_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
+    JAXB_API_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
+    MIMEPULL_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=org.jvnet.mimepull:mimepull | grep org.jvnet.mimepull:mimepull | tail -1 | cut -f4 -d':'`
     echo "Setting project version in sources to new promoted version $METRO_VERSION"
     #mvn versions:set -Pstaging -DnewVersion="$METRO_VERSION" -f boms/bom/pom.xml -s /net/bat-sca/repine/export2/hudson/tools/maven-3.0.3/settings-nexus.xml
     ./hudson/changeVersion.sh 2.3.1-SNAPSHOT $METRO_VERSION pom.xml
@@ -190,7 +190,7 @@ if [ -z "$METRO_URL" ]; then
     do
         echo "Building $project"
         pushd $project
-        mvn -U -C clean install
+        mvn -s $MVN_SETTINGS -U -C clean install
         popd
         echo "$project done"
     done
