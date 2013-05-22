@@ -144,6 +144,7 @@ if [ -z "$METRO_URL" ]; then
     pushd $METRO_SVN_ROOT
     JAXB_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
+    SOAP_API_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=javax.xml.soap:javax.xml.soap-api | grep javax.xml.soap:javax.xml.soap-api | tail -1 | cut -f4 -d':'`
     MIMEPULL_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=org.jvnet.mimepull:mimepull | grep org.jvnet.mimepull:mimepull | tail -1 | cut -f4 -d':'`
     echo "Setting project version in sources to new promoted version $METRO_VERSION"
     #mvn versions:set -Pstaging -DnewVersion="$METRO_VERSION" -f boms/bom/pom.xml -s /net/bat-sca/repine/export2/hudson/tools/maven-3.0.3/settings-nexus.xml
@@ -157,6 +158,8 @@ if [ -z "$METRO_URL" ]; then
     perl -i -pe "s|<jaxb.version>.*</jaxb.version>|<jaxb.version>$JAXB_VERSION</jaxb.version>|g" pom.xml
     echo "Updating jaxb-api.version property in GlassFish main pom.xml to $JAXB_API_VERSION"
     perl -i -pe "s|<jaxb-api.version>.*</jaxb-api.version>|<jaxb-api.version>$JAXB_API_VERSION</jaxb-api.version>|g" pom.xml
+    echo "Updating javax.xml.soap-api.version property in GlassFish main pom.xml to $SOAP_API_VERSION"
+    perl -i -pe "s|<javax.xml.soap-api.version>.*</javax.xml.soap-api.version>|<javax.xml.soap-api.version>$SOAP_API_VERSION</javax.xml.soap-api.version>|g" pom.xml
 
     echo "!!! TODO !!! REMOVE ME AFTER FIRST JAXB-API 2.2.9 INTEGRATION !!!"
     cd ..
