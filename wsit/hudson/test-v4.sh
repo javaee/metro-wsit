@@ -198,7 +198,6 @@ if [ -z "$METRO_URL" ]; then
 fi
 
 export RESULTS_DIR=$WORK_DIR/test_results
-export QL_RESULTS_DIR=$RESULTS_DIR/quick_look
 export DEVTESTS_RESULTS_DIR=$RESULTS_DIR/devtests
 export CTS_RESULTS_DIR=$RESULTS_DIR/cts-smoke
 
@@ -213,27 +212,31 @@ echo -e "\nJAVA_HOME: $JAVA_HOME" >> $ALL
 echo "GlassFish: $GF_URL" >> $ALL
 echo -e "Metro: $METRO_URL\n" >> $ALL
 
-./quicklook.sh
-mkdir -p $QL_RESULTS_DIR
-pushd $GF_SVN_ROOT/appserver/tests/quicklook
-cp quicklook_summary.txt *.output $QL_RESULTS_DIR
-popd
-cp $GF_WORK_DIR/glassfish4/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
-mv $WORK_DIR/test-quicklook.log.txt $RESULTS_DIR
+for QL_TEST_PROFILE in "all" "test_gd_security"
+do
+    export QL_RESULTS_DIR=$RESULTS_DIR/quick_look-$QL_TEST_PROFILE
+    ./quicklook.sh
+    mkdir -p $QL_RESULTS_DIR
+    pushd $GF_SVN_ROOT/appserver/tests/quicklook
+    cp quicklook_summary-$QL_TEST_PROFILE.txt *.output $QL_RESULTS_DIR
+    popd
+    cp $GF_WORK_DIR/glassfish4/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
+    mv $WORK_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt $RESULTS_DIR
 
-if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
-    echo -e "\nQuickLook tests: OK\n" >> $ALL
-else
-    echo -e "\nQuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
-    grep "FAILED:" $RESULTS_DIR/test-quicklook.log.txt >> $ALL
-    cat $ALL
-    exit 1
-fi
-if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook.log.txt`" ]; then
-    echo "QuickLook tests: build failure" >> $ALL
-    cat $ALL
-    exit 1
-fi
+    if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary-$QL_TEST_PROFILE.txt`" ]; then
+        echo -e "\nQuickLook tests: OK\n" >> $ALL
+    else
+        echo -e "\nQuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary-$QL_TEST_PROFILE.txt | cut -d ',' -f 1` failure(s)" >> $ALL
+        grep "FAILED:" $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt >> $ALL
+        cat $ALL
+        exit 1
+    fi
+    if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt`" ]; then
+        echo "QuickLook tests ($QL_TEST_PROFILE): build failure" >> $ALL
+        cat $ALL
+        exit 1
+    fi
+done
 
 ./devtests.sh
 mkdir -p $DEVTESTS_RESULTS_DIR

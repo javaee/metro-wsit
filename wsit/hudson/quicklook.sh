@@ -2,7 +2,7 @@
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2012 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2012-2013 Oracle and/or its affiliates. All rights reserved.
 #
 # The contents of this file are subject to the terms of either the GNU
 # General Public License Version 2 only ("GPL") or the Common Development
@@ -70,6 +70,11 @@ if [ -z "$GF_ZIP" ]; then
     echo "setting GF_ZIP to $GF_ZIP"
 fi
 
+if [ -z "$QL_TEST_PROFILE" ]; then
+    QL_TEST_PROFILE="all"
+    echo "setting QL_TEST_PROFILE to $QL_TEST_PROFILE"
+fi
+
 set_common
 
 print_env
@@ -108,10 +113,10 @@ if [ ! -z "$METRO_ZIP" ]; then
     install_metro $GF_WORK_DIR/$SERVER_DIR/glassfish
 fi
 
-echo "Running GlassFish QuickLook tests..."
+echo "Running GlassFish QuickLook (Profile: $QL_TEST_PROFILE) tests..."
 
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
-mvn -s $MVN_SETTINGS -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook.log.txt
+mvn -s $MVN_SETTINGS -P$QL_TEST_PROFILE -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt
 popd
 
 echo "Done."
