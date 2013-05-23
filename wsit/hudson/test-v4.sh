@@ -161,6 +161,12 @@ if [ -z "$METRO_URL" ]; then
     echo "Updating javax.xml.soap-api.version property in GlassFish main pom.xml to $SOAP_API_VERSION"
     perl -i -pe "s|<javax.xml.soap-api.version>.*</javax.xml.soap-api.version>|<javax.xml.soap-api.version>$SOAP_API_VERSION</javax.xml.soap-api.version>|g" pom.xml
 
+    echo "!!! TODO !!! REMOVE ME AFTER FIRST JAXB-API 2.2.9 INTEGRATION !!!"
+    cd ..
+    find . -name \*.xml | xargs perl -i -pe "s|jaxb-api-osgi|jaxb-api|g"
+    cd appserver
+    echo "!!! TODO !!! REMOVE ME AFTER FIRST JAXB-API 2.2.9 INTEGRATION"
+
     pushd $GF_SVN_ROOT/nucleus
     echo "Updating mimepull.version property in GlassFish nucleus-parent pom.xml to $MIMEPULL_VERSION"
     perl -i -pe "s|<mimepull.version>.*</mimepull.version>|<mimepull.version>$MIMEPULL_VERSION</mimepull.version>|g" pom.xml
