@@ -224,15 +224,15 @@ do
     ./quicklook.sh
     mkdir -p $QL_RESULTS_DIR
     pushd $GF_SVN_ROOT/appserver/tests/quicklook
-    cp quicklook_summary-$QL_TEST_PROFILE.txt *.output $QL_RESULTS_DIR
+    cp quicklook_summary.txt *.output $QL_RESULTS_DIR
     popd
     cp $GF_WORK_DIR/glassfish4/glassfish/domains/domain1/logs/server.log* $QL_RESULTS_DIR
     mv $WORK_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt $RESULTS_DIR
 
-    if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary-$QL_TEST_PROFILE.txt`" ]; then
+    if [ "`grep -E '.*Failures: 0.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
         echo -e "\nQuickLook tests: OK\n" >> $ALL
     else
-        echo -e "\nQuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary-$QL_TEST_PROFILE.txt | cut -d ',' -f 1` failure(s)" >> $ALL
+        echo -e "\nQuickLook tests: `awk '/,/ { print $6 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` failure(s)" >> $ALL
         grep "FAILED:" $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt >> $ALL
         cat $ALL
         exit 1
