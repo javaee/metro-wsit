@@ -1,7 +1,7 @@
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
 #
 # The contents of this file are subject to the terms of either the GNU
 # General Public License Version 2 only ("GPL") or the Common Development
@@ -122,6 +122,8 @@ quicklook.sh -s gfsvnroot [-g glassfish.zip] [-w workingdir] [-m metro.zip]
     -m <file>   $METRO_ZIP      Metro zip distribution to test
     -w <dir>    $WORK_DIR       working directory
                                 defaults to: /tmp
+    -p <prof>   $QL_TEST_PROFILE    test profile to run
+                                defaults to: all
   Note:
     command line options take precedence over environment variables
 

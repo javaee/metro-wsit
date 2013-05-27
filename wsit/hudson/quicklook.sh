@@ -41,9 +41,9 @@
 
 source setenv.sh
 
-USAGE="Usage: `basename $0` -s gfsvnroot [-g glassfish.zip] [-w workingdir] [-m metro.zip]"
+USAGE="Usage: `basename $0` -s gfsvnroot [-g glassfish.zip] [-w workingdir] [-m metro.zip] [-p profile]"
 
-while getopts "g:w:s:m:" opt; do
+while getopts "g:w:s:m:p:" opt; do
     case $opt in
         s)
          GF_SVN_ROOT=$OPTARG
@@ -56,6 +56,9 @@ while getopts "g:w:s:m:" opt; do
          ;;
         m)
          METRO_ZIP=$OPTARG
+         ;;
+        p)
+         QL_TEST_PROFILE=$OPTARG
          ;;
         \?)
          echo $USAGE >&2

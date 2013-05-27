@@ -221,7 +221,7 @@ echo -e "Metro: $METRO_URL\n" >> $ALL
 for QL_TEST_PROFILE in "test_gd_security" "all"
 do
     export QL_RESULTS_DIR=$RESULTS_DIR/quick_look-$QL_TEST_PROFILE
-    ./quicklook.sh
+    ./quicklook.sh -p $QL_TEST_PROFILE
     mkdir -p $QL_RESULTS_DIR
     pushd $GF_SVN_ROOT/appserver/tests/quicklook
     cp quicklook_summary.txt *.output $QL_RESULTS_DIR
