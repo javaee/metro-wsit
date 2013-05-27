@@ -237,6 +237,16 @@ do
         cat $ALL
         exit 1
     fi
+
+    if [ "`grep -E '.*Configuration Failures:.*' $QL_RESULTS_DIR/quicklook_summary.txt`" ]; then
+        echo -e "\nQuickLook tests: `awk '/,/ { print $3 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1 | cut -d ':' -f 2` configuration failure(s)" >> $ALL
+        grep "SKIPPED:" $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt >> $ALL
+        echo -e "\nQuickLook tests: `awk '/,/ { print $8 }' $QL_RESULTS_DIR/quicklook_summary.txt | cut -d ',' -f 1` skip(s)" >> $ALL
+        grep "SKIPPED:" $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt >> $ALL
+        cat $ALL
+        exit 1
+    fi
+
     if [ "`grep 'BUILD FAILURE' $RESULTS_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt`" ]; then
         echo "QuickLook tests ($QL_TEST_PROFILE): build failure" >> $ALL
         cat $ALL
