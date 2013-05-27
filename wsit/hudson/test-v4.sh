@@ -218,7 +218,7 @@ echo -e "\nJAVA_HOME: $JAVA_HOME" >> $ALL
 echo "GlassFish: $GF_URL" >> $ALL
 echo -e "Metro: $METRO_URL\n" >> $ALL
 
-for QL_TEST_PROFILE in "all" "test_gd_security"
+for QL_TEST_PROFILE in "test_gd_security" "all"
 do
     export QL_RESULTS_DIR=$RESULTS_DIR/quick_look-$QL_TEST_PROFILE
     ./quicklook.sh
