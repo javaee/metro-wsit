@@ -215,8 +215,17 @@ rm -f $ALL || true
 touch $ALL
 echo "Tested configuration:" >> $ALL
 echo -e "\nJAVA_HOME: $JAVA_HOME" >> $ALL
-echo "GlassFish: $GF_URL" >> $ALL
-echo -e "Metro: $METRO_URL\n" >> $ALL
+
+if [ -z "$GF_URL" ]; then
+    echo "GlassFish: `svn info $GF_SVN_ROOT | grep Revision`" >> $ALL
+else
+    echo "GlassFish: $GF_URL" >> $ALL
+fi
+if [ -z "$METRO_URL" ]; then
+    echo "Metro: `svn info $METRO_SVN_ROOT | grep Revision`\n" >> $ALL
+else
+    echo "Metro: $METRO_URL\n" >> $ALL
+fi
 
 for QL_TEST_PROFILE in "test_gd_security" "all"
 do
@@ -293,10 +302,10 @@ mv $WORK_DIR/test-cts-smoke.log.txt $RESULTS_DIR
 
 popd
 
-if [ ! "`grep 'Failed.' $CTS_RESULTS_DIR/summary.txt`" ]; then
+if [ ! "`grep 'Failed.' $CTS_RESULTS_DIR/text/summary.txt`" ]; then
     echo -e "\nCTS-smoke tests: OK\n" >> $ALL
 else
-    echo -e "\nCTS-smoke tests: `grep -c 'Failed.' $CTS_RESULTS_DIR/summary.txt` failure(s)" >> $ALL
+    echo -e "\nCTS-smoke tests: `grep -c 'Failed.' $CTS_RESULTS_DIR/text/summary.txt` failure(s)" >> $ALL
     grep "Failed." $CTS_RESULTS_DIR/summary.txt >> $ALL
     cat $ALL
 #    exit 1
