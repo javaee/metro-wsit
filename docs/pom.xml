@@ -49,7 +49,7 @@
     <parent>
         <artifactId>metro-project</artifactId>
         <groupId>org.glassfish.metro</groupId>
-        <version>2.2.0-4-SNAPSHOT</version>
+        <version>2.2.0-5-SNAPSHOT</version>
     </parent>
 
     <artifactId>docs</artifactId>
