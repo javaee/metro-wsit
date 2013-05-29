@@ -306,7 +306,7 @@ if [ ! "`grep 'Failed.' $CTS_RESULTS_DIR/text/summary.txt`" ]; then
     echo -e "\nCTS-smoke tests: OK\n" >> $ALL
 else
     echo -e "\nCTS-smoke tests: `grep -c 'Failed.' $CTS_RESULTS_DIR/text/summary.txt` failure(s)" >> $ALL
-    grep "Failed." $CTS_RESULTS_DIR/summary.txt >> $ALL
+    grep "Failed." $CTS_RESULTS_DIR/text/summary.txt >> $ALL
     cat $ALL
 #    exit 1
 fi
