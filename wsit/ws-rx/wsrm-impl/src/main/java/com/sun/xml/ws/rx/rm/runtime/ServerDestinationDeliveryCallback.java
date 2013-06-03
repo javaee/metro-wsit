@@ -47,7 +47,6 @@ import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
-import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
 import java.util.concurrent.TimeUnit;
 
@@ -120,8 +119,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                 }
 
                 // TODO handle RM faults
-            } catch (DuplicateMessageRegistrationException ex) {
-                onCompletion(ex);
+            } catch (final Throwable t) {
+                onCompletion(t);
             } finally {
                 HaContext.clear();
             }

@@ -91,8 +91,8 @@ public class SuspendedFiberStorage extends TimestampedCollection<String, Fiber> 
             throw LOGGER.logSevereException(new ResumeFiberException(String.format("Unable to resume fiber with a response packet: No registered fiber found for correlationId [ %s ].", correlationId)));
         }
 
-        if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("Resuming fiber [ %s ] with an exception", fiber.toString()));
+        if (LOGGER.isLoggable(Level.WARNING)) {
+            LOGGER.warning(String.format("Resuming fiber [ %s ] with an exception", fiber.toString()));
         }
 
         fiber.resume(error);

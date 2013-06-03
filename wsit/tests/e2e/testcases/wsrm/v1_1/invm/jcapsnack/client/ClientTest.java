@@ -75,4 +75,31 @@ public class ClientTest extends TestCase {
             }
         }    
     }
+     
+    // See JIRA issue: https://java.net/jira/browse/WSIT-1671
+    // Without the fix for this JIRA issue, this test hangs.
+    // Needed some test to reproduce Fiber hang to remedy it.
+    public void testNegativeCaseJIRAIssue1671() {
+        IPing port = null;
+        try {
+            PingService service = new PingService();
+            port = service.getPingPort();
+            port.ping("Negative");
+            LOGGER.info("Negative message successfully sent.");
+        } catch (Exception ex) {
+            // Ignore the SOAP fault that comes back.
+            // LOGGER.log(Level.SEVERE,
+            // "WS proxy invocation failed with an unexpected exception.",
+            // ex);
+            // fail(String.format("Test failed with the exception: %s", ex));
+        } finally {
+            if (port != null) {
+                try {
+                    ((java.io.Closeable) port).close();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error while closing WS proxy", ex);
+                }
+            }
+        }
+    }
 }

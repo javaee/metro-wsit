@@ -61,24 +61,31 @@ public class IPingImpl {
     
     @WebMethod
     public void ping(String message) {
-        MessageContext msgCtx = wsContext.getMessageContext();        
-        long msgNumber = (Long) msgCtx.get("com.sun.xml.ws.messagenumber");
+        MessageContext msgCtx = wsContext.getMessageContext();
+        
+        if (!message.equals("Negative")) {      
+            long msgNumber = (Long) msgCtx.get("com.sun.xml.ws.messagenumber");
 
-        if (msgNumber == 1) {
-            if (FIRST_MESSAGE_ALREADY_REJECTED.compareAndSet(false, true)) {
-                msgCtx.put("RM_ACK", "false");                
-                LOGGER.log(Level.ALL, String.format("Rejecting message '%s' with message number %d", message, msgNumber));
+            if (msgNumber == 1) {
+                if (FIRST_MESSAGE_ALREADY_REJECTED.compareAndSet(false, true)) {
+                    msgCtx.put("RM_ACK", "false");                
+                    LOGGER.log(Level.ALL, String.format("Rejecting message '%s' with message number %d", message, msgNumber));
+                } else {
+                    LOGGER.log(Level.ALL, String.format("Detected resent message '%s' with message number %d", message, msgNumber));
+                    FIRST_MESSAGE_RESEND_DETECTED.set(true);
+                    msgCtx.put("RM_ACK", "true");
+                }
+            } else if (!FIRST_MESSAGE_RESEND_DETECTED.get()) {
+                String errorMessage = String.format("Received message '%s' with message number %d without detecting a resend of rejected message.", message, msgNumber);
+                LOGGER.log(Level.ALL, errorMessage);
+                throw new RuntimeException(errorMessage);
             } else {
-                LOGGER.log(Level.ALL, String.format("Detected resent message '%s' with message number %d", message, msgNumber));
-                FIRST_MESSAGE_RESEND_DETECTED.set(true);
-                msgCtx.put("RM_ACK", "true");
-            }
-        } else if (!FIRST_MESSAGE_RESEND_DETECTED.get()) {
-            String errorMessage = String.format("Received message '%s' with message number %d without detecting a resend of rejected message.", message, msgNumber);
-            LOGGER.log(Level.ALL, errorMessage);
-            throw new RuntimeException(errorMessage);
+                LOGGER.log(Level.ALL, String.format("Received expected message '%s' with message number %d", message, msgNumber));            
+            }      
         } else {
-            LOGGER.log(Level.ALL, String.format("Received expected message '%s' with message number %d", message, msgNumber));            
-        }             
+            // Destined for ClassCastException in
+            // com.sun.xml.ws.rx.rm.runtime.ServerDestinationDeliveryCallback.ResponseCallbackHandler.onCompletion(Packet)
+            msgCtx.put("RM_ACK", new Object());
+        }
     }
 }
