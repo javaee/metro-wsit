@@ -231,11 +231,11 @@
             <artifactId>webservices-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.glassfish.metro</groupId>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>webservices-rt</artifactId>
             <version>${project.version}</version>
-        </dependency-->
+        </dependency>
     </dependencies>
     <properties>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
