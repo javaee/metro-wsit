@@ -3,7 +3,7 @@
 
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
 
 The contents of this file are subject to the terms of either the GNU
 General Public License Version 2 only ("GPL") or the Common Development
@@ -98,8 +98,8 @@ holder.
 
         <para>Note that these tools are located in the
         <code>webservices-tools.jar</code> file in the <code>lib/</code>
-        subdirectory of either the GlassFish V2 or Metro (standalone)
-        download. In GlassFish 3.x these tools are located in the
+        subdirectory of Metro (standalone)
+        download. In GlassFish these tools are located in the
         <code>webservices-osgi.jar</code> under <code>glassfish/modules</code>
         subdirectory. Shell script versions that of the tools are located
         under <code>glassfish/bin</code>.</para>
@@ -148,16 +148,14 @@ holder.
         system from Ant to Maven. The main Metro build as well as the whole
         <link xlink:href="http://wsit.java.net">WSIT project</link> modules
         have been fully mavenized and currently Metro is built, assembled and
-        installed using Maven. Metro is deployed to the <link
-        xlink:href="http://download.java.net/maven/2/">Java.Net Maven2
-        Repository</link>. The Metro modules share a new common root
+        installed using Maven. Metro releases are deployed to Maven central. 
+        The Metro modules share a new common root
         <code>groupId</code> with a value of <code>org.glassfish.metro</code>
         and can be browsed at the following location: <link
-        xlink:href="http://download.java.net/maven/2/org/glassfish/metro/">http://download.java.net/maven/2/org/glassfish/metro/</link>.
+        xlink:href="http://search.maven.org/#search%7Cga%7C1%7Corg.glassfish.metro">http://search.maven.org/#search%7Cga%7C1%7Corg.glassfish.metro</link>.
         All Metro binaries, sources as well as javadoc and samples are all
-        available in the Java.Net Maven2 repository. The main Metro maven
-        project is located at <link
-        xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-project/">http://download.java.net/maven/2/org/glassfish/metro/metro-project/</link>.</para>
+        available in the maven repository.
+        </para>
 
         <section xml:id="using-metro-in-a-maven-project">
             <title>Using Metro in a Maven project</title>
@@ -175,7 +173,7 @@ holder.
         &lt;dependency&gt;
             &lt;groupId&gt;org.glassfish.metro&lt;/groupId&gt;
             &lt;artifactId&gt;webservices-rt&lt;/artifactId&gt;
-            &lt;version&gt;2.1&lt;/version&gt;
+            &lt;version&gt;2.3&lt;/version&gt;
         &lt;/dependency&gt;
         ...
     &lt;/dependencies&gt;
@@ -199,55 +197,13 @@ holder.
         &lt;dependency&gt;
             &lt;groupId&gt;org.glassfish.metro&lt;/groupId&gt;
             &lt;artifactId&gt;webservices-osgi&lt;/artifactId&gt;
-            &lt;version&gt;2.1&lt;/version&gt;
+            &lt;version&gt;2.3&lt;/version&gt;
         &lt;/dependency&gt;
         ...
     &lt;/dependencies&gt;
     ...
 &lt;/project&gt;</programlisting>
             </example>
-
-            <para>Additionally, the following entries need to be added into
-            your project's <code>pom.xml</code> or into your
-            <code>settings.xml</code> configuration file:</para>
-
-            <example>
-                <title>Maven repository configuration</title>
-
-                <programlisting language="xml" linenumbering="unnumbered">&lt;repositories&gt;
-    ...
-    &lt;repository&gt;
-        &lt;id&gt;maven-repository.java.net&lt;/id&gt;
-        &lt;name&gt;Java.net Repository for Maven 1&lt;/name&gt;
-        &lt;url&gt;http://download.java.net/maven/1/&lt;/url&gt;
-        &lt;layout&gt;legacy&lt;/layout&gt;
-    &lt;/repository&gt;
-    &lt;repository&gt;
-        &lt;id&gt;maven2-repository.java.net&lt;/id&gt;
-        &lt;name&gt;Java.net Repository for Maven 2&lt;/name&gt;
-        &lt;url&gt;http://download.java.net/maven/2/&lt;/url&gt;
-    &lt;/repository&gt;
-    ...
-&lt;/repositories&gt;
-
-&lt;pluginRepositories&gt;
-    ...
-    &lt;pluginRepository&gt;
-        &lt;id&gt;maven2-repository.java.net&lt;/id&gt;
-        &lt;name&gt;Java.net Repository for Maven 2&lt;/name&gt;
-        &lt;url&gt;http://download.java.net/maven/2/&lt;/url&gt;
-        &lt;layout&gt;default&lt;/layout&gt;
-    &lt;/pluginRepository&gt;
-    ...
-&lt;/pluginRepositories&gt;</programlisting>
-            </example>
-
-            <para>Both <code>repository</code> and
-            <code>pluginRepository</code> sections will need to be added. If
-            you're behind a proxy, check the <link
-            xlink:href="http://maven.apache.org/guides/mini/guide-proxies.html">Maven
-            guide to using proxies</link> to learn about configuring proxy
-            settings in Maven.</para>
 
             <section xml:id="using-metro-tools-from-maven">
                 <title>Using Metro Tools from Maven</title>
@@ -269,11 +225,9 @@ holder.
             available from a Maven repository, you can, of course, still use
             it in a non-Maven project or install it manually to your
             container. First, you need to go to the <link
-            xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-standalone/">Metro
+            xlink:href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22metro-standalone%22">Metro
             Standalone Bundle</link> root in the Maven repository and download
-            and unzip a version of your choice, e.g. <link
-            xlink:href="http://download.java.net/maven/2/org/glassfish/metro/metro-standalone/2.1/metro-standalone-2.1.zip">Metro
-            2.1 Standalone Bundle</link>. For further instructions, please
+            and unzip a version of your choice. For further instructions, please
             consult the <code>readme.html</code> file available under the
             unzipped <code>metro</code> root directory.</para>
         </section>
@@ -1886,22 +1840,17 @@ null: HTTP/1.1 200 OK
     </section>
 
     <section xml:id="using-jax-ws-2.x---metro-1.x-2.0-with-java-se-6">
-        <title>Using JAX-WS 2.x / Metro 1.x/2.0 with Java SE 6</title>
+        <title>Using JAX-WS / Metro with Java SE</title>
 
         <section xml:id="mustanga1">
-            <title>Using JAX-WS 2.x with Java SE 6</title>
+            <title>Using JAX-WS with Java SE</title>
 
-            <para>Java SE 6 up to Update Release 3 ships with the JAX-WS 2.0
-            API, and release 4 and later contains the JAX-WS 2.1 API. (At the
-            time of writing Update Release 3 has long been obsolete and
-            multiple Update Releases have been published with security fixes.
-            It is strongly recommended to upgrade to the latest Update Release
-            of Java SE 6.) Unless you are taking precautions, applications
-            that use the JAX-WS API will run with the JAX-WS API version built
-            into Java SE 6 and not a newer version of JAX-WS on the
-            application classpath. Applications that use new functions of the
-            JAX-WS 2.2 API will therefore fail to run. This section discusses
-            how to work around this issue by using the <link
+            <para>Java SE ships with JAX-WS API and implementation. Unless you 
+            are taking precautions, applications that use the JAX-WS API will run 
+            with the JAX-WS API version built into Java SE and not a newer version 
+            of JAX-WS on the application classpath. Applications that use new 
+            functions of the JAX-WS API will therefore fail to run. This section 
+            discusses how to work around this issue by using the <link
             xlink:href="http://download.oracle.com/javase/6/docs/technotes/guides/standards/">endorsed
             standards override mechanism</link>.</para>
 
@@ -1921,7 +1870,7 @@ null: HTTP/1.1 200 OK
                 download</link>.) The directory might not exist yet and in
                 that case you will have to create it yourself.</para>
 
-                <para>Some application containers, such as Glassfish V2.x,
+                <para>Some application containers, such as Glassfish, Tomcat,
                 modify the location of the endorsed directory to a different
                 place. From inside the JVM, you can check the current location
                 by doing
@@ -1945,57 +1894,15 @@ null: HTTP/1.1 200 OK
             </section>
         </section>
 
-        <section xml:id="mustanga2">
-            <title>Using Metro 1.x with Java SE 6</title>
-
-            <para>All 1.x releases of WSIT and Metro contain JAX-WS 2.1 and
-            most what has been said in <xref linkend="mustanga1"
-            xrefstyle="select:title" /> applies to Metro 1.x. The only
-            difference are the jar files that need to be copied into the
-            endorsed directory. The one file that needs to be copied to
-            <code>$JRE_HOME/lib/endorsed</code> is
-            <code>webservices-api.jar</code>.</para>
-
-            <para>Do not install <code>jaxws-api.jar</code> and
-            <code>jaxb-api.jar</code> into the endorsed directory at the same
-            time. There is a good chance that the versions of these files
-            differ and that may yield very difficult to track application
-            errors. Do not install any other Metro libraries into the endorsed
-            directory, otherwise Metro code may not be able to load classes
-            from the application classpath.</para>
-
-            <para>If you are using the <code>metro-on-glassfish.xml</code> or
-            <code>metro-on-tomcat.xml</code> scripts to install Metro, they
-            will take care of installing <code>webservices-api.jar</code> into
-            the Java SE endorsed directory. Note that only with Metro 1.4 or
-            1.5 will the installation scripts check the Java SE 6 Update
-            Release version.</para>
-
-            <para>If you are deploying an application using Metro to GlassFish
-            or Tomcat, it is essential that you are installing Metro with the
-            <code>metro-on-glassfish.xml</code> or
-            <code>metro-on-tomcat.xml</code> scripts. That makes sure that the
-            Metro libraries are getting copied into the GlassFish/Tomcat
-            specific endorsed directories. Without that step, web applications
-            and EJBs will not be able to pick up the JAX-WS 2.1 API. In other
-            words, including the Metro libraries in the WEB-INF/lib of a web
-            application does not make use of the endorsed mechanism and the
-            JAX-WS 2.1 API cannot be used by the web application. Keep in mind
-            that all of the above is only relevant for Java SE 6 Update
-            Release 3 and older.</para>
-        </section>
-
         <section xml:id="mustanga3">
-            <title>Using Metro 2.0 with Java SE 6</title>
+            <title>Using Metro with Java SE</title>
 
-            <para>Metro 2.0 ships with the JAX-WS 2.2 API while Java SE 6
-            Update Release 4 and later contain the JAX-WS 2.1 API and older
-            Java SE 6 releases contain JAX-WS 2.0. Unless you are taking
-            precautions, applications that use the JAX-WS API will run with
-            the JAX-WS API version built into Java SE 6 and not with the
-            JAX-WS 2.2 API built into Metro on the application classpath.
-            Applications that use new functions of the JAX-WS 2.2 API or other
-            Metro 2.0 functionality will therefore fail to run.</para>
+            <para>Metro ships with the JAX-WS API Java SE contain JAX-WS API, too. 
+            Unless you are taking precautions, applications that use the JAX-WS 
+            API will run with the JAX-WS API version built into Java SE and not 
+            with the JAX-WS API built into Metro on the application classpath.
+            Applications that use new functions of the JAX-WS API or other
+            Metro functionality will therefore fail to run.</para>
 
             <para>Do not install any other JAX-WS or Metro libraries than the
             ones discussed below into an endorsed directory at the same time,
@@ -2003,35 +1910,26 @@ null: HTTP/1.1 200 OK
             application classpath.</para>
 
             <section xml:id="tomcat-and-glassfish-v2.x">
-                <title>Tomcat and GlassFish V2.x</title>
+                <title>Tomcat</title>
 
-                <para>If you are running an application in Tomcat or GlassFish
-                V2.x, make sure you are using the
-                <code>metro-on-glassfish.xml</code> or
-                <code>metro-on-tomcat.xml</code> installation scripts. They
-                will copy all files into the Tomcat/GlassFish specific
+                <para>If you are running an application in Tomcat, 
+                    make sure you are using the
+                <code>metro-on-tomcat.xml</code> installation script. They
+                will copy all files into the Tomcat specific
                 endorsed directories. Without that step, web applications and
-                EJBs will not be able to pick up the JAX-WS 2.2 API. In other
+                EJBs will not be able to pick up the proper JAX-WS API. In other
                 words, including the Metro libraries in the WEB-INF/lib of a
                 web application does not make use of the endorsed mechanism
-                and the JAX-WS 2.2 API cannot be used by the web
+                and the JAX-WS API cannot be used by the web
                 application.</para>
             </section>
 
             <section xml:id="glassfish-v3">
-                <title>GlassFish V3</title>
+                <title>GlassFish</title>
 
-                <para>If you are running an application in GlassFish V3, you
-                need to install Metro through the <link
-                xlink:href="http://www.oracle.com/technetwork/java/javaee/downloads/index.html">GlassFish
-                Update Center</link>. This is the only way of ensuring that
-                Metro is properly installed in GlassFish V3 and will take care
-                of copying the Metro libraries into the right GlassFish
-                specific endorsed directories.</para>
-
-                <para>After the initial installation through the update
-                center, you may install updates with the
-                <code>metro-on-glassfish-v3.xml</code> Ant script.</para>
+                <para>If you are running an application in GlassFish, Metro is 
+                already included. You may install updates with the
+                    <code>metro-on-glassfish.xml</code> Ant script.</para>
             </section>
 
             <section xml:id="stand-alone-applications">
@@ -3284,7 +3182,7 @@ ctxt.put("com.sun.xml.ws.client.ContentNegotiation", "pessimistic");</programlis
         Security NONCE Manager and Stateful Web Services. Currently this
         support is tested with and limited to the <link
         xlink:href="http://glassfish.java.net">GlassFish</link> Application
-        Server 3.1 and higher.</para>
+        Server.</para>
 
         <para>Clustering support in Metro is automatic, which means that once
         configured and enabled in the container, there is no extra
