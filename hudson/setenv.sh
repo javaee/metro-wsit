@@ -125,7 +125,7 @@ install_metro() {
     echo "Installing Metro..."
     _unzip $METRO_ZIP $METRO_WORK_DIR
     pushd $METRO_WORK_DIR/metro
-    ant -Das.home=$1 -f metro-on-glassfish-v3.xml install
+    ant -Das.home=$1 -f metro-on-glassfish.xml install
     popd
 }
 

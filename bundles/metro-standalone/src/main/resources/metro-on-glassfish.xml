@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2011-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2011-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -58,7 +58,7 @@
         <available file="${as.home}" type="dir"/>
     </condition>
 
-    <condition property="glassfish-v3">
+    <condition property="glassfish">
         <available file="${as.home}/modules" type="dir"/>
     </condition>
 
@@ -96,7 +96,7 @@
     </target>
 
     <target name="warning-note">
-        <echo message="NOTE: This installation script is a work in progress and works only with GlassFish v3.1.1 or later."/>
+        <echo message="NOTE: This installation script is a work in progress and works only with GlassFish v4 or later."/>
         <echo />
         <echo message="  Metro installations via this scripts are not officially supported!"/>
         <echo />
@@ -108,9 +108,8 @@
         <echo />
     </target>
 
-    <target name="gfv3-message" unless="glassfish-v3">
-        <echo message="NOTE: This script can only install Metro on GlassFish v3."/>
-        <echo message="  Please use the metro-on-glassfish.xml script to install on GlassFish v2"/>
+    <target name="gf-message" unless="glassfish">
+        <echo message="NOTE: This script can only install Metro on GlassFish 4.x."/>
         <echo/>
     </target>
 
@@ -118,12 +117,12 @@
         <fail message="The environment variable AS_HOME was not set or does not point to an existing directory."/>
     </target>
 
-    <target name="gfv3-test" unless="glassfish-v3">
-        <antcall target="gfv3-message"/>
-        <fail message="It looks like you are trying to install Metro on GlassFish v2."/>
+    <target name="gf-test" unless="glassfish">
+        <antcall target="gf-message"/>
+        <fail message="It looks like you are trying to install Metro on older GlassFish version."/>
     </target>
 
-    <target name="init" depends="ashome-test, gfv3-test"/>
+    <target name="init" depends="ashome-test, gf-test"/>
 
     <target name="backup" if="notInstalled"
             description="Back-up existing Metro jars">
@@ -235,17 +234,17 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs ${product.name} on GlassFish v3"/>
+        <echo message="  Installs ${product.name} on GlassFish"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls ${product.name} from GlassFish v3 and restores the original Metro installation"/>
+        <echo message="  Uninstalls ${product.name} from GlassFish and restores the original Metro installation"/>
         <echo/>
-        <echo message="$AS_HOME must be set to the installation directory of GlassFish v3. (e.g. '.../glassfish-v3/glassfish')"/>
+        <echo message="$AS_HOME must be set to the installation directory of GlassFish. (e.g. '.../glassfish-vX/glassfish')"/>
         <echo/>
         <echo message="Usage:"/>
-        <echo message="  ant -f metro-on-glassfish-v3.xml {install | uninstall}"/>
+        <echo message="  ant -f metro-on-glassfish.xml {install | uninstall}"/>
         <antcall target="jdk-message"/>
-        <antcall target="gfv3-message"/>
+        <antcall target="gf-message"/>
         <antcall target="warning-note"/>
     </target>
 
