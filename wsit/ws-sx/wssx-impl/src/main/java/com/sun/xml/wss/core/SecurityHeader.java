@@ -228,18 +228,18 @@ public class SecurityHeader extends SOAPElementExtension implements SOAPElement 
     
     public SOAPElement getFirstChildElement() {
         Iterator eachChild = getChildElements();
-        javax.xml.soap.Node node = null;
+        javax.xml.soap.Node node;
 
         if (eachChild.hasNext()) {
             node = (javax.xml.soap.Node) eachChild.next();
-        }else {
+        } else {
             return null;
         }
 
         while ((node.getNodeType() != Node.ELEMENT_NODE) && eachChild.hasNext()) {
             node = (javax.xml.soap.Node) eachChild.next();
         }
-        if ((null != node) /*&& (node.getNodeType() == Node.ELEMENT_NODE)*/)
+        if ((null != node))
             return (SOAPElement) node;
         else
             return null;
@@ -250,25 +250,24 @@ public class SecurityHeader extends SOAPElementExtension implements SOAPElement 
         Node temp;
         if(firstElement != null && MessageConstants.TIMESTAMP_LNAME.equals(firstElement.getLocalName())){
             temp = firstElement.getNextSibling();
-            if(temp == null)
+            if (temp == null) {
                 return null;
-            while(temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null){
-                temp = (javax.xml.soap.Node)temp.getNextSibling();
             }
-            if(null != temp){
-                while((temp != null) && (MessageConstants.SIGNATURE_CONFIRMATION_LNAME.equals(temp.getLocalName()))){
-                    temp = temp.getNextSibling();
-                    if(temp == null)
-                        return null;
-                    while(temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null){
-                        temp = (javax.xml.soap.Node)temp.getNextSibling();
-                    }
-                }
-                if(temp == null)
+            
+            while (temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null) {
+                temp = (javax.xml.soap.Node) temp.getNextSibling();
+            }
+            
+            while((temp != null) && (MessageConstants.SIGNATURE_CONFIRMATION_LNAME.equals(temp.getLocalName()))){
+                temp = temp.getNextSibling();
+                if (temp == null) {
                     return null;
-                return (SOAPElement)temp;
-            } else
-                return null;
+                }
+                while(temp.getNodeType() != Node.ELEMENT_NODE && temp.getNextSibling() != null) {
+                    temp = (javax.xml.soap.Node)temp.getNextSibling();
+                }
+            }
+            return (SOAPElement)temp;
         } else{
             return firstElement;
         }

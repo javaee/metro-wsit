@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -90,9 +90,10 @@ public class SamlTokenBuilder extends TokenBuilder{
      * @throws com.sun.xml.wss.XWSSecurityException
      */
     @SuppressWarnings("unchecked")
+    @Override
     public BuilderResult process() throws XWSSecurityException {
         BuilderResult result = new BuilderResult();
-        String assertionId = null;
+        String assertionId;
         
         SecurityHeaderElement she = null;
         
@@ -126,9 +127,9 @@ public class SamlTokenBuilder extends TokenBuilder{
             she = new GSHeaderElement(buffer);
             she.setId(id);  // set the ID again to bring it to top            
         }
-        JAXBEncryptedKey ek = null;
-        String asID = "";
-        String id = "";
+        JAXBEncryptedKey ek;
+        String asID;
+        String idVal = "";
         String keyEncAlgo = XMLCipher.RSA_v1dot5;        
         Key samlkey = null;
         if(samlAssertion != null){
@@ -138,8 +139,8 @@ public class SamlTokenBuilder extends TokenBuilder{
                 throw new XWSSecurityException("SAML Assertion is NULL");
             }
             if(asID == null || asID.length() ==0){
-                id = samlAssertion.getAttributeNS(null,"ID");
-                she.setId(id);
+                idVal = samlAssertion.getAttributeNS(null,"ID");
+                she.setId(idVal);
             }else{
                 she.setId(asID);
             }
@@ -151,13 +152,13 @@ public class SamlTokenBuilder extends TokenBuilder{
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1811_NULL_SAML_ASSERTION());
                 throw new XWSSecurityException("SAML Assertion is NULL");
             }
-            id = asID = she.getId();
+            idVal = asID = she.getId();
         }
         if(logger.isLoggable(Level.FINEST)){
-            logger.log(Level.FINEST, "SAML Assertion id:"+asID);
+            logger.log(Level.FINEST, "SAML Assertion id:{0}", asID);
         }
         
-        Key dataProtectionKey = null;
+        Key dataProtectionKey;
         if(forSign){
             PrivateKeyBinding privKBinding  = (PrivateKeyBinding)keyBinding.getKeyBinding();
             dataProtectionKey = privKBinding.getPrivateKey();
@@ -170,15 +171,9 @@ public class SamlTokenBuilder extends TokenBuilder{
                 context.getSecurityHeader().add(she);
             }
             
-        }else{
-            //Key key = null;
-            //key = KeyResolver.resolveSamlAssertion(context.getSecurableSoapMessage(), samlBinding.getAssertion(), true, context, assertionID);
-            if (she == null) {
-                SecurityHeaderElement assertion = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
-                samlkey = ((SAMLAssertion) assertion).getKey();
-            } else {
-                samlkey = ((SAMLAssertion) she).getKey();
-            }
+        } else {
+            SecurityHeaderElement assertion = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
+            samlkey = ((SAMLAssertion) assertion).getKey();
             /*
             x509Cert = context.getSecurityEnvironment().getCertificate(
                     context.getExtraneousProperties() ,(PublicKey)key, false);
@@ -192,7 +187,6 @@ public class SamlTokenBuilder extends TokenBuilder{
             }
             String dataEncAlgo = SecurityUtil.getDataEncryptionAlgo(context);
             dataProtectionKey = SecurityUtil.generateSymmetricKey(dataEncAlgo);
-            
         }
         Element authorityBinding = keyBinding.getAuthorityBinding();
         //assertionId = keyBinding.getAssertionId();
@@ -208,7 +202,7 @@ public class SamlTokenBuilder extends TokenBuilder{
         assertionId = she.getId();
         
         //todo reference different keyreference types.
-        SecurityTokenReference samlSTR = null;
+        SecurityTokenReference samlSTR;
         if(authorityBinding == null){
             KeyIdentifier keyIdentifier = new KeyIdentifier(context.getSOAPVersion());
             keyIdentifier.setValue(assertionId);
@@ -218,7 +212,7 @@ public class SamlTokenBuilder extends TokenBuilder{
                 keyIdentifier.setValueType(MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE);
             }
             samlSTR = elementFactory.createSecurityTokenReference(keyIdentifier);
-            if(id != null){
+            if (idVal != null) {
                 samlSTR.setTokenType(MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE);
             }else{
                 samlSTR.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
