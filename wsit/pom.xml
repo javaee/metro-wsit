@@ -368,13 +368,14 @@
                     <configuration>
                         <skip>${findbugs.skip}</skip>
                         <threshold>${findbugs.threshold}</threshold>
-                        <excludeFilterFile>${findbugs.exclude}</excludeFilterFile>
+                        <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+                        <excludeFilterFile>exclude-common.xml,${findbugs.exclude}</excludeFilterFile>
                     </configuration>
                     <dependencies>
                         <dependency>
-                            <groupId>org.glassfish</groupId>
+                            <groupId>org.glassfish.findbugs</groupId>
                             <artifactId>findbugs</artifactId>
-                            <version>3.2-b06</version>
+                            <version>1.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
