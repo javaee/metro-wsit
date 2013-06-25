@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -90,12 +90,13 @@ public class StreamingPayLoadDigester implements StreamFilter{
         try {
             if(!digestDone){
                 StreamUtil.writeCurrentEvent(xMLStreamReader,canonicalizer);
-                if(reader.getEventType() == xMLStreamReader.START_ELEMENT){
+                if(reader.getEventType() == XMLStreamReader.START_ELEMENT){
                     index++;
-                }else if(reader.getEventType() == xMLStreamReader.END_ELEMENT ){
+                }else if(reader.getEventType() == XMLStreamReader.END_ELEMENT ){
                     index --;
                     //|| (reader.getLocalName() == SOAP_BODY_LNAME && (reader.getNamespaceURI() == SOAP_1_1_NS || reader.getNamespaceURI() == SOAP_1_2_NS ))
                     if( index == 0 ){
+                        assert (ref != null);
                         byte [] originalDigest = ref.getDigestValue();
                         if(logger.isLoggable(Level.FINEST)){
                             logger.log(Level.FINEST, LogStringsMessages.WSS_1763_ACTUAL_DEGEST_VALUE(new String(originalDigest)));
@@ -126,9 +127,7 @@ public class StreamingPayLoadDigester implements StreamFilter{
                             MessageDigest  md = null;
                             String algo= null;
                             try {
-                                algo = (ref != null) ?
-                                    StreamUtil.convertDigestAlgorithm(ref.getDigestMethod().getAlgorithm())
-                                    : MessageConstants.SHA_1;
+                                algo = StreamUtil.convertDigestAlgorithm(ref.getDigestMethod().getAlgorithm());
                                 md = MessageDigest.getInstance(algo);
 
                             } catch (NoSuchAlgorithmException nsae) {

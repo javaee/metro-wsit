@@ -1553,6 +1553,7 @@ public final class SecurityRecipient {
                 if (isEncHeader) {
                     processedHeader = processEncryptedSOAPHeader(header, ekOrRlh);
                 }
+                assert header != null;
                 if (header.hasID(id) || id.equals(context.getEdIdforEh())) {
                     if (processedHeader == null) {
                         processedHeader = processEncryptedSOAPHeader(header, ekOrRlh);

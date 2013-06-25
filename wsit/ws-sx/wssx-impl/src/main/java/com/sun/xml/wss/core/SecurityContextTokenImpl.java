@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,6 +65,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  *<wsc:SecurityContextToken wsu:Id="..." ...> 
@@ -120,13 +121,13 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
                     "Expected wsc:SecurityContextToken Element, but Found " + getPrefix() + ":" + getLocalName());
         }
         
-        String wsuId = getAttributeNS(MessageConstants.WSU_NS, "Id");
-        if (!"".equals(wsuId))
-            setId(wsuId);
-        
+        String wsuIdVal = getAttributeNS(MessageConstants.WSU_NS, "Id");
+        if (!"".equals(wsuIdVal)) {
+            this.wsuId = wsuIdVal;
+        }
         
         Iterator children = getChildElements();
-        Node object = null;
+        Node object;
         
         while (children.hasNext()) {
 
@@ -141,6 +142,9 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
                         XMLUtil.inWsscNS(element)) {
                     this.instance = element.getFirstChild().getNodeValue();
                 } else {
+                    if (extElements == null) {
+                        extElements = new ArrayList();
+                    }
                     extElements.add(object);
                 }
             }
@@ -151,6 +155,7 @@ public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl
         }
     }
     
+    @Override
     public SOAPElement getAsSoapElement() throws XWSSecurityException {
         if ( delegateElement != null )
             return delegateElement;

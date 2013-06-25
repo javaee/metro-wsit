@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,7 +86,7 @@ final class ResponseStorage {
                 LOGGER.finer(loggerProlog + "Message state loaded from pending message backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
             }
 
-            final JaxwsMessage message = state.toMessage();
+            final JaxwsMessage message = (state == null) ? null : state.toMessage();
 
             if (LOGGER.isLoggable(Level.FINER)) {
                 LOGGER.finer(loggerProlog + "Message state converted to a pending message: " + ((message == null) ? null : message.toString()));

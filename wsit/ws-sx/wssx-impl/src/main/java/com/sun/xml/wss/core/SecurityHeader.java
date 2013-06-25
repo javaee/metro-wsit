@@ -239,10 +239,7 @@ public class SecurityHeader extends SOAPElementExtension implements SOAPElement 
         while ((node.getNodeType() != Node.ELEMENT_NODE) && eachChild.hasNext()) {
             node = (javax.xml.soap.Node) eachChild.next();
         }
-        if ((null != node))
-            return (SOAPElement) node;
-        else
-            return null;
+        return (SOAPElement) node;
     }
     
     public SOAPElement getNextSiblingOfTimestamp(){

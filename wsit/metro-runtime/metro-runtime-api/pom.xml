@@ -56,7 +56,9 @@
     <packaging>jar</packaging>
     <name>Metro Runtime API</name>
 
-    <!-- prerequisites -->
+    <properties>
+        <findbugs.exclude>${project.basedir}/exclude.xml</findbugs.exclude>
+    </properties>
 
     <build>
         <plugins>
@@ -117,5 +119,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <!--properties></properties-->
 </project>

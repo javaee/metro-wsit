@@ -281,7 +281,7 @@ public class NewWSSCPlugin {
     }
     
     public Packet  createCancelPacket(
-            final BaseSTSRequest rst, final WSDLPort wsdlPort, final WSBinding binding, final JAXBContext jbCxt, final String endPointAddress) {
+        final BaseSTSRequest rst, final WSDLPort wsdlPort, final WSBinding binding, final JAXBContext jbCxt, final String endPointAddress) {
         final Packet ret = createSendRequestPacket(
                 null, wsdlPort, binding,  jbCxt, rst, wsscVer.getSCTCancelRequestAction(), endPointAddress, null);
         return ret;
@@ -333,7 +333,7 @@ public class NewWSSCPlugin {
     }
     
     private Packet createSendRequestPacket(
-            final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final JAXBContext jbCxt, final BaseSTSRequest rst, final String action, final String endPointAddress, final Packet packet) {
+            PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final JAXBContext jbCxt, final BaseSTSRequest rst, final String action, final String endPointAddress, final Packet packet) {
         Marshaller marshaller;
         
         try {

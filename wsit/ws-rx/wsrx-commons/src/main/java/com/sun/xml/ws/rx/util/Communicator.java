@@ -260,7 +260,6 @@ public final class Communicator {
      * @return newly created response packet
      */
     public Packet createResponsePacket(@NotNull Packet requestPacket, Object jaxbElement, String responseWsaAction, boolean isClientResponse) {
-        assert requestPacket != null : "Request packet must not be 'null' when creating a response";
         if (!isClientResponse) { // server side response
             return requestPacket.createServerResponse(
                     Messages.create(jaxbContext, jaxbElement, soapVersion),
@@ -445,6 +444,7 @@ public final class Communicator {
     public Packet send(@NotNull Packet request) {
         if (fiberExecutor == null) {
             LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
+            return null;
         }
 
         return fiberExecutor.runSync(request);
@@ -460,6 +460,7 @@ public final class Communicator {
     public void sendAsync(@NotNull final Packet request, @Nullable final Fiber.CompletionCallback completionCallbackHandler) {
         if (fiberExecutor == null) {
             LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
+            return;
         }
 
         if (completionCallbackHandler != null) {

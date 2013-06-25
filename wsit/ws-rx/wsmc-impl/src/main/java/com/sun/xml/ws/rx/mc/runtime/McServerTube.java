@@ -302,7 +302,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
             Packet response = null;
             
-            final JaxwsMessage pendingMessage = (selectionUID != null) ? responseStorage.getPendingResponse(selectionUID) : null;
+            final JaxwsMessage pendingMessage = responseStorage.getPendingResponse(selectionUID);
             if (pendingMessage != null) {
                 LOGGER.finer(LocalizationMessages.WSMC_0110_PENDING_MESSAGE_FOUND_FOR_SELECTION_UUID(selectionUID));
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -221,14 +221,16 @@ final class PersistentSequenceData implements SequenceData {
             ps.setLong(++i, lastActivityTime); // LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
             ps.setLong(++i, lastAcknowledgementRequestTime); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
 
-            if (ps.executeUpdate() != 1) {
+            int rowCount = ps.executeUpdate();
+            if (rowCount != 1) {
                 cm.rollback(con);
 
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
                         "Inserting sequence data for %s sequence with id = [ %s ] failed: " +
                         "Expected inserted rows: 1, Actual: %d",
                         type,
-                        sequenceId)));
+                        sequenceId, 
+                        rowCount)));
             }
 
             PersistentSequenceData data = loadInstance(con, ts, cm, enpointUid, sequenceId);
@@ -946,7 +948,7 @@ final class PersistentSequenceData implements SequenceData {
             if (!rs.isFirst() && !rs.isLast()) {
                 cm.rollback(con);
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
-                        "Duplicate records detected for unacked message registration on %s sequence with id = [ %s ] and correlation id [ %d ]",
+                        "Duplicate records detected for unacked message registration on %s sequence with id = [ %s ] and correlation id [ %s ]",
                         type,
                         sequenceId,
                         correlationId)));
@@ -970,7 +972,7 @@ final class PersistentSequenceData implements SequenceData {
         } catch (SQLException ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
-                    "Unable to load message data from an unacked message registration for %s sequence with id = [ %s ] and correlation id [ %d ]: " +
+                    "Unable to load message data from an unacked message registration for %s sequence with id = [ %s ] and correlation id [ %s ]: " +
                     "An unexpected JDBC exception occured",
                     type,
                     sequenceId,

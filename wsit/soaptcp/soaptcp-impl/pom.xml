@@ -56,7 +56,9 @@
     <packaging>jar</packaging>
     <name>SOAP over TCP Transport Implementation</name>
 
-    <!-- prerequisites -->
+    <properties>
+        <findbugs.exclude>${project.basedir}/exclude.xml</findbugs.exclude>
+    </properties>
 
     <build>
         <plugins>
@@ -139,12 +141,5 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Test scope -->
-        <!--dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency-->
     </dependencies>
-    <!--properties></properties-->
 </project>
