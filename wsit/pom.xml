@@ -756,7 +756,7 @@
     <properties>
         <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
 
-        <istack.plugins.version>2.18</istack.plugins.version>
+        <istack.plugins.version>2.19</istack.plugins.version>
             
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
