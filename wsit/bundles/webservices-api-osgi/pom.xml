@@ -112,6 +112,37 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-property</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>jaxb-api.osgiVersion</property>
+                                    <message>Property jaxb-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>jaxws-api.osgiVersion</property>
+                                    <message>Property jaxws-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>saaj-api.osgiVersion</property>
+                                    <message>Property saaj-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>        
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -127,12 +158,12 @@
                             <instructions>
                                 <Export-Package>
                                     javax.jws.*;version=2.0,
-                                    javax.xml.ws.*;version=${jaxws.spec.version},
-                                    javax.xml.soap.*;version=${saaj.spec.version}
+                                    javax.xml.ws.*;version=${jaxws-api.osgiVersion},
+                                    javax.xml.soap.*;version=${saaj-api.osgiVersion}
                                 </Export-Package>
                                 <Import-Package>
-                                    javax.xml.bind;version=${jaxb.spec.version},
-                                    javax.xml.bind.*;version=${jaxb.spec.version},
+                                    javax.xml.bind;version=${jaxb-api.osgiVersion},
+                                    javax.xml.bind.*;version=${jaxb-api.osgiVersion},
                                     *
                                 </Import-Package>
                                 <DynamicImport-Package>org.glassfish.hk2.osgiresourcelocator</DynamicImport-Package>

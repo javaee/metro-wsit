@@ -86,9 +86,7 @@
     </developers>
 
     <properties>
-        <jaxws.spec.version>2.2</jaxws.spec.version>
         <jaxws.ri.version>2.2.9-b14079</jaxws.ri.version>
-        <jaxws.ri.release.version>2.2.9</jaxws.ri.release.version>
     </properties>
         
     <dependencyManagement>

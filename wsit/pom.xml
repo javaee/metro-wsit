@@ -179,6 +179,114 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>import-properties-plugin</artifactId>
+                    <version>${istack.plugins.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>import-pom-properties</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.8</version>
+                    <executions>
+                        <execution>
+                            <id>jaxb.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>jaxb</propertyPrefix>
+                                <versionString>${jaxb.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>jaxb-api.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>jaxb-api</propertyPrefix>
+                                <versionString>${jaxb-api.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>jaxws.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>jaxws</propertyPrefix>
+                                <versionString>${jaxws.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>jaxws-api.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>jaxws-api</propertyPrefix>
+                                <versionString>${jaxws-api.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>saaj-api.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>saaj-api</propertyPrefix>
+                                <versionString>${saaj-api.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>mail.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>mail</propertyPrefix>
+                                <versionString>${mail.version}</versionString>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>metro.version</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>parse-version</goal>
+                            </goals>
+                            <configuration>
+                                <propertyPrefix>metro</propertyPrefix>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>add.source</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${project.build.directory}/generated-sources/rsrc-gen</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>1.0.1</version>
@@ -243,24 +351,6 @@
                             <version>1.7.4-v1</version>
                         </dependency>
                     </dependencies>
-                </plugin>                
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.5</version>
-                    <executions>
-                        <execution>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${project.build.directory}/generated-sources/rsrc-gen</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -295,7 +385,7 @@
                 <plugin>
                     <groupId>com.sun.istack</groupId>
                     <artifactId>istack-commons-maven-plugin</artifactId>
-                    <version>2.12</version>
+                    <version>${istack.plugins.version}</version>
                     <executions>
                         <execution>
                             <phase>generate-sources</phase>
@@ -403,26 +493,12 @@
                 <inherited>true</inherited>
             </plugin>
             <plugin>
-                <groupId>org.glassfish.hk2</groupId>
-                <artifactId>osgiversion-maven-plugin</artifactId>
-                <version>2.1.18</version>
-                <executions>
-                    <!-- Since we don't want qualifier like b05 or SNAPSHOT to appear
-                    in package version attribute, we use the following goal to
-                    populate a project property with an OSGi version which is
-                    equivalent to maven version without qualifier and then use that
-                    property in osgi.bundle while exporting. -->
-                    <execution>
-                        <id>compute-osgi-version</id>
-                        <goals>
-                            <goal>compute-osgi-version</goal>
-                        </goals>
-                        <configuration>
-                            <dropVersionComponent>qualifier</dropVersionComponent>
-                            <versionPropertyName>metro.release.version</versionPropertyName>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>import-properties-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -680,6 +756,8 @@
     <properties>
         <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
 
+        <istack.plugins.version>2.18</istack.plugins.version>
+            
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
 

@@ -500,8 +500,7 @@
     
     <properties>
         <build.id>${scmBranch}-${buildNumber}; ${timestamp}</build.id>
-        <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS/${jaxws.spec.version}</build.version>
-        <major.version>${metro.release.version}</major.version>
+        <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS-API/${jaxws-api.version} JAXB-RI/${jaxb.version} JAXB-API/${jaxb-api.version}</build.version>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
         <generated.sources.dir.jaxr>${project.build.directory}/generated-sources-jaxr</generated.sources.dir.jaxr>
     </properties>

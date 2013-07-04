@@ -140,6 +140,49 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-property</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>jaxb.osgiVersion</property>
+                                    <message>Property jaxb.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>jaxb-api.osgiVersion</property>
+                                    <message>Property jaxb-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>saaj-api.osgiVersion</property>
+                                    <message>Property saaj-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>jaxws.osgiVersion</property>
+                                    <message>Property jaxws.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>jaxws-api.osgiVersion</property>
+                                    <message>Property jaxws-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>metro.osgiVersion</property>
+                                    <message>Property metro.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>        
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -154,47 +197,47 @@
                             <excludeDependencies>jaxws-eclipselink-plugin,sdo-eclipselink-plugin</excludeDependencies>
                             <instructions>
                                 <Export-Package>
-                                    com.oracle.webservices.*;version=${jaxws.ri.release.version},
-                                    com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.ri.release.version},
-                                    com.sun.istack.ws.*;version=${jaxb.ri.release.version},
-                                    com.sun.istack.localization;version=${jaxb.ri.release.version};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
-                                    com.sun.tools.ws.*;version=${jaxws.ri.release.version},
-                                    com.sun.wsit.security.*;version=${metro.release.version},
+                                    com.oracle.webservices.*;version=${jaxws.osgiVersion},
+                                    com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.osgiVersion},
+                                    com.sun.istack.ws.*;version=${jaxb.osgiVersion},
+                                    com.sun.istack.localization;version=${jaxb.osgiVersion};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
+                                    com.sun.tools.ws.*;version=${jaxws.osgiVersion},
+                                    com.sun.wsit.security.*;version=${metro.osgiVersion},
                                     com.sun.xml.messaging.saaj.*;version=1.3,
                                     com.sun.xml.registry.*;version=1.0,
-                                    com.sun.xml.rpc.plugins;version=${metro.release.version},
-                                    com.sun.xml.rpc.security;version=${metro.release.version},
+                                    com.sun.xml.rpc.plugins;version=${metro.osgiVersion},
+                                    com.sun.xml.rpc.security;version=${metro.osgiVersion},
                                     com.sun.xml.rpc.*;version=1.1.2,
-                                    com.sun.xml.security.*;version=${metro.release.version},
-                                    com.sun.xml.ws.api.config.management;version=${jaxws.ri.release.version},
-                                    com.sun.xml.ws.api.config.management.policy;version=${jaxws.ri.release.version},
-                                    com.sun.xml.ws.api.config.management.jmx;version=${metro.release.version},
-                                    com.sun.xml.ws.api.security.*;version=${metro.release.version},
-                                    com.sun.xml.ws.api.transport.tcp.*;version=${metro.release.version},
-                                    com.sun.xml.ws.api.tx.*;version=${metro.release.version},
-                                    com.sun.xml.ws.assembler.*;version=${metro.release.version},
-                                    com.sun.xml.ws.commons.*;version=${metro.release.version},
-                                    com.sun.xml.ws.config.management.policy.*;version=${jaxws.ri.release.version},
-                                    com.sun.xml.ws.config.*;version=${metro.release.version},
-                                    com.sun.xml.ws.metro.api.*;version=${metro.release.version},
-                                    com.sun.xml.ws.policy.config.*;version=${metro.release.version},
-                                    com.sun.xml.ws.policy.impl.bindings.*;version=${metro.release.version},
-                                    com.sun.xml.ws.policy.jaxws.*;version=${jaxws.ri.release.version},
-                                    com.sun.xml.ws.policy.jcaps.*;version=${metro.release.version},
-                                    com.sun.xml.ws.policy.localization.*;version=${metro.release.version},
-                                    com.sun.xml.ws.policy.parser.*;version=${metro.release.version},
-                                    com.sun.xml.ws.runtime.*;version=${metro.release.version},
-                                    com.sun.xml.ws.rx.*;version=${metro.release.version},
-                                    com.sun.xml.ws.security.*;version=${metro.release.version},
-                                    com.sun.xml.ws.transport.tcp.*;version=${metro.release.version},
-                                    com.sun.xml.ws.*;version=${jaxws.ri.release.version},
-                                    com.sun.xml.wss.*;version=${metro.release.version},
-                                    org.jvnet.ws.databinding.*;version=${jaxws.ri.release.version},
-                                    org.jvnet.ws.message.*;version=${jaxws.ri.release.version},
-                                    org.jvnet.ws.*;version=${jaxws.ri.release.version}
+                                    com.sun.xml.security.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.api.config.management;version=${jaxws.osgiVersion},
+                                    com.sun.xml.ws.api.config.management.policy;version=${jaxws.osgiVersion},
+                                    com.sun.xml.ws.api.config.management.jmx;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.api.security.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.api.transport.tcp.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.api.tx.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.assembler.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.commons.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.config.management.policy.*;version=${jaxws.osgiVersion},
+                                    com.sun.xml.ws.config.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.metro.api.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.policy.config.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.policy.impl.bindings.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.policy.jaxws.*;version=${jaxws.osgiVersion},
+                                    com.sun.xml.ws.policy.jcaps.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.policy.localization.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.policy.parser.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.runtime.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.rx.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.security.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.transport.tcp.*;version=${metro.osgiVersion},
+                                    com.sun.xml.ws.*;version=${jaxws.osgiVersion},
+                                    com.sun.xml.wss.*;version=${metro.osgiVersion},
+                                    org.jvnet.ws.databinding.*;version=${jaxws.osgiVersion},
+                                    org.jvnet.ws.message.*;version=${jaxws.osgiVersion},
+                                    org.jvnet.ws.*;version=${jaxws.osgiVersion}
                                 </Export-Package>
                                 <Import-Package>
-                                    com.sun.istack.*;version=${jaxb.ri.release.version},
+                                    com.sun.istack.*;version=${jaxb.osgiVersion},
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
@@ -223,9 +266,9 @@
                                     javax.ejb;resolution:=optional;version=3.0,
                                     javax.jws;version=2.0,
                                     javax.jws.soap;version=2.0,
-                                    javax.xml.soap.*;version=${saaj.spec.version},
-                                    javax.xml.ws.*;version=${jaxws.spec.version},
-                                    javax.xml.bind.*;version=${jaxb.spec.version},
+                                    javax.xml.soap.*;version=${saaj-api.osgiVersion},
+                                    javax.xml.ws.*;version=${jaxws-api.osgiVersion},
+                                    javax.xml.bind.*;version=${jaxb-api.osgiVersion},
                                     org.apache.coyote;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
@@ -235,7 +278,7 @@
                                 </Import-Package>
                                 <Private-Package>
                                     com.sun.xml.stream.*,
-                                    com.sun.xml.xwss.*;version=${metro.release.version},
+                                    com.sun.xml.xwss.*;version=${metro.osgiVersion},
                                     javanet.staxutils.*
                                 </Private-Package>
                                 <DynamicImport-Package>

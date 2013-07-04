@@ -1,4 +1,4 @@
-Metro ${metro.release.version} THIRDPARTYLICENSEREADME.txt
+Metro ${metro.version} THIRDPARTYLICENSEREADME.txt
 
 DO NOT TRANSLATE OR LOCALIZE.
 
