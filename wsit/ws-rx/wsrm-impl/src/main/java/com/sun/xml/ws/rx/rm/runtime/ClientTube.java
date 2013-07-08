@@ -185,7 +185,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             }
             assert outboundSequenceId != null;
 
-            JaxwsApplicationMessage message = new JaxwsApplicationMessage(
+            final JaxwsApplicationMessage message = new JaxwsApplicationMessage(
                     request,
                     request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
 
@@ -196,8 +196,12 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 // this synchronization is needed so that all 3 operations occur before
                 // AbstractResponseHandler.getParentFiber() is invoked on the response thread
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
-                rc.sourceMessageHandler.putToDeliveryQueue(message);
-                return super.doSuspend();
+                return doSuspend(new Runnable() {
+                    @Override
+                    public void run() {
+                        rc.sourceMessageHandler.putToDeliveryQueue(message);
+                    }
+                });
             }
         } catch (DuplicateMessageRegistrationException ex) {
             // TODO P2 duplicate message exception handling

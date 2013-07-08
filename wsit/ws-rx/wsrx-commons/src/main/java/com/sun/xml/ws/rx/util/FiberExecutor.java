@@ -46,13 +46,11 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.commons.NamedThreadFactory;
 import com.sun.xml.ws.util.Pool;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 
 /**
  * TODO javadoc
@@ -80,12 +78,22 @@ public final class FiberExecutor {
     private Pool<Tube> tubelinePool;
     private volatile Engine engine;
     private final List<Schedule> schedules = new LinkedList<Schedule>();
-    private ExecutorService fiberExecutorService;
+    private Executor executor;
 
     public FiberExecutor(String id, Tube masterTubeline) {
         this.tubelinePool = new Pool.TubePool(masterTubeline);
-        fiberExecutorService = Executors.newCachedThreadPool(new NamedThreadFactory(id + "-fiber-executor"));
-        this.engine = new Engine(id, fiberExecutorService);
+        
+        // In-line Executor runs the task in the caller's thread
+        // (so as to prevent thread hopping)
+        executor = 
+                new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
+        
+        this.engine = new Engine(id, executor);
     }
 
     public Packet runSync(Packet request) {
@@ -145,11 +153,9 @@ public final class FiberExecutor {
             this.schedules.clear();
         }
 
-
-        ExecutorService fes = this.fiberExecutorService;
+        Executor fes = this.executor;
         if (fes != null) {
-            fes.shutdownNow();
-            this.fiberExecutorService = null;
+            this.executor = null;
         }
     }
 }

@@ -180,7 +180,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             // prevent closing of TBC in case of one-way - we want to send acknowledgement back at least
             request.keepTransportBackChannelOpen();
 
-            JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+            final JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
             rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
@@ -206,9 +206,12 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 // this synchronization is needed so that all 3 operations occur before
                 // AbstractResponseHandler.getParentFiber() is invoked on the response thread
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
-                rc.destinationMessageHandler.putToDeliveryQueue(message);
-
-                return doSuspend();
+                return doSuspend(new Runnable() {
+                    @Override
+                    public void run() {
+                        rc.destinationMessageHandler.putToDeliveryQueue(message);
+                    }
+                });
             }
         } catch (AbstractSoapFaultException ex) {
             LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);
@@ -255,7 +258,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private NextAction handleDuplicateMessageException(JaxwsApplicationMessage message, Packet request) throws UnknownSequenceException, RxRuntimeException {
+    private NextAction handleDuplicateMessageException(final JaxwsApplicationMessage message, Packet request) throws UnknownSequenceException, RxRuntimeException {
         // Is failed over during request processing?
         final Sequence inboundSequence = rc.sequenceManager().getInboundSequence(message.getSequenceId());
         if (inboundSequence.isFailedOver(message.getMessageNumber())) {
@@ -263,9 +266,12 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 // this synchronization is needed so that all 3 operations occur before
                 // AbstractResponseHandler.getParentFiber() is invoked on the response thread
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
-                rc.destinationMessageHandler.putToDeliveryQueue(message);
-
-                return doSuspend();
+                return doSuspend(new Runnable() {
+                    @Override
+                    public void run() {
+                        rc.destinationMessageHandler.putToDeliveryQueue(message);
+                    }
+                });
             }
         }
 

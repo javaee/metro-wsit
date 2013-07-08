@@ -40,11 +40,10 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.commons.NamedThreadFactory;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 
 /**
@@ -66,13 +65,20 @@ public final class Postman {
          */
         public void deliver(ApplicationMessage message);
     }
-    //
-    private final ExecutorService executor;
+
+    private final Executor executor;
 
     Postman() {
-        executor = Executors.newCachedThreadPool(new NamedThreadFactory("postman-executor"));
+        // In-line Executor runs the task in the caller's thread
+        // (so as to prevent thread hopping)
+        executor = new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
     }
-
+    
     public void deliver(final ApplicationMessage message, final Callback deliveryCallback) {
         final HaContext.State state = HaContext.currentState();
 

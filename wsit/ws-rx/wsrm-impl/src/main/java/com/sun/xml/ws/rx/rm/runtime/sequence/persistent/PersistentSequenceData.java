@@ -407,9 +407,14 @@ final class PersistentSequenceData implements SequenceData {
     public long getExpirationTime() {
         return expirationTime;
     }
-
+    
     public boolean isFailedOver(long messageNumber) {
-        return false; // TODO implement
+        Connection con = cm.getConnection(true);
+        try {
+            return containsUnackedMessageNumberRegistration(con, messageNumber);
+        } finally {
+            cm.recycle(con);
+        }
     }
 
     private <T> T getFieldData(Connection con, FieldInfo<T> fi) throws PersistenceException {
