@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.security.opt.impl.incoming;
 
+import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -115,13 +116,22 @@ import com.sun.xml.ws.security.trust.WSTrustVersion;
  */
 public final class SecurityRecipient {
 
-    private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN,
-            LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);
-    //TODO Move static block to SecurityPipeBase .
-    
+    private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN, LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);
 
     static {
         com.sun.org.apache.xml.internal.security.Init.init();
+        /**
+         * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
+         */
+        com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.register(
+                com.sun.org.apache.xml.internal.security.encryption.XMLCipher.RSA_OAEP,
+                new com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.Algorithm(
+                "RSA", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "KeyTransport"));
+        try {
+            com.sun.org.apache.xml.internal.security.encryption.XMLCipher.getInstance("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"); 
+        } catch (XMLEncryptionException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
     }
     private static final int TIMESTAMP_ELEMENT = 1;
     private static final int USERNAME_TOKEN_ELEMENT = 2;
@@ -351,7 +361,7 @@ public final class SecurityRecipient {
             securityContext.setProcessedSecurityHeaders(processedHeaders);
             securityContext.setBufferedSecurityHeaders(bufferedHeaders);
             context.setSecurityContext(securityContext);
-            while (message.getEventType() != message.END_DOCUMENT) {
+            while (message.getEventType() != XMLStreamReader.END_DOCUMENT) {
                 switch (eventType) {
                     case TIMESTAMP_ELEMENT: {
                         if (context.isBSP() && bspContext.isTimeStampFound()) {
@@ -371,7 +381,7 @@ public final class SecurityRecipient {
                         context.getSecurityContext().getProcessedSecurityHeaders().add(ut);
                         context.getInferredSecurityPolicy().append(ut.getPolicy());
                         if (context.isTrustMessage() && !context.isClient()) {
-                            IssuedTokenContext ctx = null;
+                            IssuedTokenContext ctx;
                             if (context.getTrustContext() == null) {
                                 ctx = new IssuedTokenContextImpl();
                                 if (context.isSecure()) {
@@ -404,7 +414,7 @@ public final class SecurityRecipient {
                             processedHeaders.add(kbst);
                             context.getInferredSecurityPolicy().append(kbst.getPolicy());
                             if (context.isTrustMessage() && !context.isClient()) {
-                                IssuedTokenContext ctx = null;
+                                IssuedTokenContext ctx;
                                 if (context.getTrustContext() == null) {
                                     ctx = new IssuedTokenContextImpl();
                                     ctx.setAuthnContextClass(MessageConstants.KERBEROS_AUTH_TYPE);
@@ -426,7 +436,7 @@ public final class SecurityRecipient {
                             processedHeaders.add(bst);
                             context.getInferredSecurityPolicy().append(bst.getPolicy());
                             if (context.isTrustMessage() && !context.isClient()) {
-                                IssuedTokenContext ctx = null;
+                                IssuedTokenContext ctx;
                                 if (context.getTrustContext() == null) {
                                     ctx = new IssuedTokenContextImpl();
                                     ctx.setAuthnContextClass(MessageConstants.X509_AUTH_TYPE);
@@ -544,7 +554,7 @@ public final class SecurityRecipient {
                         }
                         context.getInferredSecurityPolicy().append(samlAssertion.getPolicy());
                         if (context.isTrustMessage() && !context.isClient()) {
-                            IssuedTokenContext ctx = null;
+                            IssuedTokenContext ctx;
                             if (context.getTrustContext() == null) {
                                 ctx = new IssuedTokenContextImpl();
                                 ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
@@ -570,7 +580,7 @@ public final class SecurityRecipient {
                     }
                     default: {
                         // Throw Exception if an unrecognized Security Header is present
-                        if (message.getEventType() == message.START_ELEMENT
+                        if (message.getEventType() == XMLStreamReader.START_ELEMENT
                                 && getSecurityElementType() == -1) {
                             logger.log(Level.SEVERE, LogStringsMessages.WSS_1613_UNRECOGNIZED_SECURITY_ELEMENT(message.getLocalName()));
                             throw new XWSSecurityException(LogStringsMessages.WSS_1613_UNRECOGNIZED_SECURITY_ELEMENT(message.getLocalName()));
@@ -1064,7 +1074,7 @@ public final class SecurityRecipient {
             samlAssertion.getKey();
             context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION, samlAssertion);
             if (context.isTrustMessage() && !context.isClient()) {
-                IssuedTokenContext ctx = null;
+                IssuedTokenContext ctx;
                 if (context.getTrustContext() == null) {
                     ctx = new IssuedTokenContextImpl();
                     ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
@@ -1848,7 +1858,7 @@ public final class SecurityRecipient {
                 ctx.isExpired(true);
             }
             
-            if ((action != null && (action.contains("/RST/SCT") || action.contains("/RSTR/SCT")))) {
+            if ((action.contains("/RST/SCT") || action.contains("/RSTR/SCT"))) {
                 if (ctx.getBootstrapAlgoSuite() != null) {
                     ctx.setAlgorithmSuite(ctx.getBootstrapAlgoSuite());
                 }

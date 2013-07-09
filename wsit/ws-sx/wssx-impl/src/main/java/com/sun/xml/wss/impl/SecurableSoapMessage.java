@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,10 +36,6 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- */
-
-/**
- * $Id: SecurableSoapMessage.java,v 1.2 2010-10-21 15:37:15 snajper Exp $
  */
 
 package com.sun.xml.wss.impl;
@@ -79,6 +75,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import com.sun.org.apache.xml.internal.security.Init;
+import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.swa.MimeConstants;
@@ -100,7 +97,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
     private boolean optimized = false;
     private SOAPElement wsseSecurity;
     private boolean doNotSetMU= false;
-    private static Logger log = Logger.getLogger(
+    private static final Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
@@ -109,11 +106,17 @@ public final class SecurableSoapMessage extends SOAPMessage {
         xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
         
         /**
-         * Work-around for the fact that BC currently doesn't support
-         * the standard JCE name for oaep padding
-         * java.security.Provider bc = java.security.Security.getProvider("BC");
-         * if (bc != null) bc.put("Alg.Alias.Cipher.RSA/ECB/OAEPWithSHA1AndMGF1Padding","RSA/OAEP");
+         * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
+        com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.register(
+                com.sun.org.apache.xml.internal.security.encryption.XMLCipher.RSA_OAEP,
+                new com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.Algorithm(
+                "RSA", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "KeyTransport"));
+        try {
+            com.sun.org.apache.xml.internal.security.encryption.XMLCipher.getInstance("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"); 
+        } catch (XMLEncryptionException ex) {
+            log.log(Level.SEVERE, null, ex);
+        }
     }
     
     public SecurableSoapMessage() {}
@@ -198,7 +201,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         // Putting work-around for Bug Id: 5060366
         org.w3c.dom.NodeList headerChildNodes = header.getChildNodes();
         if (headerChildNodes != null) {
-            org.w3c.dom.Node currentNode = null;
+            org.w3c.dom.Node currentNode;
             for (int i = 0; i < headerChildNodes.getLength(); i ++) {
                 currentNode = headerChildNodes.item(i);
                 if (MessageConstants.WSSE_SECURITY_LNAME.equals(
@@ -365,7 +368,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
             SOAPBody body = soapMessage.getSOAPBody();
             body.removeContents();
             QName faultCode = sfe.getFaultCode();
-            Name faultCodeName = null;
+            Name faultCodeName;
             if (faultCode == null) {
                 faultCodeName = SOAPFactory.newInstance().createName(
                         "Client",
@@ -389,10 +392,12 @@ public final class SecurableSoapMessage extends SOAPMessage {
         
     }
     
+    @Override
     public SOAPPart getSOAPPart() {
         return soapMessage.getSOAPPart();
     }
     
+    @Override
     public SOAPBody getSOAPBody() throws SOAPException {
         try {
             return soapMessage.getSOAPBody();
@@ -410,83 +415,103 @@ public final class SecurableSoapMessage extends SOAPMessage {
         init(soapMsg);
     }
     
+    @Override
     public void addAttachmentPart(AttachmentPart AttachmentPart) {
         soapMessage.addAttachmentPart(AttachmentPart);
     }
     
+    @Override
     public int countAttachments() {
         return soapMessage.countAttachments();
     }
     
+    @Override
     public AttachmentPart createAttachmentPart() {
         return soapMessage.createAttachmentPart();
     }
     
+    @Override
     public AttachmentPart createAttachmentPart(Object content, String contentType) {
         return soapMessage.createAttachmentPart(content, contentType);
     }
     
+    @Override
     public AttachmentPart createAttachmentPart(DataHandler dataHandler) {
         return soapMessage.createAttachmentPart(dataHandler);
     }
     
+    @Override
     public boolean equals(Object obj) {
         return soapMessage.equals(obj);
     }
     
+    @Override
     public Iterator getAttachments() {
         return soapMessage.getAttachments();
     }
     
+    @Override
     public Iterator getAttachments(MimeHeaders headers) {
         return soapMessage.getAttachments(headers);
     }
     
+    @Override
     public String getContentDescription() {
         return soapMessage.getContentDescription();
     }
     
+    @Override
     public MimeHeaders getMimeHeaders() {
         return soapMessage.getMimeHeaders();
     }
     
+    @Override
     public Object getProperty(String property) throws SOAPException {
         return soapMessage.getProperty(property);
     }
     
+    @Override
     public SOAPHeader getSOAPHeader() throws SOAPException {
         return soapMessage.getSOAPHeader();
     }
     
+    @Override
     public int hashCode() {
         return soapMessage.hashCode();
     }
     
+    @Override
     public void removeAllAttachments() {
         soapMessage.removeAllAttachments();
     }
     
+    @Override
     public boolean saveRequired() {
         return soapMessage.saveRequired();
     }
     
+    @Override
     public void setContentDescription(String description) {
         soapMessage.setContentDescription(description);
     }
     
+    @Override
     public void setProperty(String property, Object value)
     throws SOAPException {
         soapMessage.setProperty(property, value);
     }
     
+    @Override
     public String toString() {
         return soapMessage.toString();
     }
     
+    @Override
     public void writeTo(OutputStream out) throws SOAPException, IOException {
         soapMessage.writeTo(out);
     }
     
+    @Override
     public void saveChanges() throws SOAPException {
         soapMessage.saveChanges();
     }
@@ -533,45 +558,21 @@ public final class SecurableSoapMessage extends SOAPMessage {
         // assign the wsu:Id to the element
         element.setAttributeNS(MessageConstants.WSU_NS, "wsu:Id", id);
     }
-    
-    /**
-     * @param wsuIdElements
-     * @param id
-     * @return
-     */
-    private boolean wsuIdIsUnique(NodeList wsuIdElements, String id) {
-        boolean result = true;
         
-        // make sure id is unique
-        
-        if (wsuIdElements == null)
-            return result;
-        
-        for (int i = 0; i < wsuIdElements.getLength(); i++) {
-            if (((Element) wsuIdElements.item(i))
-            .getAttributeNS(MessageConstants.WSU_NS, "Id")
-            .equals(id)) {
-                result = false;
-            }
-        }
-        
-        return result;
-    }
-    
     public SOAPElement getElementByWsuId(String id)
     throws XWSSecurityException {
         
         Element  element = getSOAPPart().getElementById(id);
         if (element != null) {
             if (MessageConstants.debug) {
-                log.fine("Document.getElementById() returned " + element);
+                log.log(Level.FINE, "Document.getElementById() returned {0}", element);
             }
             
             return (SOAPElement)element;
         }
         
         if (MessageConstants.debug) {
-            log.fine("Document.getElementById() FAILED......'" + id + "'");
+            log.log(Level.FINE, "Document.getElementById() FAILED......''{0}''", id);
         }
         
         SOAPElement result = null;
@@ -609,13 +610,13 @@ public final class SecurableSoapMessage extends SOAPMessage {
         Element  element = getSOAPPart().getElementById(id);
         if (element != null) {
             if (MessageConstants.debug) {
-                log.fine("Document.getElementById() returned " + element);
+                log.log(Level.FINE, "Document.getElementById() returned {0}", element);
             }
             return element;
         }
         
         if (MessageConstants.debug) {
-            log.fine("Document.getElementById() FAILED......'" + id + "'");
+            log.log(Level.FINE, "Document.getElementById() FAILED......''{0}''", id);
         }
         
         Element result = null;
@@ -633,7 +634,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                                             MessageConstants.SAML_ASSERTION_LNAME);
             }
             
-            String assertionId = null;
+            String assertionId;
             int len = assertions.getLength();
             if (len > 0) {
                 for (int i=0; i < len; i++) {
@@ -825,9 +826,11 @@ public final class SecurableSoapMessage extends SOAPMessage {
 //                    }
                     retValue = new NodeList(){
                         Node node = se;
+                        @Override
                         public int getLength(){
                             return 1;
                         }
+                        @Override
                         public Node item(int num){
                             if(num == 0){
                                 return node;
@@ -891,7 +894,6 @@ public final class SecurableSoapMessage extends SOAPMessage {
         } else
             if (type.equals(Target.TARGET_TYPE_VALUE_XPATH)) {
             try {
-                XPathFactory xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
                 XPath xpath = xpathFactory.newXPath();
                 
                 xpath.setNamespaceContext(getNamespaceContext());
@@ -927,7 +929,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         
         if (throwFault) {
             if(log.isLoggable(Level.FINE)){
-            log.log(Level.FINE,"No message part can be identified by the Target:"+value);
+            log.log(Level.FINE, "No message part can be identified by the Target:{0}", value);
             }
             //throw new XWSSecurityException("No message part can be identified by the Target: " + value);
             //Do not throw an exception, acc. to WS-SecurityPolicy, it ok if a target is not found in message
@@ -937,6 +939,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         return retValue;
     }
     
+    @Override
     public  AttachmentPart getAttachment(SOAPElement element)
     throws SOAPException {
         log.log(Level.SEVERE, LogStringsMessages.WSS_0291_UNSUPPORTED_OPERATION_GET_ATTACHMENT());
@@ -944,6 +947,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         //soapMessage.getAttachment(element);
     }
     
+    @Override
     public void removeAttachments(MimeHeaders hdrs) {
         log.log(Level.SEVERE, LogStringsMessages.WSS_0292_UNSUPPORTED_OPERATION_REMOVE_ATTACHMENT());
         throw new UnsupportedOperationException("Operation Not Supported");
