@@ -41,7 +41,6 @@
 package com.sun.xml.ws.security.opt.impl.util;
 
 import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
-import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 
 import com.sun.xml.security.core.dsig.KeyInfoType;
 import com.sun.xml.security.core.dsig.TransformType;
@@ -92,7 +91,6 @@ import javax.xml.crypto.Data;
 import com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.logging.LogDomainConstants;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -106,20 +104,14 @@ public class WSSElementFactory {
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     static {
-        com.sun.org.apache.xml.internal.security.Init.init();
         /**
          * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
-        com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.register(
-                com.sun.org.apache.xml.internal.security.encryption.XMLCipher.RSA_OAEP,
-                new com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.Algorithm(
-                "RSA", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "KeyTransport"));
-        try {
-            com.sun.org.apache.xml.internal.security.encryption.XMLCipher.getInstance("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"); 
-        } catch (XMLEncryptionException ex) {
-            log.log(Level.SEVERE, null, ex);
-        }
+        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml");
+        
+        com.sun.org.apache.xml.internal.security.Init.init();
     }
+    
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;
     
     public static final com.sun.xml.security.core.xenc.ObjectFactory eoFactory = new com.sun.xml.security.core.xenc.ObjectFactory();

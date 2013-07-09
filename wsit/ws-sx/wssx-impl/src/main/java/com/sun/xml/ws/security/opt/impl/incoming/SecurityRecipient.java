@@ -40,7 +40,6 @@
 
 package com.sun.xml.ws.security.opt.impl.incoming;
 
-import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AddressingUtils;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -119,19 +118,12 @@ public final class SecurityRecipient {
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN, LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);
 
     static {
-        com.sun.org.apache.xml.internal.security.Init.init();
         /**
          * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
-        com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.register(
-                com.sun.org.apache.xml.internal.security.encryption.XMLCipher.RSA_OAEP,
-                new com.sun.org.apache.xml.internal.security.algorithms.JCEMapper.Algorithm(
-                "RSA", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "KeyTransport"));
-        try {
-            com.sun.org.apache.xml.internal.security.encryption.XMLCipher.getInstance("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"); 
-        } catch (XMLEncryptionException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
+        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml"); 
+
+        com.sun.org.apache.xml.internal.security.Init.init();
     }
     private static final int TIMESTAMP_ELEMENT = 1;
     private static final int USERNAME_TOKEN_ELEMENT = 2;
