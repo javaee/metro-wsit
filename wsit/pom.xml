@@ -184,7 +184,7 @@
                     <version>${istack.plugins.version}</version>
                     <executions>
                         <execution>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>import-pom-properties</goal>
                             </goals>
@@ -198,7 +198,7 @@
                     <executions>
                         <execution>
                             <id>jaxb.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -209,7 +209,7 @@
                         </execution>
                         <execution>
                             <id>jaxb-api.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -220,7 +220,7 @@
                         </execution>
                         <execution>
                             <id>jaxws.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -231,7 +231,7 @@
                         </execution>
                         <execution>
                             <id>jaxws-api.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -242,7 +242,7 @@
                         </execution>
                         <execution>
                             <id>saaj-api.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -253,7 +253,7 @@
                         </execution>
                         <execution>
                             <id>mail.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
@@ -264,7 +264,7 @@
                         </execution>
                         <execution>
                             <id>metro.version</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>parse-version</goal>
                             </goals>
