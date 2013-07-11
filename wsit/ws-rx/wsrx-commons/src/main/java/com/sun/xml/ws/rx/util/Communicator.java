@@ -191,7 +191,7 @@ public final class Communicator {
             throw new IllegalStateException("Destination address is not defined in this communicator instance");
         }
 
-        final Packet packet = createPacket(message, expectReply);
+        final Packet packet = createRequestPacket(message, expectReply);
 
         AddressingUtils.fillRequestAddressingHeaders(
                 message.getHeaders(),
@@ -237,7 +237,7 @@ public final class Communicator {
             throw new IllegalStateException("Destination address is not defined in this communicator instance");
         }
 
-        return createPacket(null, expectReply);
+        return createRequestPacket(null, expectReply);
     }
 
     /**
@@ -341,8 +341,9 @@ public final class Communicator {
         return packet;
     }
 
-    private Packet createPacket(final Message message, final boolean expectReply) {
+    private Packet createRequestPacket(final Message message, final boolean expectReply) {
         final Packet packet = createPacket(message);
+        packet.setState(Packet.State.ClientRequest);
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
         return packet;
@@ -428,6 +429,7 @@ public final class Communicator {
 
         Packet emptyPacket = createEmptyRequestPacket(false);
         emptyPacket.invocationProperties.putAll(request.invocationProperties);
+
         @SuppressWarnings("unchecked")
         JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(emptyPacket);
 

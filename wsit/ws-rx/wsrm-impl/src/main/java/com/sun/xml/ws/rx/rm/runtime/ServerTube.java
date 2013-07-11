@@ -52,7 +52,6 @@ import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.runtime.dev.Session;
 import com.sun.xml.ws.runtime.dev.SessionManager;
-import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmSecurityException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
@@ -75,6 +74,9 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
+import com.sun.xml.ws.security.secconv.STRValidationHelper;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
@@ -99,12 +101,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
     //
     private final RuntimeContext rc;
     private final WSEndpoint endpoint;
+    private STRValidationHelper validator;
 
     public ServerTube(ServerTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.rc = original.rc;
         this.endpoint = original.endpoint;
+        this.validator = original.validator;
     }
 
     public ServerTube(RmConfiguration configuration, ServerTubelineAssemblyContext context) {
@@ -150,6 +154,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 context.getEndpoint().getContainer());
 
         this.rc.setSequenceManager(sequenceManager);
+        
+        // TODO instead of default, consider adding Metro impl to the container
+        validator = context.getEndpoint().getContainer().getSPI(STRValidationHelper.class);
+        if (validator == null) {
+            validator = new MetroSTRValidationHelper();
+        }
+
+        LOGGER.fine("STRValidationHelper: " + validator.getClass().getName());
     }
 
     @Override
@@ -363,15 +375,16 @@ public class ServerTube extends AbstractFilterTubeImpl {
             // FIXME: The STR processing should probably only check if the
             // com.sun.xml.ws.runtime.util.Session was started by security tube
             // and if the STR id equals to the one in this session...
-            String activeSctId = getSecurityContextTokenId(request);
+            String activeSctId = validator.getSecurityContextTokenId(request);
             if (activeSctId == null) {
                 throw new CreateSequenceRefusedFault(
                         LocalizationMessages.WSRM_1133_NO_SECURITY_TOKEN_IN_REQUEST_PACKET(),
                         Code.Sender);
             }
+
             try {
-                receivedSctId = Utilities.extractSecurityContextTokenId(requestData.getStrType());
-            } catch (RxException ex) {
+                receivedSctId = validator.extractSecurityTokenId(requestData.getStrType());
+            } catch (Exception ex) {
                 throw new CreateSequenceRefusedFault(
                         ex.getMessage(),
                         Code.Sender);
@@ -383,7 +396,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         Code.Sender);
             }
         }
-
 
         Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                 rc.sequenceManager().generateSequenceUID(),
@@ -411,6 +423,19 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         return rc.protocolHandler.toPacket(responseBuilder.build(), request, false);
+    }
+    
+    private class MetroSTRValidationHelper implements STRValidationHelper {
+        @Override
+        public String getSecurityContextTokenId(final Packet packet) {
+            final Session session = getSession(packet);
+            return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
+        }
+    
+        @Override
+        public String extractSecurityTokenId(final SecurityTokenReferenceType str) throws Exception {
+            return Utilities.extractSecurityContextTokenId(str);
+        }
     }
 
     private Packet handleCloseSequenceAction(Packet request) {
@@ -539,14 +564,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * TODO javadoc
-     */
-    private String getSecurityContextTokenId(Packet packet) {
-        Session session = getSession(packet);
-        return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
-    }
-
-    /**
      * Determines whether the security context token identifier used to secure the message
      * wrapped in the packet is the expected one
      *
@@ -555,7 +572,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
      * @throws RmSecurityException if the actual security context token identifier does not equal to the expected one
      */
     private void validateSecurityContextTokenId(String expectedSctId, Packet packet) throws RmSecurityException {
-        String actualSctId = getSecurityContextTokenId(packet);
+        String actualSctId = validator.getSecurityContextTokenId(packet);
         boolean isValid = (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
 
         if (!isValid) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -52,7 +52,6 @@ import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.wss.WSITXMLFactory;
 
 
 import java.util.List;
@@ -68,11 +67,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType implements SecurityTokenReference {
     
     
-    public SecurityTokenReferenceImpl(Reference ref){
+    public SecurityTokenReferenceImpl(final Reference ref){
         setReference(ref);
     }
     
-    public SecurityTokenReferenceImpl(SecurityTokenReferenceType strType)
+    public SecurityTokenReferenceImpl(final SecurityTokenReferenceType strType)
     {
         final Reference ref = getReference(strType);
         setReference(ref);
@@ -116,11 +115,10 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
             return new KeyIdentifierImpl((KeyIdentifierType)obj.getValue());
         }
             
-        //ToDo
         return null;       
     }
 
-    public void setTokenType(String tokenType){
+    public void setTokenType(final String tokenType){
         getOtherAttributes().put(TOKEN_TYPE, tokenType);
     }
 
@@ -134,7 +132,7 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
     
     public Object getTokenValue() {
         try {
-            final DocumentBuilderFactory dbf = WSITXMLFactory.createDocumentBuilderFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document doc = builder.newDocument();

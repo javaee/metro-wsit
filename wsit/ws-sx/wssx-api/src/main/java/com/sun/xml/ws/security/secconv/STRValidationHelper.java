@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,56 +38,29 @@
  * holder.
  */
 
-/*
- * $Id: DirectReferenceImpl.java,v 1.2 2010-10-21 15:36:57 snajper Exp $
- */
+package com.sun.xml.ws.security.secconv;
 
-package com.sun.xml.ws.security.trust.impl.elements.str;
-
-import com.sun.xml.ws.security.secconv.impl.WSSCVersion10;
-import com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13;
-import com.sun.xml.ws.security.secext10.ReferenceType;
-import com.sun.xml.ws.security.trust.elements.str.DirectReference;
-
-import java.net.URI;
-import javax.xml.namespace.QName;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 /**
- * Reference Interface
+ * This interface is used by the RM server side to validate the SecurityTokenReference.
  */
-public class DirectReferenceImpl extends ReferenceType implements DirectReference {
-    private final static QName _WSC_INSTANCE_10_Type_QNAME = new QName(WSSCVersion10.WSSC_10_NS_URI, "Instance");
-    private final static QName _WSC_INSTANCE_13_Type_QNAME = new QName(WSSCVersion13.WSSC_13_NS_URI, "Instance");
-    private final static String WSC_INSTANCE = "wsc:Instance";
-    public DirectReferenceImpl(String valueType, String uri){
-        setValueType(valueType);
-        setURI(uri);
-    }
+public interface STRValidationHelper {
+    /**
+     * Get the active security token used by the specified packet for signing and encrypting the message.
+     *   
+     * @param packet
+     * @return The reference URI to the security token context
+     */
+    public String getSecurityContextTokenId(Packet packet);
     
-    public DirectReferenceImpl(String valueType, String uri, String instance){
-        setValueType(valueType);
-        setURI(uri);
-        if(WSSCVersion10.WSSC_10.getSCTTokenTypeURI().equals(valueType)){
-            getOtherAttributes().put(_WSC_INSTANCE_10_Type_QNAME, instance);
-        }else if(WSSCVersion13.WSSC_13.getSCTTokenTypeURI().equals(valueType)){
-            getOtherAttributes().put(_WSC_INSTANCE_13_Type_QNAME, instance);
-        }        
-    }
-    
-    public DirectReferenceImpl(ReferenceType refType){
-        this(refType.getValueType(), refType.getURI());
-    }
-
-    public URI getURIAttr(){
-        return URI.create(super.getURI());
-    }
-
-    public URI getValueTypeURI(){
-        return URI.create(super.getValueType());
-    }
-    
-    public String getType(){
-        return "Reference";
-    }
-
+    /**
+     * Get the security token reference URI from the specified wsse:SecurityTokenReference element.
+     * 
+     * @param str
+     * @return The reference URI to the SecurityTokenReference
+     * @throws Exception
+     */
+    public String extractSecurityTokenId(SecurityTokenReferenceType str) throws Exception;
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,12 +59,12 @@ public class KeyIdentifierImpl extends KeyIdentifierType implements KeyIdentifie
         // default c'tor
     }
 
-    public KeyIdentifierImpl(String valueType, String encodingType) {
+    public KeyIdentifierImpl(final String valueType, final String encodingType) {
         setValueType(valueType);
         setEncodingType(encodingType);
     }
     
-    public KeyIdentifierImpl(KeyIdentifierType kidType){
+    public KeyIdentifierImpl(final KeyIdentifierType kidType){
         this(kidType.getValueType(), kidType.getEncodingType());
         setValue(kidType.getValue());
     }

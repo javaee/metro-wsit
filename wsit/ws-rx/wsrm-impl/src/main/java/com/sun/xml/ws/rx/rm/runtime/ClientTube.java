@@ -105,10 +105,23 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         this.outboundSequenceId = new VolatileReference<String>(null);
 
+        // the legacy way of getting the scInitiator, works for Metro SC impl
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {
             // TODO P3 remove this condition and remove context.getScInitiator() method
             scInitiator = ((MetroClientTubelineAssemblyContext) context).getScInitiator();
+        }
+        
+        // the SPI way of getting the scInitiator, it works for JRF OWSM SC integration
+        // TODO consider using the SPI way for Metro SC impl as well
+        if (scInitiator == null) {
+            scInitiator = context.getContainer().getSPI(SecureConversationInitiator.class);
+        }
+
+        if (scInitiator == null) {
+            LOGGER.fine("No SecureConversationInitiator");
+        } else {
+            LOGGER.fine("SecureConversationInitiator: " + scInitiator.getClass().getName());
         }
 
         this.rc = RuntimeContext.builder(
@@ -165,7 +178,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             LOGGER.exiting();
         }
     }
-
+    
     @Override
     public NextAction processRequest(Packet request) {
         LOGGER.entering();
