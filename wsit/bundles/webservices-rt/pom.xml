@@ -173,7 +173,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.external</groupId>
-                                    <artifactId>management-api-sources</artifactId>
+                                    <artifactId>management-api</artifactId>
+                                    <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
