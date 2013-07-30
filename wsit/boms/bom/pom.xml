@@ -87,6 +87,7 @@
 
     <properties>
         <jaxws.ri.version>2.2.9-b14094</jaxws.ri.version>
+        <jaxws.maven.plugin.version>2.3.1-SNAPSHOT</jaxws.maven.plugin.version>
     </properties>
         
     <dependencyManagement>
@@ -99,6 +100,13 @@
                 <version>${jaxws.ri.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- JAXWS maven plugin -->
+            <dependency>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>${jaxws.maven.plugin.version}</version>
             </dependency>
 
             <!-- Distribution Artifacts -->
