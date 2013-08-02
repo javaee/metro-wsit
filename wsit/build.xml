@@ -86,6 +86,8 @@
         <copy todir="${dist.image.wsit.dir}/osgi" filtering="false">
             <fileset dir="${v3.build.dir}">
                 <include name="webservices*osgi.jar"/>
+            </fileset>
+            <fileset dir="${lib.runtime.dir}">
                 <include name="woodstox-core-asl.jar"/>
                 <include name="stax2-api.jar"/>
             </fileset>
