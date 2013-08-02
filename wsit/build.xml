@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2013 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -82,15 +82,12 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
-        <bnd classpath="lib/runtime/woodstox.jar, lib/runtime/jsr173_api.jar"
-             failok="false"
-             output="${v3.build.dir}/woodstox-osgi.jar"
-             files="etc/bnd/woodstox.bnd"/>
 
         <copy todir="${dist.image.wsit.dir}/osgi" filtering="false">
             <fileset dir="${v3.build.dir}">
                 <include name="webservices*osgi.jar"/>
-                <include name="woodstox-osgi.jar"/>
+                <include name="woodstox-core-asl.jar"/>
+                <include name="stax2-api.jar"/>
             </fileset>
             <fileset dir="${lib.osgi.dir}">
                 <include name="jaxb*osgi.jar"/>
@@ -246,21 +243,19 @@
     <target name="integrate-jaxws-hudson"
             description="integrates latest JAX-WS 2.2 bits in WSIT, meant for internal consumption only">
 
-        <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.1/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://prg10044.cz.oracle.com/hudson/job/jaxws-ri-2.2.1//lastSuccessfulBuild"/>
         
     </target>
 
     <target name="integrate-jaxws-bleedingedge-hudson"
             description="integrates latest JAX-WS 2.2 bleedingedge bits in WSIT, meant for internal consumption only">
                 
-        <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.1/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://prg10044.cz.oracle.com/hudson/job/jaxws-ri-2.2.1//lastSuccessfulBuild"/>
         
     </target>
     
     <target name="integrate-xwss30-hudson"
             description="integrate the last successful XWSS 3.0 Hudson build">
-        <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
-         dest="lib/xws-security.src.zip" / -->
         <get src="http://hudson.sfbay.sun.com/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
              dest="lib/runtime/xws-security.jar" />
         <get src="http://hudson.sfbay.sun.com/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
@@ -445,7 +440,7 @@
         <property name="jsr109.jar.source.url" value="http://javaweb.sfbay/~bhakti/109oct20/jsr109-impl.jar" />
         <!--property name="jsr109.jar.source.url" value="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar" /-->
 
-        <property name="shell.scripts.source.url.base" value="http://hudson.sfbay/job/jsr109-impl/ws/webservices/jsr109-impl/target/classes" />
+        <property name="shell.scripts.source.url.base" value="http://hudson-sca.us.oracle.com/job/jsr109-impl/ws/webservices/jsr109-impl/target/classes" />
 
 
         <property environment="env" />

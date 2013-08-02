@@ -137,7 +137,7 @@ wom.jar [ Taken from JAX-WS: no | version: TODO ]
   - TODO: define dependent domain(s)
 
 
-woodstox.jar [ Taken from JAX-WS: yes | version: TODO ]  
+woodstox-core-asl.jar, stax2-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
   - TODO: define dependent domain(s)
 
 
