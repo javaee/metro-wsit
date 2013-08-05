@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -100,11 +100,12 @@ public final class SecurableSoapMessage extends SOAPMessage {
     private boolean optimized = false;
     private SOAPElement wsseSecurity;
     private boolean doNotSetMU= false;
-    private static Logger log = Logger.getLogger(
+    private static final Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     static {
+        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml");
         Init.init();
         xpathFactory = XPathFactory.newInstance();
         

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -104,9 +104,10 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 public class WSSElementFactory {
     
     static {
+        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml");    
         com.sun.org.apache.xml.internal.security.Init.init();
-        
     }
+    
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;
     
     public static final com.sun.xml.security.core.xenc.ObjectFactory eoFactory = new com.sun.xml.security.core.xenc.ObjectFactory();

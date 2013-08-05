@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -114,11 +114,12 @@ public final class SecurityRecipient {
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN,
             LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);
     //TODO Move static block to SecurityPipeBase .
-    
 
     static {
+        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml"); 
         com.sun.org.apache.xml.internal.security.Init.init();
     }
+    
     private static final int TIMESTAMP_ELEMENT = 1;
     private static final int USERNAME_TOKEN_ELEMENT = 2;
     private static final int BINARYSECURITY_TOKEN_ELEMENT = 3;
