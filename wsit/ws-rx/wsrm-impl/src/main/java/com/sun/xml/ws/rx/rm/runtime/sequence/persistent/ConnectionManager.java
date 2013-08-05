@@ -47,6 +47,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
@@ -68,12 +75,12 @@ final class ConnectionManager {
         this.dataSourceProvider = dataSourceProvider;
     }
 
-    Connection getConnection(boolean autoCommit) throws PersistenceException {
+    Connection getConnection() throws PersistenceException {
         try {
             Connection connection = dataSourceProvider.getDataSource().getConnection();
             
             // connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-            connection.setAutoCommit(autoCommit);
+            connection.setAutoCommit(false);
             return connection;
         } catch (SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException("Unable to setup required JDBC connection parameters", ex));
@@ -121,20 +128,73 @@ final class ConnectionManager {
         }
     }
 
-
     void rollback(Connection sqlConnection) {
-        try {
-            sqlConnection.rollback();
-        } catch (SQLException ex) {
-            LOGGER.warning("Unexpected exception occured while performing transaction rollback", ex);
+        if (isDistributedTransactionInUse()) {
+            //don't roll back ourselves here as we don't own this distributed tx
+            //but mark it so that the only possible outcome of the tx is to 
+            //roll back the tx
+            try {
+                getUserTransaction().setRollbackOnly();
+            } catch (IllegalStateException ise) {
+                //TODO i18n
+                LOGGER.warning("Was not able to mark distributed transaction for rollback", ise);
+            } catch (SystemException se) {
+                //TODO i18n
+                LOGGER.warning("Was not able to mark distributed transaction for rollback", se);
+            }
+        } else {
+            try {
+                sqlConnection.rollback();
+            } catch (SQLException ex) {
+                LOGGER.warning("Unexpected exception occured while performing transaction rollback", ex);
+            }
         }
     }
 
     void commit(Connection sqlConnection) throws PersistenceException {
-        try {
-            sqlConnection.commit();
-        } catch (SQLException ex) {
-            throw LOGGER.logSevereException(new PersistenceException("Unexpected exception occured while performing transaction commit", ex));
+        if (isDistributedTransactionInUse()) {
+            //do nothing as the distributed tx will eventually get  
+            //committed and this work will be part of that
+        } else {
+            try {
+                sqlConnection.commit();
+            } catch (SQLException ex) {
+                throw LOGGER.logSevereException(new PersistenceException("Unexpected exception occured while performing transaction commit", ex));
+            }
         }
+    }
+    
+    private boolean isDistributedTransactionInUse() {
+        boolean result = false;
+        int status = Status.STATUS_NO_TRANSACTION;
+        try {
+            UserTransaction userTransaction = getUserTransaction();
+            if (userTransaction != null) {
+                status = userTransaction.getStatus();
+            }
+        } catch (SystemException se) {
+            //TODO i18n
+            LOGGER.warning("Not able to determine if distributed transaction is in use", se);
+        }
+
+        if (status != Status.STATUS_NO_TRANSACTION) {
+            result = true;
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("Determined that distributed transaction is in use. Status code: " + status);    
+            }
+        }
+        return result;
+    }
+    
+    private UserTransaction getUserTransaction() {
+        UserTransaction userTransaction = null;
+        try {
+            Context initialContext = new InitialContext();
+            userTransaction = 
+                    (UserTransaction)initialContext.lookup("java:comp/UserTransaction");
+        } catch (NamingException ne) {
+            LOGGER.warning("Not able to lookup UserTransaction from InitialContext", ne);
+        }
+        return userTransaction;
     }
 }

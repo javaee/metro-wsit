@@ -198,8 +198,9 @@ final class PersistentSequenceData implements SequenceData {
             long lastActivityTime,
             long lastAcknowledgementRequestTime) throws DuplicateSequenceException {
 
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
+        PersistentSequenceData data = null;
         try {
             ps = cm.prepareStatement(con, "INSERT INTO RM_SEQUENCES " +
                     "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_NUMBER, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
@@ -233,11 +234,9 @@ final class PersistentSequenceData implements SequenceData {
                         rowCount)));
             }
 
-            PersistentSequenceData data = loadInstance(con, ts, cm, enpointUid, sequenceId);
+            data = loadInstance(con, ts, cm, enpointUid, sequenceId);
             cm.commit(con);
-
-            return data;
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Inserting sequence data for %s sequence with id = [ %s ] failed: " +
@@ -248,16 +247,30 @@ final class PersistentSequenceData implements SequenceData {
             cm.recycle(ps);
             cm.recycle(con);
         }
-
+        return data;
     }
 
     static PersistentSequenceData loadInstance(TimeSynchronizer ts, ConnectionManager cm, String endpointUid, String sequenceId) {
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection();
+        PersistentSequenceData result = null;
         try {
-            return loadInstance(con, ts, cm, endpointUid, sequenceId);
+            result = loadInstance(con, ts, cm, endpointUid, sequenceId);
+            cm.commit(con);
+        } catch(final PersistenceException e) {
+            //Intercepting this RuntimeException only to rollback the tx
+            //Re-throwing is fine as clients don't have to handle it
+            cm.rollback(con);
+            throw e;
+        } catch(final Throwable t) {
+            //Catching Throwable so as to rollback the tx no matter what is the cause
+            //Not re-throwing it upwards as it would require clients to handle it just
+            //like a checked exception
+            cm.rollback(con);
+            LOGGER.logSevereException(t);
         } finally {
             cm.recycle(con);
         }
+        return result;
     }
 
     private static PersistentSequenceData loadInstance(Connection connection, TimeSynchronizer ts, ConnectionManager cm, String endpointUid, String sequenceId) {
@@ -292,7 +305,7 @@ final class PersistentSequenceData implements SequenceData {
                     rs.getString("BOUND_ID"),
                     rs.getLong("EXP_TIME"));
 
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Loading sequence data for a sequence with id = [ %s ] failed: " +
                     "An unexpected JDBC exception occured",
@@ -303,7 +316,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     static void remove(ConnectionManager cm, String endpointUid, String sequenceId) {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?");
@@ -337,7 +350,7 @@ final class PersistentSequenceData implements SequenceData {
 
             cm.commit(con);
 
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Removing sequence with id = [ %s ] failed: " +
@@ -350,7 +363,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     static void bind(ConnectionManager cm, String endpointUid, String referenceSequenceId, String boundSequenceId) {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
@@ -375,7 +388,7 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             cm.commit(con);
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Binding a sequence with id = [ %s ] to a sequence with id [ %s ] failed: " +
@@ -409,12 +422,21 @@ final class PersistentSequenceData implements SequenceData {
     }
     
     public boolean isFailedOver(long messageNumber) {
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection();
+        boolean result = false;
         try {
-            return containsUnackedMessageNumberRegistration(con, messageNumber);
+            result = containsUnackedMessageNumberRegistration(con, messageNumber);
+            cm.commit(con);
+        } catch(final PersistenceException e) {
+            cm.rollback(con);
+            throw e;
+        } catch(final Throwable t) {
+            cm.rollback(con);
+            LOGGER.logSevereException(t);
         } finally {
             cm.recycle(con);
         }
+        return result;
     }
 
     private <T> T getFieldData(Connection con, FieldInfo<T> fi) throws PersistenceException {
@@ -454,7 +476,7 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             return returnValue;
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Loading %s column data on a sequence with id = [ %s ]  failed: " +
                     "An unexpected JDBC exception occured",
@@ -466,12 +488,21 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     private <T> T getFieldData(FieldInfo<T> fi) {
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection();
+        T returnValue = null;
         try {
-            return getFieldData(con, fi);
+            returnValue = getFieldData(con, fi);
+            cm.commit(con);
+        } catch(final PersistenceException e) {
+            cm.rollback(con);
+            throw e;
+        } catch(final Throwable t) {
+            cm.rollback(con);
+            LOGGER.logSevereException(t);
         } finally {
             cm.recycle(con);
         }
+        return returnValue;
     }
 
     private <T> void setFieldData(Connection con, FieldInfo<T> fi, T value, boolean updateLastActivityTime) {
@@ -505,7 +536,7 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)),
                         Level.WARNING);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Updating %s column data on a sequence with id = [ %s ]  failed: " +
                     "An unexpected JDBC exception occured",
@@ -517,7 +548,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     private <T> void setFieldData(FieldInfo<T> fi, T value, boolean updateLastActivityTime) {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         boolean commit = false;
         try {
             setFieldData(con, fi, value, updateLastActivityTime);
@@ -566,8 +597,9 @@ final class PersistentSequenceData implements SequenceData {
      * {@inheritDoc }
      */
     public long incrementAndGetLastMessageNumber(boolean received) {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
+        long newLastMessageId = 0L;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
                     "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1, " + fLastActivityTime.columnName + "=? " +
@@ -589,7 +621,7 @@ final class PersistentSequenceData implements SequenceData {
                         Level.WARNING);
             }
 
-            long newLastMessageId = getFieldData(con, fLastMessageNumber);
+            newLastMessageId = getFieldData(con, fLastMessageNumber);
             if (LOGGER.isLoggable(Level.FINER)) {
                 LOGGER.finer("New last message id: " + newLastMessageId);
             }
@@ -605,8 +637,8 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             cm.commit(con);
-            return newLastMessageId;
-        } catch (SQLException ex) {
+            
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Incrementing last message number on a sequence with id = [ %s ] failed: " +
@@ -616,6 +648,8 @@ final class PersistentSequenceData implements SequenceData {
             cm.recycle(ps);
             cm.recycle(con);
         }
+        
+        return newLastMessageId;
     }
 
     private boolean containsUnackedMessageNumberRegistration(Connection con, long messageNumber) throws PersistenceException {
@@ -718,7 +752,7 @@ final class PersistentSequenceData implements SequenceData {
      * {@inheritDoc }
      */
     public void registerReceivedUnackedMessageNumber(long messageNumber) throws DuplicateMessageRegistrationException {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         try {
             long lastMessageNumber = getFieldData(con, fLastMessageNumber);
             if (lastMessageNumber < messageNumber) {
@@ -734,19 +768,22 @@ final class PersistentSequenceData implements SequenceData {
             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
-        } catch (PersistenceException ex) {
+        } catch (final PersistenceException ex) {
             cm.rollback(con);
             throw ex;
-        } catch (DuplicateMessageRegistrationException ex) {
+        } catch (final DuplicateMessageRegistrationException ex) {
             cm.rollback(con);
             throw ex;
+        } catch(final Throwable t){
+            cm.rollback(con);
+            LOGGER.logSevereException(t);
         } finally {
             cm.recycle(con);
         }
     }
 
     public void markAsAcknowledged(long messageNumber) {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES " +
@@ -781,7 +818,7 @@ final class PersistentSequenceData implements SequenceData {
             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Message acknowledgement failed for %s sequence with id = [ %s ] and message number [ %d ]: " +
@@ -796,7 +833,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public List<Long> getUnackedMessageNumbers() {
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT MSG_NUMBER FROM RM_UNACKED_MESSAGES " +
@@ -811,9 +848,11 @@ final class PersistentSequenceData implements SequenceData {
             while (rs.next()) {
                 result.add(rs.getLong("MSG_NUMBER"));
             }
-
+            
+            cm.commit(con);
             return result;
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
+            cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to load list of unacked message registration for %s sequence with id = [ %s ]: " +
                     "An unexpected JDBC exception occured",
@@ -826,7 +865,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public List<Long> getLastMessageNumberWithUnackedMessageNumbers() {
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT RM_SEQUENCES.LAST_MESSAGE_NUMBER AS LAST_NUMBER, RM_UNACKED_MESSAGES.MSG_NUMBER AS MESSAGE_NUMBER " +
@@ -855,7 +894,7 @@ final class PersistentSequenceData implements SequenceData {
             cm.commit(con);
 
             return result;
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to load list of unacked message registration for %s sequence with id = [ %s ]: " +
@@ -870,7 +909,7 @@ final class PersistentSequenceData implements SequenceData {
 
     public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
         ByteArrayInputStream bais = null;
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_UNACKED_MESSAGES SET " +
@@ -908,7 +947,7 @@ final class PersistentSequenceData implements SequenceData {
             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to store message data in an unacked message registration for %s sequence with id = [ %s ] and message number [ %d ]: " +
@@ -932,7 +971,7 @@ final class PersistentSequenceData implements SequenceData {
 
     public ApplicationMessage retrieveMessage(String correlationId) {
 
-        Connection con = cm.getConnection(false);
+        Connection con = cm.getConnection();
         PreparedStatement ps = null;
             
         InputStream messageDataStream = null;
@@ -974,7 +1013,7 @@ final class PersistentSequenceData implements SequenceData {
             cm.commit(con);
 
             return message;
-        } catch (SQLException ex) {
+        } catch (final Throwable ex) {
             cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to load message data from an unacked message registration for %s sequence with id = [ %s ] and correlation id [ %s ]: " +
