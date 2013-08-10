@@ -398,6 +398,8 @@
                     <artifactId>gfnexus-maven-plugin</artifactId>
                     <version>0.13</version>
                     <configuration>
+                        <nexusRepoUrl>https://maven.java.net/</nexusRepoUrl>
+                        <nexusRepoId>jvnet-nexus-staging</nexusRepoId>
                         <stagingRepos>
                             <stagingRepo>
                                 <ref>org.glassfish.metro:webservices-rt:${project.version}:jar</ref>
