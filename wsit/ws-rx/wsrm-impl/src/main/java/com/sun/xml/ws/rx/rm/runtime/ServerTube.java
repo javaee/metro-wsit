@@ -518,10 +518,13 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private Packet handleAckRequestedAction(Packet request) { // TODO move packet creation processing to protocol handler
+        //when true, RM_SEQUENCES DB table row contention is avoided when handling AckRequested
+        boolean noStateUpdate = rc.configuration.getRmFeature().isStateUpdateOnReceivedAckRequestedDisabled();
+        
         AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(request.getMessage());
-        rc.destinationMessageHandler.processAcknowledgements(ackData);
+        rc.destinationMessageHandler.processAcknowledgements(ackData, noStateUpdate);
 
-        return rc.protocolHandler.createEmptyAcknowledgementResponse(rc.destinationMessageHandler.getAcknowledgementData(ackData.getAckReqestedSequenceId()), request);
+        return rc.protocolHandler.createEmptyAcknowledgementResponse(rc.destinationMessageHandler.getAcknowledgementData(ackData.getAckReqestedSequenceId(), true, noStateUpdate), request);
     }
 
     /**

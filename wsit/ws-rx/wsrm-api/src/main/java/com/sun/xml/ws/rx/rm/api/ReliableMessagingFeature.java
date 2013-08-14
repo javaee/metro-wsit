@@ -124,6 +124,17 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
      * element as part of the {@code CreateSequence} message.
      */
     public static final boolean DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED = false;
+    
+    /**
+     * A constant specifying the default value for enabling "reject out-of-order messages".
+     */
+    public static final boolean DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES = false;
+    
+    /**
+     * A constant specifying the default value for turning off state update when
+     * received AckRequested is processed at RMD.
+     */
+    public static final boolean DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED = false;
 
     /**
      * Defines the enumeration of possible security binding mechanism options that
@@ -337,6 +348,16 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     private final long maxConcurrentSessions;
     //
     private final boolean offerElementGenerationDisabled;
+    
+    //Do not retain out-of-order messages waiting for 'gap' 
+    //message(s) to arrive
+    private final boolean rejectOutOfOrderMessagesEnabled;
+    
+    //This is to avoid resource contention when AckRequested is processed
+    //concurrently on service-side with the same sequence application message.
+    //e.g. LAST_ACTIVITY_TIME update to RM_SEQUENCES table will block
+    //if row-level lock is in place for the same sequence.
+    private final boolean stateUpdateOnReceivedAckRequestedDisabled;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -367,7 +388,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 false, // this.persistenceEnabled
                 DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD,
                 DEFAULT_MAX_CONCURRENT_SESSIONS,
-                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
+                DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES,
+                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED);
     }
 
     @FeatureConstructor({
@@ -415,7 +438,10 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 persistenceEnabled, // this.persistenceEnabled
                 sequenceManagerMaintenancePeriod,
                 maxConcurrentSessions,
-                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
+                DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES,
+                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED
+                );
     }
 
     ReliableMessagingFeature(
@@ -436,7 +462,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
             boolean persistenceEnabled,
             long sequenceManagerMaintenancePeriod,
             long maxConcurrentRmSessions,
-            boolean offerElementGenerationDisabled) {
+            boolean offerElementGenerationDisabled,
+            boolean rejectOutOfOrderMessagesEnabled,
+            boolean stateUpdateOnReceivedAckRequestedDisabled) {
 
         super.enabled = enabled;
         this.version = version;
@@ -456,6 +484,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
         this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
         this.maxConcurrentSessions = maxConcurrentRmSessions;
         this.offerElementGenerationDisabled = offerElementGenerationDisabled;
+        this.rejectOutOfOrderMessagesEnabled = rejectOutOfOrderMessagesEnabled;
+        this.stateUpdateOnReceivedAckRequestedDisabled = stateUpdateOnReceivedAckRequestedDisabled;
     }
 
     @Override
@@ -734,7 +764,26 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     public boolean isOfferElementGenerationDisabled() {
         return offerElementGenerationDisabled;
     }
-
+    
+    /**
+     * Specifies whether RMD should reject out-of-order messages that it receives.
+     *
+     * @return {@code true} if RMD should reject out-of-order messages. Default is false.
+     */
+    public boolean isRejectOutOfOrderMessagesEnabled() {
+        return rejectOutOfOrderMessagesEnabled;
+    }
+    
+    /**
+     * Specifies whether state update should not be made when RMD receives AckRequested.
+     *
+     * @return {@code true} if RMD should not update state while processing received
+     * AckRequested. Default is false.
+     */
+    public boolean isStateUpdateOnReceivedAckRequestedDisabled() {
+        return stateUpdateOnReceivedAckRequestedDisabled;
+    }
+    
     @Override
     public String toString() {
         return "ReliableMessagingFeature" +
@@ -755,6 +804,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 ",\n\tsequenceManagerMaintenancePeriod=" + sequenceManagerMaintenancePeriod + 
                 ",\n\tmaxConcurrentSessions=" + maxConcurrentSessions + 
                 ",\n\tofferElementGenerationDisabled=" + offerElementGenerationDisabled + 
+                ",\n\trejectOutOfOrderMessagesEnabled=" + rejectOutOfOrderMessagesEnabled + 
+                ",\n\tstateUpdateOnReceivedAckRequestedDisabled=" + stateUpdateOnReceivedAckRequestedDisabled + 
                 "\n}";
     }        
 }

@@ -100,6 +100,10 @@ class DestinationMessageHandler implements MessageHandler {
     }
 
     public void processAcknowledgements(@Nullable AcknowledgementData acknowledgementData) throws UnknownSequenceException {
+        processAcknowledgements(acknowledgementData, false);
+    }
+    
+    void processAcknowledgements(@Nullable AcknowledgementData acknowledgementData, boolean doNotSetAckRequestedFlag) throws UnknownSequenceException {
         assert sequenceManager != null;
 
         if (acknowledgementData == null) {
@@ -116,12 +120,12 @@ class DestinationMessageHandler implements MessageHandler {
             }
         }
 
-        if (acknowledgementData.getAckReqestedSequenceId() != null) { // process inbound sequence ack requested flag
+        if (acknowledgementData.getAckReqestedSequenceId() != null && !doNotSetAckRequestedFlag) { // process inbound sequence ack requested flag
             final Sequence inboundSequence = sequenceManager.getInboundSequence(acknowledgementData.getAckReqestedSequenceId());
             inboundSequence.setAckRequestedFlag();
         }
     }
-
+    
     /**
      * Retrieves acknowledgement information for a given outbound (and inbound) sequence
      *
@@ -130,13 +134,19 @@ class DestinationMessageHandler implements MessageHandler {
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
     public AcknowledgementData getAcknowledgementData(String inboundSequenceId) throws UnknownSequenceException {
+        return getAcknowledgementData(inboundSequenceId, false, false);
+    }
+
+    AcknowledgementData getAcknowledgementData(String inboundSequenceId, boolean isRespondingToAckRequested, boolean doNotClearAckRequestedFlag) throws UnknownSequenceException {
         assert sequenceManager != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         final Sequence inboundSequence = sequenceManager.getInboundSequence(inboundSequenceId);
-        if (inboundSequence.isAckRequested() || inboundSequence.isClosed()) {
+        if (isRespondingToAckRequested || inboundSequence.isAckRequested() || inboundSequence.isClosed()) {
             ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers(), inboundSequence.isClosed());
-            inboundSequence.clearAckRequestedFlag();
+            if (!doNotClearAckRequestedFlag) {
+                inboundSequence.clearAckRequestedFlag();
+            }
         }
 
         // outbound sequence ack requested flag

@@ -71,7 +71,10 @@ public final class ReliableMessagingFeatureBuilder {
     private long maxConcurrentSessions = DEFAULT_MAX_CONCURRENT_SESSIONS;
     //
     private boolean offerElementGenerationDisabled = DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED;
-
+    
+    private boolean rejectOutOfOrderMessagesEnabled = DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES;
+    private boolean stateUpdateOnReceivedAckRequestedDisabled = DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED;
+    
     public ReliableMessagingFeatureBuilder(RmProtocolVersion version) {
         this.protocolVersion = version;
     }
@@ -95,7 +98,9 @@ public final class ReliableMessagingFeatureBuilder {
                 this.persistenceEnabled,
                 this.sequenceMaintenancePeriod,
                 this.maxConcurrentSessions,
-                this.offerElementGenerationDisabled);
+                this.offerElementGenerationDisabled,
+                this.rejectOutOfOrderMessagesEnabled,
+                this.stateUpdateOnReceivedAckRequestedDisabled);
     }
 
     /**
@@ -239,6 +244,24 @@ public final class ReliableMessagingFeatureBuilder {
      */
     public ReliableMessagingFeatureBuilder disableOfferElementGeneration() {
         this.offerElementGenerationDisabled = true;
+
+        return this;
+    }
+    
+    /**
+     * @see ReliableMessagingFeature#isRejectOutOfOrderMessagesEnabled()
+     */
+    public ReliableMessagingFeatureBuilder rejectOutOfOrderMessages() {
+        this.rejectOutOfOrderMessagesEnabled = true;
+
+        return this;
+    }
+    
+    /**
+     * @see ReliableMessagingFeature#isStateUpdateOnReceivedAckRequestedDisabled()
+     */
+    public ReliableMessagingFeatureBuilder disableStateUpdateOnReceivedAckRequested() {
+        this.stateUpdateOnReceivedAckRequestedDisabled = true;
 
         return this;
     }
