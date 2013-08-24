@@ -151,6 +151,7 @@
                         </goals>
                         <configuration>
                             <useExtensions>true</useExtensions>
+                            <fop1Extensions>true</fop1Extensions>
                             <includes>user-guide.xml</includes>
                         </configuration>
                         <phase>package</phase>
