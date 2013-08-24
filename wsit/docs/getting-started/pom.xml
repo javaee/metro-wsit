@@ -156,10 +156,20 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>Single page HTML and PDF</id>
+                        <id>Single page PDF</id>
+                        <goals>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <configuration>
+                            <includes>getting-started.xml</includes>
+                            <highlightSource>false</highlightSource>
+                        </configuration>
+                        <phase>package</phase>
+                    </execution>
+                    <execution>
+                        <id>Single page HTML</id>
                         <goals>
                             <goal>generate-html</goal>
-                            <goal>generate-pdf</goal>
                         </goals>
                         <configuration>
                             <includes>getting-started.xml</includes>
