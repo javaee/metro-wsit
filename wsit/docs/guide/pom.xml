@@ -118,7 +118,6 @@
                     <partAutolabel>true</partAutolabel>
                     <sectionAutolabel>true</sectionAutolabel>
                     <sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
-                    <useExtensions>true</useExtensions>
                     <linenumberingExtension>true</linenumberingExtension>
                     <linenumberingEveryNth>1</linenumberingEveryNth>
                     <calloutsExtension>true</calloutsExtension>
@@ -127,6 +126,7 @@
                     <highlightDefaultLanguage>true</highlightDefaultLanguage>
                     <htmlLongdesc>false</htmlLongdesc>
                     <keepRelativeImageUris>true</keepRelativeImageUris>
+                    <useStandardOutput>true</useStandardOutput>
 
                     <preProcess>
                         <copy todir="${project.build.directory}/docbook/figures">
@@ -145,10 +145,20 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>Single page HTML and PDF</id>
+                        <id>Single page PDF</id>
+                        <goals>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <configuration>
+                            <useExtensions>true</useExtensions>
+                            <includes>user-guide.xml</includes>
+                        </configuration>
+                        <phase>package</phase>
+                    </execution>
+                    <execution>
+                        <id>Single page HTML</id>
                         <goals>
                             <goal>generate-html</goal>
-                            <goal>generate-pdf</goal>
                         </goals>
                         <configuration>
                             <includes>user-guide.xml</includes>
