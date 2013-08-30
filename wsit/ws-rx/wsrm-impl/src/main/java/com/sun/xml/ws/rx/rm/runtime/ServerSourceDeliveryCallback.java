@@ -68,6 +68,10 @@ class ServerSourceDeliveryCallback implements Postman.Callback {
                     JaxwsApplicationMessage.class.getName())));
         }
     }
+    
+    public RuntimeContext getRuntimeContext() {
+        return rc;
+    }
 
     public void deliver(JaxwsApplicationMessage message) {
         rc.sourceMessageHandler.attachAcknowledgementInfo(message);

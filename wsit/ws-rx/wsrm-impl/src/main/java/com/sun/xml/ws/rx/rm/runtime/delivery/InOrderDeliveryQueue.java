@@ -45,9 +45,13 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
+import com.sun.xml.ws.rx.rm.runtime.sequence.OutOfOrderMessageException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -76,8 +80,10 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     private final @NotNull BlockingQueue<ApplicationMessage> postponedMessageQueue;
     //
     private volatile boolean isClosed;
+    //
+    private boolean rejectOutOfOrderMessages;
 
-    public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize) {
+    public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize, boolean rejectOutOfOrderMessages) {
         assert postman != null;
         assert deliveryCallback != null;
         assert sequence != null;
@@ -91,20 +97,32 @@ class InOrderDeliveryQueue implements DeliveryQueue {
         this.postponedMessageQueue = new PriorityBlockingQueue<ApplicationMessage>(32, MSG_ID_COMPARATOR);
 
         this.isClosed = false;
+        
+        this.rejectOutOfOrderMessages = rejectOutOfOrderMessages;
     }
 
     public void put(ApplicationMessage message) {
 //        LOGGER.info(Thread.currentThread().getName() + " put: mesageNumber = " + message.getMessageNumber());
         assert message.getSequenceId().equals(sequence.getId());
 
-        try {
-            postponedMessageQueue.put(message);
-        } catch (InterruptedException ex) {
-            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1147_ADDING_MSG_TO_QUEUE_INTERRUPTED(), ex));
-        }
+        if (rejectOutOfOrderMessages && !isDeliverable(message)) {
+            JaxwsApplicationMessage jam = 
+                    JaxwsApplicationMessage.class.cast(message);
+            String correlationId = jam.getCorrelationId();
+            SuspendedFiberStorage sfs = deliveryCallback.getRuntimeContext().suspendedFiberStorage;
+            OutOfOrderMessageException e = new OutOfOrderMessageException(sequence.getId(), message.getMessageNumber());
+            sfs.resumeFiber(correlationId, e);
+        } else {
+            try {
+                postponedMessageQueue.put(message);
+            } catch (InterruptedException ex) {
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1147_ADDING_MSG_TO_QUEUE_INTERRUPTED(), ex));
+            }
 
-        tryDelivery();
+            tryDelivery();
+        }
     }
+    
     public void onSequenceAcknowledgement() {
 //        LOGGER.info(Thread.currentThread().getName() + " onSequenceAcknowledgement");
         if (!isClosed) {
@@ -125,9 +143,9 @@ class InOrderDeliveryQueue implements DeliveryQueue {
                 synchronized (postponedMessageQueue) {
                     ApplicationMessage queueHead = postponedMessageQueue.peek();
 
-//                    LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue head message number = " + ((queueHead != null) ? queueHead.getMessageNumber() + " is deliverable: " + isDeliverable(queueHead) : "n/a"));
+//                  LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue head message number = " + ((queueHead != null) ? queueHead.getMessageNumber() + " is deliverable: " + isDeliverable(queueHead) : "n/a"));
 
-                    if (queueHead != null && isDeliverable(queueHead)) {
+                    if(queueHead != null && isDeliverable(queueHead)) {
                         deliverableMessage = postponedMessageQueue.poll();
                         assert isDeliverable(deliverableMessage);
                     }

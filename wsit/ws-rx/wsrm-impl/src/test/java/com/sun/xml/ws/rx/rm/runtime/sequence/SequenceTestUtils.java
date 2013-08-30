@@ -48,6 +48,7 @@ import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
@@ -107,6 +108,12 @@ final class SequenceTestUtils  {
         return DeliveryQueueBuilder.getBuilder(getConfiguration(), PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
 
             public void deliver(ApplicationMessage message) {
+            }
+
+            @Override
+            public RuntimeContext getRuntimeContext() {
+                // TODO Auto-generated method stub
+                return null;
             }
         });
     }

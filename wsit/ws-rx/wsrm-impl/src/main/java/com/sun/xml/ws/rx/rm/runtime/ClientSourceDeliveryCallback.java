@@ -149,7 +149,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                         rc.destinationMessageHandler.registerMessage(message);
                         rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
                     } else {
-                        // if the response message does not contain sequence headers, process it as a normal, non-RM message
+                        // if the response message does not contain sequence headers, 
+                        // process it as a normal, non-RM message
                         resumeParentFiber(response);
                     }
 
@@ -306,5 +307,10 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         } finally {
             LOGGER.exiting();
         }
+    }
+
+    @Override
+    public RuntimeContext getRuntimeContext() {
+        return rc;
     }
 }

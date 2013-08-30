@@ -203,7 +203,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
             Packet requestCopy = request.copy(true);
 
             request.addSatellite(new AdditionalResponses());
-            fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID, configuration));
+            fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID, configuration), null);
 
             return super.doReturnWith(createEmptyResponse(requestCopy));
         } finally {

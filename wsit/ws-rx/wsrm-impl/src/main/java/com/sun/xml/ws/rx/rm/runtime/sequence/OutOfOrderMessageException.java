@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,38 +38,35 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.rm.runtime;
+package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 
-class ClientDestinationDeliveryCallback implements Postman.Callback {
+/**
+ * Exception used by sequence implementation to reject out of order
+ * message number for a given sequence when InOrder QoS is configured.
+ *
+ * @author Uday Joshi <uday.joshi at oracle.com>
+ */
+public class OutOfOrderMessageException extends RxException {
+    private static final long serialVersionUID = 1L;
+    private final String sequenceId;
+    private final long messageNumber;
 
-    private static final Logger LOGGER = Logger.getLogger(ClientDestinationDeliveryCallback.class);
-    private final RuntimeContext rc;
+    public OutOfOrderMessageException(String sequenceId, long messageNumber) {
+        //TODO i18n
+        super("Out of order message received: sequenceId "+sequenceId+", messageNumber "+messageNumber);
 
-    public ClientDestinationDeliveryCallback(RuntimeContext rc) {
-        this.rc = rc;
+        this.sequenceId = sequenceId;
+        this.messageNumber = messageNumber;
     }
 
-    public void deliver(ApplicationMessage message) {
-        if (message instanceof JaxwsApplicationMessage) {
-            deliver(JaxwsApplicationMessage.class.cast(message));
-        } else {
-            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1141_UNEXPECTED_MESSAGE_CLASS(
-                    message.getClass().getName(),
-                    JaxwsApplicationMessage.class.getName())));
-        }
-    }
-    
-    public RuntimeContext getRuntimeContext() {
-        return rc;
+    public long getMessageNumber() {
+        return messageNumber;
     }
 
-    private void deliver(JaxwsApplicationMessage message) {
-        rc.suspendedFiberStorage.resumeFiber(message.getCorrelationId(), message.getPacket());
-        rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(message);
+    public String getSequenceId() {
+        return sequenceId;
     }
 }

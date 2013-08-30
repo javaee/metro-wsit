@@ -54,6 +54,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
@@ -459,14 +460,21 @@ public final class Communicator {
      * @param completionCallbackHandler completion callback handler to process the response.
      *        May be {@code null}. In such case a generic completion callback handler will be used.
      */
-    public void sendAsync(@NotNull final Packet request, @Nullable final Fiber.CompletionCallback completionCallbackHandler) {
+    public void sendAsync(@NotNull final Packet request,
+            @Nullable final Fiber.CompletionCallback completionCallbackHandler) {
+        sendAsync(request, completionCallbackHandler, null);
+    }
+
+    public void sendAsync(@NotNull final Packet request,
+            @Nullable final Fiber.CompletionCallback completionCallbackHandler,
+            @Nullable FiberContextSwitchInterceptor interceptor) {
         if (fiberExecutor == null) {
             LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
             return;
         }
 
         if (completionCallbackHandler != null) {
-            fiberExecutor.start(request, completionCallbackHandler);
+            fiberExecutor.start(request, completionCallbackHandler, interceptor);
         } else {
             fiberExecutor.start(request, new Fiber.CompletionCallback() {
 
@@ -477,7 +485,7 @@ public final class Communicator {
                 public void onCompletion(Throwable error) {
                     LOGGER.warning("Unexpected exception occured", error);
                 }
-            });
+            }, interceptor);
         }
     }
 

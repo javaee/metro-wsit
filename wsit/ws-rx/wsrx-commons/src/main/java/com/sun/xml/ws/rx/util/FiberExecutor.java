@@ -41,10 +41,12 @@
 package com.sun.xml.ws.rx.util;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.util.Pool;
 import java.util.Iterator;
@@ -115,15 +117,19 @@ public final class FiberExecutor {
             Schedule schedule = iterator.next();
             iterator.remove();
 
-            start(schedule.request, schedule.completionCallback);
+            start(schedule.request, schedule.completionCallback, null);
         }
     }
 
-    public void start(Packet request, @NotNull final Fiber.CompletionCallback callback) {
+    public void start(Packet request,
+            @NotNull final Fiber.CompletionCallback callback,
+            @Nullable FiberContextSwitchInterceptor interceptor) {
         Fiber fiber = engine.createFiber();
-//        if (interceptor != null) {
-//            fiber.addInterceptor(interceptor);
-//        }
+
+        if (interceptor != null) {
+            fiber.addInterceptor(interceptor);
+        }
+
         final Tube tube = tubelinePool.take();
         fiber.start(tube, request, new Fiber.CompletionCallback() {
 

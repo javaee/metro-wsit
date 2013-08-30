@@ -42,6 +42,7 @@ package com.sun.xml.ws.rx.rm.runtime.delivery;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -64,6 +65,8 @@ public final class Postman {
          * @param message
          */
         public void deliver(ApplicationMessage message);
+        
+        public RuntimeContext getRuntimeContext();
     }
 
     private final Executor executor;
