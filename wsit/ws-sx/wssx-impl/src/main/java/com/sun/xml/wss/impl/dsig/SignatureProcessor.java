@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -90,6 +90,7 @@ import com.sun.xml.wss.impl.keyinfo.KeyInfoStrategy;
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
+import com.sun.xml.wss.impl.transform.DOMSTRTransform;
 import com.sun.xml.wss.impl.AlgorithmSuite;
 
 import java.io.IOException;
@@ -97,6 +98,7 @@ import java.io.InputStream;
 
 import java.security.Key;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.MessageDigest;
 
 import java.util.ArrayList;
@@ -113,7 +115,10 @@ import javax.xml.crypto.NodeSetData;
 import javax.xml.crypto.OctetStreamData;
 import javax.xml.crypto.URIReference;
 import javax.xml.crypto.URIReferenceException;
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.SignedInfo;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.TransformService;
@@ -773,6 +778,7 @@ public class SignatureProcessor{
             XMLSignatureFactory signatureFactory = WSSPolicyConsumerImpl.getInstance().getSignatureFactory();
             // unmarshal the XMLSignature
             XMLSignature signature = signatureFactory.unmarshalXMLSignature(validationContext);
+            verifySignatureAlgorithm(signature);
             
             //For SignatureConfirmation
             List scList = (ArrayList)context.getExtraneousProperty("receivedSignValues");
@@ -2047,4 +2053,180 @@ public class SignatureProcessor{
         return ekSha1Ref;
     }
     
+    @SuppressWarnings("unchecked")
+	private static void verifySignatureAlgorithm(XMLSignature signature)
+			throws XWSSecurityException {
+		if (null == signature) {
+			logger.log(Level.FINE,
+					" null signature, no signature algorithm verification");
+			return;
+		}
+		SignedInfo signedInfo = signature.getSignedInfo();
+		if (null == signedInfo) {
+			String errorStr = LogStringsMessages
+					.WSS_1315_SIGNATURE_VERIFICATION_FAILED()
+					+ "at ds:SignedInfo";
+			logger.log(Level.SEVERE, errorStr + " ds:SignedInfo is NULL");
+			throw new XWSSecurityException(errorStr);
+		}
+		verifyCanonicalizationMethod(signedInfo.getCanonicalizationMethod());
+		verifyReferences(signedInfo.getReferences());
+		verifySignatureMethod(signedInfo.getSignatureMethod());
+	}
+	
+	public static void verifyCanonicalizationMethodAlgorithm(
+			String c14nMethodAlgorithm) throws XWSSecurityException {
+		if ((null == c14nMethodAlgorithm) || (c14nMethodAlgorithm.length() < 1)) {
+			String errorStr = LogStringsMessages
+					.WSS_1368_ILLEGAL_STR_CANONCALIZATION()
+					+ " at ds:CanonicalizationMethod Algorithm";
+			logger.log(Level.SEVERE, errorStr + "NULL Algorithm");
+			throw new XWSSecurityException(errorStr);
+		}
+		String algoStr = c14nMethodAlgorithm.trim();
+		for (int i = 0; i < SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM.length; i++) {
+			if (SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM[i].equals(algoStr)) {
+				return;
+			}
+		}
+
+		String errorStr = LogStringsMessages.WSS_1320_STR_UN_TRANSFORM_ERROR()
+				+ " Unexpected ds:CanonicalizationMethod, ["
+				+ c14nMethodAlgorithm + "]";
+		logger.log(Level.SEVERE, errorStr
+				+ " Unknown ds:CanonicalizationMethod Algorithm");
+		throw new XWSSecurityException(errorStr);
+	}
+
+	private static void verifyReferences(List<Reference> referenceList)
+			throws XWSSecurityException {
+		if (null == referenceList || referenceList.size() < 1) {
+			String errorStr = LogStringsMessages
+					.WSS_1315_SIGNATURE_VERIFICATION_FAILED()
+					+ " at ds:Reference ";
+			logger.log(Level.SEVERE, errorStr + " Empty or NULL ");
+			throw new XWSSecurityException(errorStr);
+		}
+		for (int i = 0; i < referenceList.size(); i++) {
+			Reference ref = referenceList.get(i);
+			verifyTransforms(ref.getTransforms());
+			verifyDigestMethod(ref.getDigestMethod());
+		}
+	}
+
+	private static void verifyDigestMethod(DigestMethod digestMethod)
+			throws XWSSecurityException {
+		// WSS_1765_INVALID_DEGEST_ALGO
+		if (null == digestMethod || null == digestMethod.getAlgorithm()) {
+			String errorStr = LogStringsMessages
+					.WSS_1301_INVALID_DIGEST_ALGO(null)
+					+ "at ds:Reference/ds:DigestMethod";
+			logger.log(Level.SEVERE, errorStr + " is NULL");
+			throw new XWSSecurityException(errorStr);
+		}
+		// todo: verify <ds:DigestMethod Algorithm >
+	}
+
+	private static void verifyTransforms(List<?> trList)
+			throws XWSSecurityException {
+		if (null == trList || trList.size() < 1 || trList.size() > 1) {
+			String errorStr = LogStringsMessages
+					.WSS_1342_ILLEGAL_UNMATCHED_TRANSFORMS() + " Empty or NULL";
+			logger.log(Level.SEVERE, errorStr + " at ds:Transforms");
+			return; // throw new XWSSecurityException(errorStr);
+		}
+		// Only support one Tranform here
+		verifyTransform((Transform) trList.get(0));
+	}
+
+	private static void verifyTransform(Transform tr)
+			throws XWSSecurityException {
+		// WSS_1300_DSIG_TRANSFORM_PARAM_ERROR()
+		if (null == tr) {
+			String errorStr = LogStringsMessages
+					.WSS_1342_ILLEGAL_UNMATCHED_TRANSFORMS() + " Empty or NULL";
+			logger.log(Level.SEVERE, errorStr + "Null ds:Transform found");
+			throw new XWSSecurityException(errorStr);
+		}
+		if (MessageConstants.STR_TRANSFORM_URI.equals(tr.getAlgorithm())) {
+			verifyStrTransform(tr);
+		}
+		// Todo: Add other transform verifications
+	}
+
+	private static void verifyStrTransform(Transform tr)
+			throws XWSSecurityException {
+		// WSS_1300_DSIG_TRANSFORM_PARAM_ERROR()
+		AlgorithmParameterSpec algoParaSpec = tr.getParameterSpec();
+		if ((null == algoParaSpec)
+				|| !(algoParaSpec instanceof DOMSTRTransform.STRTransformParameterSpec)) {
+			String errorStr = LogStringsMessages
+					.WSS_1300_DSIG_TRANSFORM_PARAM_ERROR()
+					+ " at ds:Transform/wsse:TransformationParameters";
+			logger.log(
+					Level.SEVERE,
+					errorStr
+							+ "Error on wsse:TransformationParameters for #STR-Transform");
+			throw new XWSSecurityException(errorStr);
+		}
+		DOMSTRTransform.STRTransformParameterSpec spec = (DOMSTRTransform.STRTransformParameterSpec) algoParaSpec;
+		verifyCanonicalizationMethod(spec.getCanonicalizationMethod());
+	}
+
+	private static void verifyCanonicalizationMethod(
+			CanonicalizationMethod canonicalizationMethod)
+			throws XWSSecurityException {
+		if (null == canonicalizationMethod) {
+			String errorStr = LogStringsMessages
+					.WSS_1368_ILLEGAL_STR_CANONCALIZATION()
+					+ " at ds:CanonicalizationMethod";
+			logger.log(Level.SEVERE, errorStr
+					+ " NULL ds:CanonicalizationMethod");
+			throw new XWSSecurityException(errorStr);
+		}
+		verifyCanonicalizationMethodAlgorithm(canonicalizationMethod
+				.getAlgorithm());
+
+	}
+
+	private static String SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM[] = new String[] {
+	/*
+	 * The <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">Canonical
+	 * XML (without comments)</a> canonicalization method algorithm URI. String
+	 * INCLUSIVE = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
+	 */
+	CanonicalizationMethod.INCLUSIVE,
+	/*
+	 * The <a
+	 * href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments">
+	 * Canonical XML with comments</a> canonicalization method algorithm URI.
+	 * String INCLUSIVE_WITH_COMMENTS =
+	 * "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
+	 */
+
+	CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS,
+	/*
+	 * The <a href="http://www.w3.org/2001/10/xml-exc-c14n#">Exclusive Canonical
+	 * XML (without comments)</a> canonicalization method algorithm URI. String
+	 * EXCLUSIVE = "http://www.w3.org/2001/10/xml-exc-c14n#";
+	 */
+	CanonicalizationMethod.EXCLUSIVE,
+	/*
+	 * The <a href="http://www.w3.org/2001/10/xml-exc-c14n#WithComments">
+	 * Exclusive Canonical XML with comments</a> canonicalization method
+	 * algorithm URI. String EXCLUSIVE_WITH_COMMENTS =
+	 * "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
+	 */
+	CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS };
+
+	private static void verifySignatureMethod(SignatureMethod signatureMethod)
+			throws XWSSecurityException {
+		if (null == signatureMethod || null == signatureMethod.getAlgorithm()) {
+			String errorStr = LogStringsMessages
+					.WSS_1315_SIGNATURE_VERIFICATION_FAILED()
+					+ "at ds:SignedInfo/ds:SignatureMethod";
+			logger.log(Level.SEVERE, errorStr + " is NULL");
+			throw new XWSSecurityException(errorStr);
+		}
+	}
 }

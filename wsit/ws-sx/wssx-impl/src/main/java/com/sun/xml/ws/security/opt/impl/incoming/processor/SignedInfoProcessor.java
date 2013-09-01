@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -68,6 +68,7 @@ import com.sun.xml.wss.BasicSecurityProfile;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
+import com.sun.xml.wss.impl.dsig.SignatureProcessor;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.UnsyncByteArrayOutputStream;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -269,7 +270,8 @@ public class SignedInfoProcessor {
             if(canonAlgo != null && canonAlgo.length() ==0){
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
                 throw new XWSSecurityException(LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
-            }            
+            }
+            SignatureProcessor.verifyCanonicalizationMethodAlgorithm(canonAlgo);
             String [] prefixList = null;
             if(reader.hasNext()){
                 reader.next();
@@ -593,6 +595,7 @@ public class SignedInfoProcessor {
             reader.next();
             if(StreamUtil.isStartElement(reader) && (reader.getLocalName() == MessageConstants.CANONICALIZATION_METHOD)){                
                 String value = reader.getAttributeValue(null,"Algorithm");
+                SignatureProcessor.verifyCanonicalizationMethodAlgorithm(value);
                 cm.setAlgorithm(value);
                 StreamUtil.moveToNextStartOREndElement(reader);
             }
