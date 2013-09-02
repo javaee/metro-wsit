@@ -244,7 +244,6 @@ public class SignC14Test extends TestCase {
 	private static Node findNode(String name, Node node) {
 		String nodeName = node.getLocalName();
 		if (name.equals(nodeName)) {
-			System.out.println(name);
 			return node;
 		} else {
 			NodeList childNodes = node.getChildNodes();
@@ -279,7 +278,7 @@ public class SignC14Test extends TestCase {
 				wssAssertionws = (com.sun.xml.ws.security.policy.WSSAssertion) assertion;
 			}
 		}
-		// wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
+//		 wssAssertion.addRequiredProperty("RequireSignatureConfirmation");
 		wssAssertion = new WSSAssertion(wssAssertionws.getRequiredProperties(),
 				"1.0");
 		MessagePolicy pol = new MessagePolicy();
@@ -294,8 +293,8 @@ public class SignC14Test extends TestCase {
 			SecurityRecipient.validateMessage(context);
 		} catch (Exception ex) {
 			String errMsg = ex.getMessage();
-			if (!errMsg.endsWith("Unexpected ds:CanonicalizationMethod, ["
-					+ c14Value + "]")) {
+			if (!(errMsg.endsWith("Unexpected ds:CanonicalizationMethod, ["
+					+ c14Value + "]") || errMsg.endsWith("Illegal CanonicalizationMethod"))) {
 				throw ex;
 			}
 
