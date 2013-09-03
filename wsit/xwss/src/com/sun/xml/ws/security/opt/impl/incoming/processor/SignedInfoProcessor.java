@@ -1,27 +1,31 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License. You can obtain
- * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
- * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ * may not use this file except in compliance with the License.  You can
+ * obtain a copy of the License at
+ * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+ * or packager/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
- * Sun designates this particular file as subject to the "Classpath" exception
- * as provided by Sun in the GPL Version 2 section of the License file that
- * accompanied this code.  If applicable, add the following below the License
- * Header, with the fields enclosed by brackets [] replaced by your own
- * identifying information: "Portions Copyrighted [year]
- * [name of copyright owner]"
- * 
+ * file and include the License file at packager/legal/LICENSE.txt.
+ *
+ * GPL Classpath Exception:
+ * Oracle designates this particular file as subject to the "Classpath"
+ * exception as provided by Oracle in the GPL Version 2 section of the License
+ * file that accompanied this code.
+ *
+ * Modifications:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ *
  * Contributor(s):
- * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -64,6 +68,7 @@ import com.sun.xml.wss.BasicSecurityProfile;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
+import com.sun.xml.wss.impl.dsig.SignatureProcessor;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.UnsyncByteArrayOutputStream;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -265,7 +270,8 @@ public class SignedInfoProcessor {
             if(canonAlgo != null && canonAlgo.length() ==0){
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
                 throw new XWSSecurityException(LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
-            }            
+            }
+            SignatureProcessor.verifyCanonicalizationMethodAlgorithm(canonAlgo);
             String [] prefixList = null;
             if(reader.hasNext()){
                 reader.next();
@@ -546,7 +552,7 @@ public class SignedInfoProcessor {
      * @return Object
      */
     private Object getMessagePart(String id){
-        HeaderList headers = securityContext.getNonSecurityHeaders();
+        HeaderList headers = (HeaderList) securityContext.getNonSecurityHeaders();
         if(headers != null && headers.size() >0){
             Iterator<Header> listItr = headers.listIterator();
             boolean found = false;
@@ -586,6 +592,7 @@ public class SignedInfoProcessor {
             reader.next();
             if(StreamUtil.isStartElement(reader) && (reader.getLocalName() == MessageConstants.CANONICALIZATION_METHOD)){                
                 String value = reader.getAttributeValue(null,"Algorithm");
+                SignatureProcessor.verifyCanonicalizationMethodAlgorithm(value);
                 cm.setAlgorithm(value);
                 StreamUtil.moveToNextStartOREndElement(reader);
             }
