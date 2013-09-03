@@ -115,11 +115,11 @@
             <attribute default="/does/not/exist" name="sourcepath"/>
             <element name="customize" optional="true"/>
             <sequential>
-                <javac debug="@{debug}" deprecation="${javac.deprecation}" destdir="@{destdir}" encoding="${source.encoding}" excludes="@{excludes}" includeantruntime="false" includes="@{includes}" source="${javac.source}" sourcepath="@{sourcepath}" srcdir="@{srcdir}" target="${javac.target}" nowarn="on">
+                <javac debug="@{debug}" fork="true" deprecation="${javac.deprecation}" destdir="@{destdir}" encoding="${source.encoding}" excludes="@{excludes}" includeantruntime="false" includes="@{includes}" source="${javac.source}" sourcepath="@{sourcepath}" srcdir="@{srcdir}" target="${javac.target}" nowarn="on">
                     <classpath>
                         <path path="@{classpath}"/>
                     </classpath>
-                    <compilerarg line="-Xlint:-unchecked ${javac.compilerargs} ${javac.compilerargs.jaxws} -Xmaxwarns 10000 -nowarn "/>
+                    <compilerarg line="${javac.compilerargs} ${javac.compilerargs.jaxws}"/>
                 <customize/>
                 </javac>
             </sequential>

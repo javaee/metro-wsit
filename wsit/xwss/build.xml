@@ -48,12 +48,6 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
 
-    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
-        <classpath>
-            <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
-        </classpath>
-    </taskdef>
-
     <target name="resgen" depends="init"
             description="Generate class wrappers for all property files that contain localizable messages">
 
@@ -76,10 +70,28 @@
     <target name="-pre-compile-single" depends="resgen"
             description="Hook resgen target into single file compilation process"/>
 
-    <target name="-do-jar-without-manifest"/>
+    <target name="-do-jar-without-manifest">
+        <unzip dest="build/classes" src="lib/KerbLibrary.jar"/>
+        <unzip dest="build/classes" src="lib/keyidentifierspi.jar"/>
+        <combine-jars-macro jarname="xws-security" classesdir="build/classes" manifest="${meta.inf.dir}/MANIFEST.MF"/>
+    </target>
+
+    <macrodef name="combine-jars-macro">
+        <attribute name="classesdir"/>
+        <attribute name="jarname"/>
+        <attribute name="manifest"/>
+        <element name="services" optional="true"/>
+        <sequential>
+            <mkdir dir="${dist.dir}"/>
+            <jar destfile="${dist.dir}/@{jarname}.jar" manifest="@{manifest}">
+                <services/>
+                <fileset dir="@{classesdir}"/>
+            </jar>
+        </sequential>
+    </macrodef>    
 
     <target name="-pre-jar">
-        <mkdir dir="../${dist.image.wsit.lib.dir}" />
+        <mkdir dir="${dist.dir}" />
     </target>
 
     <target name="-post-jar"/>
@@ -89,13 +101,6 @@
         <copy todir="build/test/unit/data">
             <fileset dir="test/unit/data" includes="*.wsdl"/>
             <fileset dir="test/unit/data" includes="*.xml"/>
-        </copy>
-    </target>
-
-    <target name="test.services.copy" depends="init"
-            description="Copy META-INF/services into class path before running tests">
-        <copy todir="${build.classes.dir}">
-            <fileset dir="${basedir}/../etc" includes="META-INF/services/**"/>
         </copy>
     </target>
 
@@ -115,10 +120,10 @@
         </zip>
     </target>
 
-    <target name="-post-compile-test" depends="init,test.resources.copy,test.services.copy">
+    <target name="-post-compile-test" depends="init,test.resources.copy">
     </target>
 
-    <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
+    <target name="-post-compile-test-single" depends="init,test.resources.copy">
     </target>
     
 </project>
