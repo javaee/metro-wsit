@@ -73,22 +73,10 @@
     <target name="-do-jar-without-manifest">
         <unzip dest="build/classes" src="lib/KerbLibrary.jar"/>
         <unzip dest="build/classes" src="lib/keyidentifierspi.jar"/>
-        <combine-jars-macro jarname="xws-security" classesdir="build/classes" manifest="${meta.inf.dir}/MANIFEST.MF"/>
+        <jar destfile="../lib/runtime/xws-security.jar" manifest="${meta.inf.dir}/MANIFEST.MF">
+            <fileset dir="build/classes"/>
+        </jar>
     </target>
-
-    <macrodef name="combine-jars-macro">
-        <attribute name="classesdir"/>
-        <attribute name="jarname"/>
-        <attribute name="manifest"/>
-        <element name="services" optional="true"/>
-        <sequential>
-            <mkdir dir="${dist.dir}"/>
-            <jar destfile="${dist.dir}/@{jarname}.jar" manifest="@{manifest}">
-                <services/>
-                <fileset dir="@{classesdir}"/>
-            </jar>
-        </sequential>
-    </macrodef>    
 
     <target name="-pre-jar">
         <mkdir dir="${dist.dir}" />
