@@ -231,6 +231,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         */
     }
     
+    /**
     private static UserTransaction getUserTransaction() {
         UserTransaction userTransaction = null;
         try {
@@ -242,7 +243,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
         return userTransaction;
     }
-
+    */
+    
     @Override
     public RuntimeContext getRuntimeContext() {
         return rc;

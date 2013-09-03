@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -106,8 +106,16 @@ class InOrderDeliveryQueue implements DeliveryQueue {
         assert message.getSequenceId().equals(sequence.getId());
 
         if (rejectOutOfOrderMessages && !isDeliverable(message)) {
-            JaxwsApplicationMessage jam = 
-                    JaxwsApplicationMessage.class.cast(message);
+            JaxwsApplicationMessage jam = null;
+                    
+            if (message instanceof JaxwsApplicationMessage) {
+                jam = JaxwsApplicationMessage.class.cast(message);
+            } else {
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1141_UNEXPECTED_MESSAGE_CLASS(
+                        message.getClass().getName(),
+                        JaxwsApplicationMessage.class.getName())));
+            }
+            
             String correlationId = jam.getCorrelationId();
             SuspendedFiberStorage sfs = deliveryCallback.getRuntimeContext().suspendedFiberStorage;
             OutOfOrderMessageException e = new OutOfOrderMessageException(sequence.getId(), message.getMessageNumber());
