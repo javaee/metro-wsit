@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2013 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+
+
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="WSIT-XWSS" default="default" basedir=".">
+    <description>Builds, tests, and runs the project WSIT-XWSS.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <import file="../build-shared.xml"/>
+
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
+
+    <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
+        <classpath>
+            <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
+        </classpath>
+    </taskdef>
+
+    <target name="resgen" depends="init"
+            description="Generate class wrappers for all property files that contain localizable messages">
+
+        <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
+            <classpath>
+                <path path="${javac.classpath}"/>
+                <pathelement path="${basedir}/../${lib.tooltime.dir}/jaxws-tools.jar"/>
+            </classpath>
+        </taskdef>
+
+        <mkdir dir="${build.gen-src.dir}"/>
+
+        <resgen destdir="${build.gen-src.dir}">
+            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties, com/sun/xml/wss/**/*.properties"/>
+        </resgen>
+    </target>
+
+    <target name="-pre-compile" depends="resgen" description="Hook resgen target into compilation process"/>
+
+    <target name="-pre-compile-single" depends="resgen"
+            description="Hook resgen target into single file compilation process"/>
+
+    <target name="-do-jar-without-manifest"/>
+
+    <target name="-pre-jar">
+        <mkdir dir="../${dist.image.wsit.lib.dir}" />
+    </target>
+
+    <target name="-post-jar"/>
+
+    <target name="test.resources.copy"
+            description="Copy test resources before running tests">
+        <copy todir="build/test/unit/data">
+            <fileset dir="test/unit/data" includes="*.wsdl"/>
+            <fileset dir="test/unit/data" includes="*.xml"/>
+        </copy>
+    </target>
+
+    <target name="test.services.copy" depends="init"
+            description="Copy META-INF/services into class path before running tests">
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${basedir}/../etc" includes="META-INF/services/**"/>
+        </copy>
+    </target>
+
+    <target name="src-zip" depends="init">
+        <property name="build.src.dir" value="${build.dir}/src"/>
+        <delete dir="${build.src.dir}" quiet="true"/>
+        <mkdir dir="${build.src.dir}"/>
+        <unzip dest="${build.src.dir}">
+            <fileset dir="../${lib.runtime.dir}" includes="*src.zip"/>
+        </unzip>
+        <delete file="${build.src.dir}/*.txt"/>
+        <delete dir="${build.src.dir}/META-INF" includeemptydirs="true"/>
+        <zip destfile="${build.dir}/${name}-src.zip">
+            <fileset dir="src"/>
+            <fileset dir="${build.gen-src.dir}"/>
+            <fileset dir="${build.src.dir}"/>
+        </zip>
+    </target>
+
+    <target name="-post-compile-test" depends="init,test.resources.copy,test.services.copy">
+    </target>
+
+    <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
+    </target>
+    
+</project>
