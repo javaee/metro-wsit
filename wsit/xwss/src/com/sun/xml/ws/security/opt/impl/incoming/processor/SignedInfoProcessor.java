@@ -1,27 +1,31 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License. You can obtain
- * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
- * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ * may not use this file except in compliance with the License.  You can
+ * obtain a copy of the License at
+ * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+ * or packager/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
- * Sun designates this particular file as subject to the "Classpath" exception
- * as provided by Sun in the GPL Version 2 section of the License file that
- * accompanied this code.  If applicable, add the following below the License
- * Header, with the fields enclosed by brackets [] replaced by your own
- * identifying information: "Portions Copyrighted [year]
- * [name of copyright owner]"
- * 
+ * file and include the License file at packager/legal/LICENSE.txt.
+ *
+ * GPL Classpath Exception:
+ * Oracle designates this particular file as subject to the "Classpath"
+ * exception as provided by Oracle in the GPL Version 2 section of the License
+ * file that accompanied this code.
+ *
+ * Modifications:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ *
  * Contributor(s):
- * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -64,6 +68,7 @@ import com.sun.xml.wss.BasicSecurityProfile;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
+import com.sun.xml.wss.impl.dsig.SignatureProcessor;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.UnsyncByteArrayOutputStream;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -160,7 +165,11 @@ public class SignedInfoProcessor {
     public XMLStreamWriter getCanonicalizer(){
         return exc14nFinal;
     }
-    
+    /**
+     * processes different types the SignedInfo element of an XMLSignature
+     * @return  SignedInfo
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     public SignedInfo process() throws XWSSecurityException{
         try {            
             for(int i=0; i< reader.getNamespaceCount();i++){
@@ -245,19 +254,24 @@ public class SignedInfoProcessor {
             }
             return si;
         } catch (XMLStreamException ex) {
-            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE());
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE(),ex);
             throw new XWSSecurityException(LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE() ,ex);
         }
         //return null;
     }
-    
+    /**
+     *
+     * @param reader  XMLStreamReader
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     public void readCanonicalizationMethod(XMLStreamReader reader) throws XWSSecurityException{
         try{
             canonAlgo = reader.getAttributeValue(null,"Algorithm");
             if(canonAlgo != null && canonAlgo.length() ==0){
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
                 throw new XWSSecurityException(LogStringsMessages.WSS_1718_MISSING_CANON_ALGORITHM());
-            }            
+            }
+            SignatureProcessor.verifyCanonicalizationMethodAlgorithm(canonAlgo);
             String [] prefixList = null;
             if(reader.hasNext()){
                 reader.next();
@@ -290,11 +304,15 @@ public class SignedInfoProcessor {
                 }                             
             }
         }catch(XMLStreamException xse){
-            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE());
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE(),xse);
             throw new XWSSecurityException(LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE() ,xse);
         }
     }
-    
+    /**
+     * processes references
+     * @param reader XMLStreamReader
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     private void processReferences(XMLStreamReader reader)throws XWSSecurityException{
         try{
             String dm = "";
@@ -348,7 +366,7 @@ public class SignedInfoProcessor {
                 try{
                     rt.setDigestValue(Base64.decode(digestValue));
                 }catch(Base64DecodingException dec){
-                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1719_ERROR_DIGESTVAL_REFERENCE(uri));
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1719_ERROR_DIGESTVAL_REFERENCE(uri),dec);
                     throw new XWSSecurityException(LogStringsMessages.WSS_1719_ERROR_DIGESTVAL_REFERENCE(uri));
                 }
             }
@@ -375,11 +393,16 @@ public class SignedInfoProcessor {
                 refCache.add((Reference)rt);
             }            
         }catch(XMLStreamException xe){
-            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE());
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE(),xe);
             throw new XWSSecurityException(LogStringsMessages.WSS_1711_ERROR_VERIFYING_SIGNATURE() ,xe);
         }
     }
-    
+    /**
+     * processes the given reference
+     * @param reference Reference
+     * @return boolean
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     public boolean processReference(Reference reference)throws XWSSecurityException{
         final String uri = reference.getURI();
         URIReference ref = new URIReference() {
@@ -394,7 +417,7 @@ public class SignedInfoProcessor {
         try{
             data = resolver.dereference(ref,null);
         }catch(URIReferenceException ure){
-            logger.log(Level.SEVERE, LogStringsMessages.WSS_1720_ERROR_URI_DEREF(uri));
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1720_ERROR_URI_DEREF(uri),ure);
             throw new XWSSecurityException(LogStringsMessages.WSS_1720_ERROR_URI_DEREF(uri), ure);
         }
         if(data != null){
@@ -408,7 +431,7 @@ public class SignedInfoProcessor {
                 }
                 return true;
             }catch(XMLSignatureException xse){
-                logger.log(Level.SEVERE, LogStringsMessages.WSS_1722_ERROR_REFERENCE_VALIDATION(uri));
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1722_ERROR_REFERENCE_VALIDATION(uri),xse);
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_FAILED_CHECK,LogStringsMessages.WSS_1722_ERROR_REFERENCE_VALIDATION(uri),xse);
             }
         }
@@ -451,7 +474,13 @@ public class SignedInfoProcessor {
         }
         return -1;
     }
-    
+    /**
+     * processes the transforms under a reference
+     * @param reader XMLStreamReader
+     * @param uri String
+     * @return trList ArrayList
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     private ArrayList processTransforms(XMLStreamReader reader,String uri)throws XWSSecurityException{
         try{
             ArrayList trList  = new ArrayList(1);
@@ -469,7 +498,13 @@ public class SignedInfoProcessor {
             throw new XWSSecurityException(xse);
         }
     }
-    
+    /**
+     * processes the transform identified by the algorithm attribute
+     * @param reader XMLStreamReader
+     * @param uri String
+     * @return Transform
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     private Transform processTransform(XMLStreamReader reader,String uri) throws XWSSecurityException{
         try{
             
@@ -511,7 +546,11 @@ public class SignedInfoProcessor {
         }
     }
     
-    
+    /**
+     *
+     * @param id String
+     * @return Object
+     */
     private Object getMessagePart(String id){
         HeaderList headers = securityContext.getNonSecurityHeaders();
         if(headers != null && headers.size() >0){
@@ -534,7 +573,12 @@ public class SignedInfoProcessor {
         return null;
     }
     
-    
+    /**
+     * reads the STR transform and creates the XMLStructure
+     * @param reader XMLStreamReader
+     * @return XMLStructure
+     * @throws com.sun.xml.wss.XWSSecurityException
+     */
     private XMLStructure readSTRTransform(XMLStreamReader reader)throws XWSSecurityException{
         try{
             TransformationParametersType tp =
@@ -548,6 +592,7 @@ public class SignedInfoProcessor {
             reader.next();
             if(StreamUtil.isStartElement(reader) && (reader.getLocalName() == MessageConstants.CANONICALIZATION_METHOD)){                
                 String value = reader.getAttributeValue(null,"Algorithm");
+                SignatureProcessor.verifyCanonicalizationMethodAlgorithm(value);
                 cm.setAlgorithm(value);
                 StreamUtil.moveToNextStartOREndElement(reader);
             }
@@ -556,7 +601,12 @@ public class SignedInfoProcessor {
             throw new XWSSecurityException(ex);
         }
     }
-    
+    /**
+     * reads the exclusive canonicalization
+     * @param reader XMLStreamReader
+     * @return ExcC14NParameterSpec
+     * @throws javax.xml.stream.XMLStreamException
+     */
     private ExcC14NParameterSpec readEXC14nTransform(XMLStreamReader reader) throws XMLStreamException{
         String prefixList = "";
         ExcC14NParameterSpec exc14nSpec = null;

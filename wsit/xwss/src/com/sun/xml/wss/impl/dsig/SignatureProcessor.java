@@ -1,32 +1,31 @@
-
-/*
- * $Id: SignatureProcessor.java,v 1.21 2008/07/03 05:28:56 ofung Exp $
- */
-
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License. You can obtain
- * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
- * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ * may not use this file except in compliance with the License.  You can
+ * obtain a copy of the License at
+ * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+ * or packager/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
- * Sun designates this particular file as subject to the "Classpath" exception
- * as provided by Sun in the GPL Version 2 section of the License file that
- * accompanied this code.  If applicable, add the following below the License
- * Header, with the fields enclosed by brackets [] replaced by your own
- * identifying information: "Portions Copyrighted [year]
- * [name of copyright owner]"
- * 
+ * file and include the License file at packager/legal/LICENSE.txt.
+ *
+ * GPL Classpath Exception:
+ * Oracle designates this particular file as subject to the "Classpath"
+ * exception as provided by Oracle in the GPL Version 2 section of the License
+ * file that accompanied this code.
+ *
+ * Modifications:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ *
  * Contributor(s):
- * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -40,7 +39,6 @@
  */
 
 package com.sun.xml.wss.impl.dsig;
-
 
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
@@ -89,6 +87,7 @@ import com.sun.xml.wss.impl.keyinfo.KeyInfoStrategy;
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
+import com.sun.xml.wss.impl.transform.DOMSTRTransform;
 import com.sun.xml.wss.impl.AlgorithmSuite;
 
 import java.io.IOException;
@@ -96,6 +95,7 @@ import java.io.InputStream;
 
 import java.security.Key;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.MessageDigest;
 
 import java.util.ArrayList;
@@ -112,7 +112,10 @@ import javax.xml.crypto.NodeSetData;
 import javax.xml.crypto.OctetStreamData;
 import javax.xml.crypto.URIReference;
 import javax.xml.crypto.URIReferenceException;
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.SignedInfo;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.TransformService;
@@ -729,10 +732,10 @@ public class SignatureProcessor{
             //End SignatureConfirmation specific code
             
         }catch(XWSSecurityException xe){          
-                logger.log(Level.SEVERE,"WSS1316.sign.failed",xe);           
+                logger.log(Level.SEVERE,"WSS1316.sign.failed",xe);
             throw xe;
         }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1316.sign.failed",ex);       
+                logger.log(Level.SEVERE,"WSS1316.sign.failed",ex);
             throw new XWSSecurityException(ex);
         }
         return 0;
@@ -761,6 +764,7 @@ public class SignatureProcessor{
             XMLSignatureFactory signatureFactory = WSSPolicyConsumerImpl.getInstance().getSignatureFactory();
             // unmarshal the XMLSignature
             XMLSignature signature = signatureFactory.unmarshalXMLSignature(validationContext);
+            verifySignatureAlgorithm(signature);
             
             //For SignatureConfirmation
             List scList = (ArrayList)context.getExtraneousProperty("receivedSignValues");
@@ -1320,7 +1324,6 @@ public class SignatureProcessor{
             return coreValidity;
             
         }catch (Exception e) {
-            //log here
             logger.log(Level.SEVERE,"Exception occurred during signature verification"+e.getMessage());
             throw new XWSSecurityException(e);
         }
@@ -1871,7 +1874,7 @@ public class SignatureProcessor{
             sct.setId(secureMessage.generateId());
         }
         sctWsuId = sct.getWsuId();
-        
+            
         if(sctBinding.INCLUDE_ALWAYS_TO_RECIPIENT.equals(sctBinding.getIncludeToken()) ||
                 sctBinding.INCLUDE_ALWAYS.equals(sctBinding.getIncludeToken())) {
             
@@ -2028,4 +2031,159 @@ public class SignatureProcessor{
         return ekSha1Ref;
     }
     
+    @SuppressWarnings("unchecked")
+	private static void verifySignatureAlgorithm(XMLSignature signature)
+			throws XWSSecurityException {
+		if (null == signature) {
+			logger.log(Level.FINE,
+					" null signature, no signature algorithm verification");
+			return;
+}
+		SignedInfo signedInfo = signature.getSignedInfo();
+		if (null == signedInfo) {
+                    String errorStr = "WSS1315.signature.verification.failed at ds:SignedInfo is NULL";
+                    logger.log(Level.SEVERE, errorStr);
+                    throw new XWSSecurityException(errorStr);
+		}
+		verifyCanonicalizationMethod(signedInfo.getCanonicalizationMethod());
+		verifyReferences(signedInfo.getReferences());
+		verifySignatureMethod(signedInfo.getSignatureMethod());
+	}
+	
+	public static void verifyCanonicalizationMethodAlgorithm(
+			String c14nMethodAlgorithm) throws XWSSecurityException {
+		if ((null == c14nMethodAlgorithm) || (c14nMethodAlgorithm.length() < 1)) {
+			String errorStr = "WSS1368: STR Transform must have a canonicalization method specified at ds:CanonicalizationMethod Algorithm";
+			logger.log(Level.SEVERE, errorStr + "NULL Algorithm");
+			throw new XWSSecurityException(errorStr);
+		}
+		String algoStr = c14nMethodAlgorithm.trim();
+		for (int i = 0; i < SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM.length; i++) {
+			if (SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM[i].equals(algoStr)) {
+				return;
+			}
+		}
+
+		String errorStr = "WSS1320: Error occurred when unmarshaling transformation parameters. Unexpected ds:CanonicalizationMethod, ["
+				+ c14nMethodAlgorithm + "]";
+		logger.log(Level.SEVERE, errorStr
+				+ " Unknown ds:CanonicalizationMethod Algorithm");
+		throw new XWSSecurityException(errorStr);
+	}
+
+	private static void verifyReferences(List<Reference> referenceList)
+			throws XWSSecurityException {
+		if (null == referenceList || referenceList.size() < 1) {
+                    String errorStr = "WSS1315.signature.verification.failed at ds:Reference is NULL";
+                    logger.log(Level.SEVERE, errorStr);
+                    throw new XWSSecurityException(errorStr);
+		}
+		for (int i = 0; i < referenceList.size(); i++) {
+			Reference ref = referenceList.get(i);
+			verifyTransforms(ref.getTransforms());
+			verifyDigestMethod(ref.getDigestMethod());
+		}
+	}
+
+	private static void verifyDigestMethod(DigestMethod digestMethod)
+			throws XWSSecurityException {
+		// WSS_1765_INVALID_DEGEST_ALGO
+		if (null == digestMethod || null == digestMethod.getAlgorithm()) {
+			String errorStr = "WSS1301: Invalid Digest Algorithm {0} specified at ds:Reference/ds:DigestMethod";
+			logger.log(Level.SEVERE, errorStr + " is NULL");
+			throw new XWSSecurityException(errorStr);
+		}
+		// todo: verify <ds:DigestMethod Algorithm >
+	}
+
+	private static void verifyTransforms(List<?> trList)
+			throws XWSSecurityException {
+		if (null == trList || trList.size() < 1 || trList.size() > 1) {
+			String errorStr = "WSS1342: Receiver Requirements for the transforms are not met Empty or NULL";
+			logger.log(Level.SEVERE, errorStr + " at ds:Transforms");
+			return; // throw new XWSSecurityException(errorStr);
+		}
+		// Only support one Tranform here
+		verifyTransform((Transform) trList.get(0));
+	}
+
+	private static void verifyTransform(Transform tr)
+			throws XWSSecurityException {
+		// WSS_1300_DSIG_TRANSFORM_PARAM_ERROR()
+		if (null == tr) {
+                    String errorStr = "WSS1300: Error occurred while creating transform object Empty or NULL";
+                    logger.log(Level.SEVERE, errorStr + "Null ds:Transform found");
+                    throw new XWSSecurityException(errorStr);
+		}
+		if (MessageConstants.STR_TRANSFORM_URI.equals(tr.getAlgorithm())) {
+			verifyStrTransform(tr);
+		}
+		// Todo: Add other transform verifications
+	}
+
+	private static void verifyStrTransform(Transform tr)
+			throws XWSSecurityException {
+		// WSS_1300_DSIG_TRANSFORM_PARAM_ERROR()
+		AlgorithmParameterSpec algoParaSpec = tr.getParameterSpec();
+		if ((null == algoParaSpec) || !(algoParaSpec instanceof DOMSTRTransform.STRTransformParameterSpec)) {
+			String errorStr = "WSS1300: Error occurred while creating transform object at ds:Transform/wsse:TransformationParameters";
+			logger.log(Level.SEVERE, errorStr + "Error on wsse:TransformationParameters for #STR-Transform");
+			throw new XWSSecurityException(errorStr);
+		}
+		DOMSTRTransform.STRTransformParameterSpec spec = (DOMSTRTransform.STRTransformParameterSpec) algoParaSpec;
+		verifyCanonicalizationMethod(spec.getCanonicalizationMethod());
+	}
+
+	private static void verifyCanonicalizationMethod(
+			CanonicalizationMethod canonicalizationMethod)
+			throws XWSSecurityException {
+		if (null == canonicalizationMethod) {
+			String errorStr = "WSS1368: STR Transform must have a canonicalization method specified at ds:CanonicalizationMethod";
+			logger.log(Level.SEVERE, errorStr
+					+ " NULL ds:CanonicalizationMethod");
+			throw new XWSSecurityException(errorStr);
+		}
+		verifyCanonicalizationMethodAlgorithm(canonicalizationMethod
+				.getAlgorithm());
+
+	}
+
+	private static String SUPPORTED_CANONICALIZATION_METHOD_ALGORITHM[] = new String[] {
+	/*
+	 * The <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">Canonical
+	 * XML (without comments)</a> canonicalization method algorithm URI. String
+	 * INCLUSIVE = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
+	 */
+	CanonicalizationMethod.INCLUSIVE,
+	/*
+	 * The <a
+	 * href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments">
+	 * Canonical XML with comments</a> canonicalization method algorithm URI.
+	 * String INCLUSIVE_WITH_COMMENTS =
+	 * "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
+	 */
+
+	CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS,
+	/*
+	 * The <a href="http://www.w3.org/2001/10/xml-exc-c14n#">Exclusive Canonical
+	 * XML (without comments)</a> canonicalization method algorithm URI. String
+	 * EXCLUSIVE = "http://www.w3.org/2001/10/xml-exc-c14n#";
+	 */
+	CanonicalizationMethod.EXCLUSIVE,
+	/*
+	 * The <a href="http://www.w3.org/2001/10/xml-exc-c14n#WithComments">
+	 * Exclusive Canonical XML with comments</a> canonicalization method
+	 * algorithm URI. String EXCLUSIVE_WITH_COMMENTS =
+	 * "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
+	 */
+	CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS };
+
+	private static void verifySignatureMethod(SignatureMethod signatureMethod)
+			throws XWSSecurityException {
+            if (null == signatureMethod || null == signatureMethod.getAlgorithm()) {
+                String errorStr = "WSS1315.signature.verification.failed at ds:SignedInfo/ds:SignatureMethod is NULL";
+                logger.log(Level.SEVERE, errorStr);
+                throw new XWSSecurityException(errorStr);
+            }
+	}
 }
