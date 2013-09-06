@@ -237,6 +237,8 @@
                                     org.jvnet.ws.*;version=${jaxws.osgiVersion}
                                 </Export-Package>
                                 <Import-Package>
+                                    com.ibm.security.util;resolution:=optional,
+                                    com.ibm.security.x509;resolution:=optional,
                                     com.sun.istack.*;version=${jaxb.osgiVersion},
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
