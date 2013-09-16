@@ -491,7 +491,7 @@
                 <plugin>
                     <groupId>org.glassfish.build</groupId>
                     <artifactId>gfnexus-maven-plugin</artifactId>
-                    <version>0.13</version>
+                    <version>0.16</version>
                     <configuration>
                         <nexusRepoUrl>https://maven.java.net/</nexusRepoUrl>
                         <nexusRepoId>jvnet-nexus-staging</nexusRepoId>
@@ -502,6 +502,7 @@
                             </stagingRepo>
                         </stagingRepos>
                         <promotionProfile>metro</promotionProfile>
+                        <message>metro-${project.version}}</message>
                     </configuration>
                 </plugin>
             </plugins>
