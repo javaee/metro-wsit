@@ -80,6 +80,7 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
+
 import javax.xml.ws.EndpointReference;
 
 /**
@@ -203,6 +204,13 @@ public class ServerTube extends AbstractFilterTubeImpl {
             exposeSequenceDataToUser(message);
 
             rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+            
+            boolean useTX = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
+            if (useTX) {
+                int txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
+                rc.transactionHandler.begin(txTimeout);
+            }
+            
             try {
                 rc.destinationMessageHandler.registerMessage(message);
             } catch (DuplicateMessageRegistrationException ex) {
@@ -313,8 +321,13 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
                         request));
             }
-            rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
-            return doSuspend();
+
+            return doSuspend(new Runnable() {
+                @Override
+                public void run() {
+                    rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
+                }
+            });
         } else {
             return doReturnWith(rc.protocolHandler.createEmptyAcknowledgementResponse(
                     rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),

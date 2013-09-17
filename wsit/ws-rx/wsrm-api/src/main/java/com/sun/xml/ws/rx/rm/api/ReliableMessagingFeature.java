@@ -119,22 +119,34 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
      * Currently, the default value is set to infinity (-1).
      */
     public static final long DEFAULT_MAX_CONCURRENT_SESSIONS = -1;
+    
     /**
      * A constant specifying the default value for disabling the generation of the {@code Offer}
      * element as part of the {@code CreateSequence} message.
      */
     public static final boolean DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED = false;
-    
+
     /**
      * A constant specifying the default value for enabling "reject out-of-order messages".
      */
     public static final boolean DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES = false;
-    
+
     /**
      * A constant specifying the default value for turning off state update when
      * received AckRequested is processed at RMD.
      */
     public static final boolean DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED = false;
+
+    /**
+     * A constant specifying the default value for enabling XA TX at server side RMD. 
+     */
+    public static final boolean DEFAULT_XA_TX_FOR_SERVER_RMD = false;
+    
+    /**
+     * A constant specifying the default value for XA TX timeout that is used at 
+     * server side RMD (in seconds).
+     */
+    public static final int DEFAULT_XA_TX_FOR_SERVER_RMD_TIMEOUT_SECONDS = 60;
 
     /**
      * Defines the enumeration of possible security binding mechanism options that
@@ -358,6 +370,16 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     //e.g. LAST_ACTIVITY_TIME update to RM_SEQUENCES table will block
     //if row-level lock is in place for the same sequence.
     private final boolean stateUpdateOnReceivedAckRequestedDisabled;
+    
+    //Use XA TX at server-side RM Destination to prevent duplicate request
+    //reaching application layer. This XA TX makes below three one unit:
+    //1) register request message which also adds it to RM_UNACKED_MESSAGES list
+    //2) deliver request message to the application layer
+    //3) remove the request message from RM_UNACKED_MESSAGES list
+    private final boolean distributedTXForServerRMDEnabled;
+    
+    //TX timeout when distributedTXForServerRMDEnabled is true
+    private final int distributedTXForServerRMDTimeoutInSeconds;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -390,7 +412,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 DEFAULT_MAX_CONCURRENT_SESSIONS,
                 DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
                 DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES,
-                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED);
+                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED,
+                DEFAULT_XA_TX_FOR_SERVER_RMD,
+                DEFAULT_XA_TX_FOR_SERVER_RMD_TIMEOUT_SECONDS);
     }
 
     @FeatureConstructor({
@@ -440,7 +464,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 maxConcurrentSessions,
                 DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
                 DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES,
-                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED
+                DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED,
+                DEFAULT_XA_TX_FOR_SERVER_RMD,
+                DEFAULT_XA_TX_FOR_SERVER_RMD_TIMEOUT_SECONDS
                 );
     }
 
@@ -464,7 +490,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
             long maxConcurrentRmSessions,
             boolean offerElementGenerationDisabled,
             boolean rejectOutOfOrderMessagesEnabled,
-            boolean stateUpdateOnReceivedAckRequestedDisabled) {
+            boolean stateUpdateOnReceivedAckRequestedDisabled,
+            boolean distributedTXForServerRMDEnabled,
+            int distributedTXForServerRMDTimeoutInSeconds) {
 
         super.enabled = enabled;
         this.version = version;
@@ -486,6 +514,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
         this.offerElementGenerationDisabled = offerElementGenerationDisabled;
         this.rejectOutOfOrderMessagesEnabled = rejectOutOfOrderMessagesEnabled;
         this.stateUpdateOnReceivedAckRequestedDisabled = stateUpdateOnReceivedAckRequestedDisabled;
+        this.distributedTXForServerRMDEnabled = distributedTXForServerRMDEnabled;
+        this.distributedTXForServerRMDTimeoutInSeconds = distributedTXForServerRMDTimeoutInSeconds;
     }
 
     @Override
@@ -764,7 +794,7 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     public boolean isOfferElementGenerationDisabled() {
         return offerElementGenerationDisabled;
     }
-    
+
     /**
      * Specifies whether RMD should reject out-of-order messages that it receives.
      *
@@ -773,7 +803,7 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     public boolean isRejectOutOfOrderMessagesEnabled() {
         return rejectOutOfOrderMessagesEnabled;
     }
-    
+
     /**
      * Specifies whether state update should not be made when RMD receives AckRequested.
      *
@@ -782,6 +812,25 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
      */
     public boolean isStateUpdateOnReceivedAckRequestedDisabled() {
         return stateUpdateOnReceivedAckRequestedDisabled;
+    }
+
+    /**
+     * Specifies whether XA TX should be used at server RMD.
+     * Default value is false.
+     * 
+     * @return {@code true} if server side RMD should use XA TX.
+     */
+    public boolean isDistributedTXForServerRMDEnabled() {
+        return distributedTXForServerRMDEnabled;
+    }
+
+    /**
+     * XA TX timeout to be used by server RMD.
+     * This applies only when distributedTXForServerRMDEnabled is true.
+     * @return XA TX timeout in seconds.
+     */
+    public int getDistributedTXForServerRMDTimeoutInSeconds() {
+        return distributedTXForServerRMDTimeoutInSeconds;
     }
     
     @Override
@@ -805,7 +854,9 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 ",\n\tmaxConcurrentSessions=" + maxConcurrentSessions + 
                 ",\n\tofferElementGenerationDisabled=" + offerElementGenerationDisabled + 
                 ",\n\trejectOutOfOrderMessagesEnabled=" + rejectOutOfOrderMessagesEnabled + 
-                ",\n\tstateUpdateOnReceivedAckRequestedDisabled=" + stateUpdateOnReceivedAckRequestedDisabled + 
+                ",\n\tstateUpdateOnReceivedAckRequestedDisabled=" + stateUpdateOnReceivedAckRequestedDisabled +
+                ",\n\tdistributedTXForServerRMDEnabled=" + distributedTXForServerRMDEnabled +
+                ",\n\tdistributedTXForServerRMDTimeoutInSeconds=" + distributedTXForServerRMDTimeoutInSeconds +
                 "\n}";
-    }        
+    }
 }

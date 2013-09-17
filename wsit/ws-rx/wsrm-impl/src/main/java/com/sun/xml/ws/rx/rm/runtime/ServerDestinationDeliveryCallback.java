@@ -41,23 +41,15 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
+import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
 import java.util.concurrent.TimeUnit;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-import javax.xml.ws.WebServiceException;
 
 /**
  *
@@ -101,30 +93,21 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                 String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
                 if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
                     rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
-                    
-                    /**
-                    //Commit the tx right after acknowledgeApplicationLayerDelivery
-                    UserTransaction userTransaction = getUserTransaction();
-                    
-                    int status = Status.STATUS_NO_TRANSACTION;
-                    try {
-                        status = userTransaction.getStatus();
-                    } catch (SystemException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    
-                    if (userTransaction != null && status == Status.STATUS_ACTIVE) {
-                        try {
-                            userTransaction.commit();
-                            LOGGER.info("UserTransaction committed");
-                        } catch (final Throwable t) {
-                            t.printStackTrace();
-                            throw new WebServiceException("Not able to begin UserTransaction in com.sun.xml.ws.rx.rm.runtime.ServerDestinationDeliveryCallback.deliver(JaxwsApplicationMessage)", t);
+
+                    boolean txInUse = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
+                    if (txInUse) {
+                        if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
+                            //Commit XA TX if active right after acknowledgeApplicationLayerDelivery.
+                            //If it was marked for rollback before reaching here, commit will roll back the TX.
+                            rc.transactionHandler.commit();
+                        } else {
+                            throw new TransactionException("Unexpected transaction status: "+rc.transactionHandler.getStatusAsString());
                         }
                     }
-                    */
                 } else {
+                    //Private contract between Metro RM and Sun JavaCAPS (BPM) team 
+                    //to let them control the acknowledgement of the message. 
+                    //Does not apply to anyone else.
                     LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
                     RedeliveryTaskExecutor.register(
                             request,
@@ -135,7 +118,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     return;
                 }
 
-                if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
+                if (response.getMessage() == null) { 
+                    //was one-way request - create empty acknowledgement message if needed
                     AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
                     if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
                         // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
@@ -145,6 +129,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
                     resumeParentFiber(response);
                 } else {
+                    //two-way MEP, response is stored as part of registerMessage to support replay
                     JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                     rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
                     rc.sourceMessageHandler.putToDeliveryQueue(message);
@@ -152,6 +137,12 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
                 // TODO handle RM faults
             } catch (final Throwable t) {
+                boolean txInUse = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
+                if (txInUse) {
+                    if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
+                        rc.transactionHandler.rollback();
+                    }
+                }
                 onCompletion(t);
             } finally {
                 HaContext.clear();
@@ -159,26 +150,12 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (Utilities.isResendPossible(error)) {
-                try {
-                    HaContext.initFrom(request.getPacket());
-
-                    RedeliveryTaskExecutor.register(
-                            request,
-                            rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                            TimeUnit.MILLISECONDS,
-                            rc.destinationMessageHandler,
-                            request.getPacket().component);
-
-                } finally {
-                    HaContext.clear();
-                }
-            } else {
-                resumeParentFiber(error);
-            }
+            //Resume original Fiber with Throwable. 
+            //No retry attempts to send request to application layer.
+            resumeParentFiber(error);
         }
-
     }
+    
     private static final Logger LOGGER = Logger.getLogger(ServerDestinationDeliveryCallback.class);
     private final RuntimeContext rc;
 
@@ -198,52 +175,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
-
         rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback, null);
-        /**        
-                new FiberContextSwitchInterceptor() {
-
-            @Override
-            public <R, P> R execute(Fiber f, P p, Work<R, P> work) {
-                UserTransaction userTransaction = getUserTransaction();
-                
-                int status = Status.STATUS_NO_TRANSACTION;
-                try {
-                    status = userTransaction.getStatus();
-                } catch (SystemException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                
-                if (userTransaction != null && status == Status.STATUS_NO_TRANSACTION) {
-                    try {
-                        userTransaction.begin();
-                        LOGGER.info("UserTransaction started");
-                    } catch (final Throwable t) {
-                        t.printStackTrace();
-                        throw new WebServiceException("Not able to begin UserTransaction in com.sun.xml.ws.rx.rm.runtime.ServerDestinationDeliveryCallback.deliver(JaxwsApplicationMessage)", t);
-                    }
-                }
-                return work.execute(p);
-            }
-            
-        });
-        */
     }
-    
-    /**
-    private static UserTransaction getUserTransaction() {
-        UserTransaction userTransaction = null;
-        try {
-            Context initialContext = new InitialContext();
-            userTransaction = 
-                    (UserTransaction)initialContext.lookup("java:comp/UserTransaction");
-        } catch (NamingException ne) {
-            LOGGER.warning("Not able to lookup UserTransaction from InitialContext", ne);
-        }
-        return userTransaction;
-    }
-    */
     
     @Override
     public RuntimeContext getRuntimeContext() {

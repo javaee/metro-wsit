@@ -49,6 +49,8 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
+import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionHandler;
+import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionHandlerImpl;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -79,6 +81,9 @@ public final class RuntimeContext {
         private 
         @Nullable
         DestinationMessageHandler destinationMessageHandler;
+        private
+        @Nullable
+        TransactionHandler transactionHandler;
 
         public Builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
@@ -89,6 +94,7 @@ public final class RuntimeContext {
 
             this.sourceMessageHandler = new SourceMessageHandler(null);
             this.destinationMessageHandler = new DestinationMessageHandler(null);
+            this.transactionHandler = new TransactionHandlerImpl();
         }
 
         public Builder sequenceManager(SequenceManager sequenceManager) {
@@ -108,7 +114,8 @@ public final class RuntimeContext {
                     new SuspendedFiberStorage(),
                     new ScheduledTaskManager("RM Runtime Context", communicator.getContainer()),
                     sourceMessageHandler,
-                    destinationMessageHandler);
+                    destinationMessageHandler,
+                    transactionHandler);
         }
     }
     public final RmConfiguration configuration;
@@ -123,6 +130,7 @@ public final class RuntimeContext {
     final SourceMessageHandler sourceMessageHandler;
     final DestinationMessageHandler destinationMessageHandler;
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    public final TransactionHandler transactionHandler;
 
     @SuppressWarnings("LeakingThisInConstructor")
     private RuntimeContext(
@@ -132,7 +140,8 @@ public final class RuntimeContext {
             SuspendedFiberStorage suspendedFiberStorage,
             ScheduledTaskManager scheduledTaskManager,
             SourceMessageHandler srcMsgHandler,
-            DestinationMessageHandler dstMsgHandler) {
+            DestinationMessageHandler dstMsgHandler,
+            TransactionHandler txHandler) {
 
         this.configuration = configuration;
         this.sequenceManager = sequenceManager;
@@ -147,6 +156,7 @@ public final class RuntimeContext {
         this.rmVersion = configuration.getRuntimeVersion();
 
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
+        this.transactionHandler = txHandler;
     }
 
     public void close() {

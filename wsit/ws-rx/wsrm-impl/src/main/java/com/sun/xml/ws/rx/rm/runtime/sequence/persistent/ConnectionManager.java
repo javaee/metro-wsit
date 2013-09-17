@@ -129,12 +129,18 @@ final class ConnectionManager {
     }
 
     void rollback(Connection sqlConnection) {
+        rollback(sqlConnection, true);
+    }
+
+    void rollback(Connection sqlConnection, boolean markRollbackForXA) {
         if (isDistributedTransactionInUse()) {
-            //don't roll back ourselves here as we don't own this distributed tx
-            //but mark it so that the only possible outcome of the tx is to 
-            //roll back the tx
             try {
-                getUserTransaction().setRollbackOnly();
+                if (markRollbackForXA) {
+                    //Do not roll back ourselves here as we don't own this distributed TX
+                    //but mark it so that the only possible outcome of the TX is to 
+                    //roll back the TX
+                    getUserTransaction().setRollbackOnly();
+                }
             } catch (IllegalStateException ise) {
                 //TODO i18n
                 LOGGER.warning("Was not able to mark distributed transaction for rollback", ise);
@@ -153,7 +159,7 @@ final class ConnectionManager {
 
     void commit(Connection sqlConnection) throws PersistenceException {
         if (isDistributedTransactionInUse()) {
-            //do nothing as the distributed tx will eventually get  
+            //Do nothing as the distributed TX will eventually get  
             //committed and this work will be part of that
         } else {
             try {
@@ -163,7 +169,7 @@ final class ConnectionManager {
             }
         }
     }
-    
+
     private boolean isDistributedTransactionInUse() {
         boolean result = false;
         int status = Status.STATUS_NO_TRANSACTION;
@@ -185,7 +191,7 @@ final class ConnectionManager {
         }
         return result;
     }
-    
+
     private UserTransaction getUserTransaction() {
         UserTransaction userTransaction = null;
         try {

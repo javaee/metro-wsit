@@ -772,9 +772,14 @@ final class PersistentSequenceData implements SequenceData {
             cm.rollback(con);
             throw ex;
         } catch (final DuplicateMessageRegistrationException ex) {
-            cm.rollback(con);
+            //DuplicateMessageRegistrationException is caught by the callers
+            //and used for flow control, don't mark XA TX 'rollback only'.
+            //It is only a select query before this exception is thrown 
+            //so no state change that needs to be rolled back.
+            //Local JDBC TX rollback is fine (when no XA TX in use).
+            cm.rollback(con, false /*markRollbackForXA*/);
             throw ex;
-        } catch(final Throwable t){
+        } catch(final Throwable t) {
             cm.rollback(con);
             LOGGER.logSevereException(t);
         } finally {
