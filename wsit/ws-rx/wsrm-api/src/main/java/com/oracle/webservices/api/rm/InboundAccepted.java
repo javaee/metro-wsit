@@ -13,24 +13,38 @@ import com.oracle.webservices.api.message.BasePropertySet;
 public abstract class InboundAccepted
     extends BasePropertySet
 {
+    // ----------------------------------------------------------------------
     /**
      * Key for accepted property
      *
-     * @see  #setAccepted
+     * @see #getAccepted
+     * @see #setAccepted
      */
     public static final String ACCEPTED_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.accepted";
 
     /**
-     * <p>When the user determines that the message has been delivered to them then they call {@code #accepted(true)}.</p>
+     * @return the value set via {@link #setAccepted} or {@code null}
+     * if {@link #setAccepted} has not been called or if the call to
+     * {@link #setAccepted} resulted in {@link InboundAcceptedAcceptFailed}
+     * being thrown.
      *
-     * <p>The RMD will <em>not</em> acknowledge the message to the RMS until {@code #accepted(true)} is called.</p>
+     * @see #ACCEPTED_PROPERTY
+     * @see #setAccepted
+     */
+    @Property(ACCEPTED_PROPERTY)
+    public abstract Boolean getAccepted();
+
+    /**
+     * <p>When the user determines that the message has been delivered to them then they call {@code #setAccepted(true)}.</p>
      *
-     * <p>If the user calls {@code #accepted(false)} then the RMD will not
+     * <p>The RMD will <em>not</em> acknowledge the message to the RMS until {@code #setAccepted(true)} is called.</p>
+     *
+     * <p>If the user calls {@code #setAccepted(false)} then the RMD will not
      * acknowledge the delivery of this particular request.  Note: if the
      * RMS sends a retry, that is considered a new request and the
      * delivery/acceptance process starts anew.</p>
      *
-     * <p>If the user calls {@code #accepted(false)} and an atomic
+     * <p>If the user calls {@code #setAccepted(false)} and an atomic
      * transaction is being used to handle the message, then that
      * transaction will be rolled back.</p>
      *
@@ -41,11 +55,12 @@ public abstract class InboundAccepted
      *     exception is thrown.
      *
      * @see #ACCEPTED_PROPERTY
+     * @see #getAccepted
      */
-    @Property(ACCEPTED_PROPERTY)
-    public abstract void setAccepted(boolean accept) throws InboundAcceptedAcceptFailed;
+    public abstract void setAccepted(Boolean accept) throws InboundAcceptedAcceptFailed;
 
 
+    // ----------------------------------------------------------------------
     /**
      * Key for inbound RM sequence id
      *
@@ -63,6 +78,7 @@ public abstract class InboundAccepted
     public abstract String getRMSequenceId();
 
 
+    // ----------------------------------------------------------------------
     /**
      * Key for inbound RM message number
      *

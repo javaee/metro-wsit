@@ -13,12 +13,24 @@ import com.oracle.webservices.api.message.BasePropertySet;
 public abstract class OutboundDelivered
     extends BasePropertySet
 {
+    // ----------------------------------------------------------------------
     /**
      * Key for delivered property
      *
-     * @see  #setDelivered
+     * @see #getDelivered
+     * @see #setDelivered
      */
     public static final String DELIVERED_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.delivered";
+
+    /**
+     * @return The value set by {@link #setDelivered} or {@code null}
+     * if {@link #setDelivered} has not been called.
+     *
+     * @see #DELIVERED_PROPERTY
+     * @see #setDelivered
+     */
+    @Property(DELIVERED_PROPERTY)
+    public abstract Boolean getDelivered();
 
     /**
      * <p>When the RMS receives an ACK from the RMD for the request message instance
@@ -31,18 +43,18 @@ public abstract class OutboundDelivered
      * {@code #delivered(false)}.
      *
      * @see #DELIVERED_PROPERTY
+     * @see #getDelivered
      */
-    @Property(DELIVERED_PROPERTY)
-    public abstract void setDelivered(boolean accept);
+    public abstract void setDelivered(Boolean accept);
 
 
+    // ----------------------------------------------------------------------
     /**
      * Key for message identity property
      *
      * @see  #getMessageIdentity
      */
     public static final String MESSAGE_IDENTITY_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.message.identity";
-
 
     /**
      * @return The identity of the message.  Note: the return type is
