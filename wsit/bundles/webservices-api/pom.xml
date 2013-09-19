@@ -99,6 +99,13 @@
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.transaction</groupId>
+                                    <artifactId>transaction-api</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -137,6 +144,7 @@
                                     <include>javax.xml.bind:jaxb-api</include>
                                     <include>javax.xml.soap:javax.xml.soap-api</include>
                                     <include>javax.jws:jsr181-api</include>
+                                    <include>javax.transaction:transaction-api</include>
                                 </includes>
                             </artifactSet>
                             <createSourcesJar>true</createSourcesJar>
@@ -194,6 +202,10 @@
         <dependency>
             <groupId>javax.jws</groupId>
             <artifactId>jsr181-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>transaction-api</artifactId>
         </dependency>
     </dependencies>
     <properties>
