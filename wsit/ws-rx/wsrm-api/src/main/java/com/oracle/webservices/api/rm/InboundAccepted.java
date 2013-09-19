@@ -45,6 +45,41 @@ public abstract class InboundAccepted
     @Property(ACCEPTED_PROPERTY)
     public abstract void accepted(boolean accept) throws InboundAcceptedAcceptFailed;
 
+
+    /**
+     * Key for inbound RM sequence id
+     *
+     * @see  #rmSequenceId
+     */
+    public static final String RM_SEQUENCE_ID_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.rm.sequence.id";
+
+    /**
+     * @return The RM sequence id associated with the message.
+     *     Note: it may be {@code null} if RM is not enabled.
+     *
+     * @see #RM_SEQUENCE_ID_PROPERTY
+     */
+    @Property(RM_SEQUENCE_ID_PROPERTY)
+    public abstract String rmSequenceId();
+
+
+    /**
+     * Key for inbound RM message number
+     *
+     * @see  #rmMessageNumber
+     */
+    public static final String RM_MESSAGE_NUMBER_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.rm.message.number";
+
+    /**
+     * @return The RM message number associated with the message.
+     *     Note: it may be {@code -1} if RM is not enabled.
+     *
+     * @see #RM_MESSAGE_NUMBER_PROPERTY
+     */
+    @Property(RM_MESSAGE_NUMBER_PROPERTY)
+    public abstract long rmMessageNumber();
+
+
     ////////////////////////////////////////////////////
     //
     // PropertySet boilerplate

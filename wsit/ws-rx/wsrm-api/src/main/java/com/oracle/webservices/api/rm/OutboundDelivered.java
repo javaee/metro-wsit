@@ -35,6 +35,27 @@ public abstract class OutboundDelivered
     @Property(DELIVERED_PROPERTY)
     public abstract void delivered(boolean accept);
 
+
+    /**
+     * Key for message identity property
+     *
+     * @see  #messageIdentity
+     */
+    public static final String MESSAGE_IDENTITY_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.message.identity";
+
+
+    /**
+     * @return The identity of the message.  Note: the return type is
+     * {@code Object}.  The web services stack will only use that object to hash on.
+     * The only thing that matters is that the implementor of the return {@code Object}'s
+     * {@code hashCode} return a consistent "identity".
+     *
+     * @see #MESSAGE_IDENTITY_PROPERTY
+     */
+    @Property(MESSAGE_IDENTITY_PROPERTY)
+    public abstract Object messageIdentity();
+
+
     ////////////////////////////////////////////////////
     //
     // PropertySet boilerplate
