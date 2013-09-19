@@ -16,7 +16,7 @@ public abstract class OutboundDelivered
     /**
      * Key for delivered property
      *
-     * @see  #delivered
+     * @see  #setDelivered
      */
     public static final String DELIVERED_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.delivered";
 
@@ -33,13 +33,13 @@ public abstract class OutboundDelivered
      * @see #DELIVERED_PROPERTY
      */
     @Property(DELIVERED_PROPERTY)
-    public abstract void delivered(boolean accept);
+    public abstract void setDelivered(boolean accept);
 
 
     /**
      * Key for message identity property
      *
-     * @see  #messageIdentity
+     * @see  #getMessageIdentity
      */
     public static final String MESSAGE_IDENTITY_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.message.identity";
 
@@ -53,7 +53,7 @@ public abstract class OutboundDelivered
      * @see #MESSAGE_IDENTITY_PROPERTY
      */
     @Property(MESSAGE_IDENTITY_PROPERTY)
-    public abstract Object messageIdentity();
+    public abstract Object getMessageIdentity();
 
 
     ////////////////////////////////////////////////////

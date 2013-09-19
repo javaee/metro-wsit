@@ -16,7 +16,7 @@ public abstract class InboundAccepted
     /**
      * Key for accepted property
      *
-     * @see  #accepted
+     * @see  #setAccepted
      */
     public static final String ACCEPTED_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.accepted";
 
@@ -43,13 +43,13 @@ public abstract class InboundAccepted
      * @see #ACCEPTED_PROPERTY
      */
     @Property(ACCEPTED_PROPERTY)
-    public abstract void accepted(boolean accept) throws InboundAcceptedAcceptFailed;
+    public abstract void setAccepted(boolean accept) throws InboundAcceptedAcceptFailed;
 
 
     /**
      * Key for inbound RM sequence id
      *
-     * @see  #rmSequenceId
+     * @see  #getRMSequenceId
      */
     public static final String RM_SEQUENCE_ID_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.rm.sequence.id";
 
@@ -60,13 +60,13 @@ public abstract class InboundAccepted
      * @see #RM_SEQUENCE_ID_PROPERTY
      */
     @Property(RM_SEQUENCE_ID_PROPERTY)
-    public abstract String rmSequenceId();
+    public abstract String getRMSequenceId();
 
 
     /**
      * Key for inbound RM message number
      *
-     * @see  #rmMessageNumber
+     * @see  #getRMMessageNumber
      */
     public static final String RM_MESSAGE_NUMBER_PROPERTY = "com.oracle.webservices.api.rm.inbound.accepted.rm.message.number";
 
@@ -77,7 +77,7 @@ public abstract class InboundAccepted
      * @see #RM_MESSAGE_NUMBER_PROPERTY
      */
     @Property(RM_MESSAGE_NUMBER_PROPERTY)
-    public abstract long rmMessageNumber();
+    public abstract long getRMMessageNumber();
 
 
     ////////////////////////////////////////////////////
