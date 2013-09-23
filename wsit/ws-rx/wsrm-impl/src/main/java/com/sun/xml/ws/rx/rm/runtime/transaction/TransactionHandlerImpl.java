@@ -9,11 +9,14 @@ import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import com.sun.istack.Nullable;
 import com.sun.istack.logging.Logger;
 
 public class TransactionHandlerImpl implements TransactionHandler {
     private static final Logger LOGGER = Logger
             .getLogger(TransactionHandlerImpl.class);
+
+    private UserTransaction userTransaction = null;
 
     @Override
     public void begin(int txTimeout) throws TransactionException {
@@ -32,8 +35,9 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
         try {
             userTransaction.begin();
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine("UserTransaction started.");
+            //TODO change it to FINE logging later
+            if (LOGGER.isLoggable(Level.INFO)) {
+                LOGGER.info("UserTransaction started.");
             }
         } catch (final Throwable t) {
             String message = "Not able to begin UserTransaction.";
@@ -44,86 +48,83 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
     @Override
     public void commit() throws TransactionException {
-        endTX(true);
+        UserTransaction userTransaction = getUserTransaction();
+        try {
+            userTransaction.commit();
+            //TODO change it to FINE logging later
+            if (LOGGER.isLoggable(Level.INFO)) {
+                LOGGER.info("UserTransaction committed successfully.");
+            }
+        } catch (final Throwable t) {
+            String message = "Not able to commit UserTransaction.";
+            LOGGER.severe(message, t);
+            throw new TransactionException(message, t);
+        }
     }
 
     @Override
     public void rollback() throws TransactionException {
-        endTX(false);
-    }
-
-    private void endTX(boolean commit) {
         UserTransaction userTransaction = getUserTransaction();
-
-        if (commit) {
-            try {
-                userTransaction.commit();
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine("UserTransaction committed successfully.");
-                }
-            } catch (final Throwable t) {
-                String message = "Not able to commit UserTransaction.";
-                LOGGER.severe(message, t);
-                throw new TransactionException(message, t);
+        try {
+            userTransaction.rollback();
+            //TODO change it to FINE logging later
+            if (LOGGER.isLoggable(Level.INFO)) {
+                LOGGER.info("UserTransaction rolled back successfully.");
             }
-        } else {
-            try {
-                userTransaction.rollback();
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine("UserTransaction rolled back successfully.");
-                }
-            } catch (final Throwable t) {
-                String message = "Not able to roll back UserTransaction.";
-                LOGGER.severe(message, t);
-                throw new TransactionException(message, t);
-            }
+        } catch (final Throwable t) {
+            String message = "Not able to roll back UserTransaction.";
+            LOGGER.severe(message, t);
+            throw new TransactionException(message, t);
         }
     }
 
     @Override
-    public boolean isActive() throws TransactionException {
+    public void setRollbackOnly() throws TransactionException {
         UserTransaction userTransaction = getUserTransaction();
-        int status = Status.STATUS_NO_TRANSACTION;
         try {
-            status = userTransaction.getStatus();
-        } catch (final SystemException se) {
-            String message = "Not able to get UserTransaction status.";
-            LOGGER.severe(message, se);
-            throw new TransactionException(message, se);
+            userTransaction.setRollbackOnly();
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("UserTransaction marked for roll back successfully.");
+            }
+        } catch (final Throwable t) {
+            String message = "Not able to mark UserTransaction for roll back.";
+            LOGGER.severe(message, t);
+            throw new TransactionException(message, t);
         }
+    }
 
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine("UserTransaction status is: " + status);
-        }
+    @Override
+    public boolean userTransactionAvailable() throws TransactionException {
+        UserTransaction ut = getUserTransaction();
+        return (ut != null);
+    }
 
+    @Override
+    public boolean isActive() throws TransactionException {
+        int status = getStatus();
         return status == Status.STATUS_ACTIVE;
     }
 
     @Override
     public boolean isMarkedForRollback() throws TransactionException {
-        UserTransaction userTransaction = getUserTransaction();
-        int status = Status.STATUS_NO_TRANSACTION;
-        try {
-            status = userTransaction.getStatus();
-        } catch (final SystemException se) {
-            String message = "Not able to get UserTransaction status.";
-            LOGGER.severe(message, se);
-            throw new TransactionException(message, se);
-        }
-
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine("UserTransaction status is: " + status);
-        }
-
+        int status = getStatus();
         return status == Status.STATUS_MARKED_ROLLBACK;
     }
 
     @Override
+    public boolean canBegin() {
+        int status = getStatus();
+        return (Status.STATUS_NO_TRANSACTION == status ||
+                Status.STATUS_COMMITTED == status ||
+                Status.STATUS_ROLLEDBACK == status);
+    }
+
+    @Override
     public int getStatus() throws TransactionException {
-        UserTransaction userTransaction = getUserTransaction();
+        UserTransaction ut = getUserTransaction();
         int status = Status.STATUS_NO_TRANSACTION;
         try {
-            status = userTransaction.getStatus();
+            status = ut.getStatus();
         } catch (final SystemException se) {
             String message = "Not able to get UserTransaction status.";
             LOGGER.severe(message, se);
@@ -180,22 +181,19 @@ public class TransactionHandlerImpl implements TransactionHandler {
         return statusString;
     }
 
-    private UserTransaction getUserTransaction() {
-        UserTransaction userTransaction = null;
+    private @Nullable UserTransaction getUserTransaction() {
+        if (userTransaction != null) {
+            return userTransaction;
+        }
+
         try {
             Context initialContext = new InitialContext();
             userTransaction = (UserTransaction) initialContext
                     .lookup("java:comp/UserTransaction");
         } catch (final NamingException ne) {
+            //this is expected off server, just log a warning
             String message = "Not able to lookup UserTransaction from InitialContext.";
-            LOGGER.severe(message, ne);
-            throw new TransactionException(message, ne);
-        }
-
-        if (userTransaction == null) {
-            String message = "UserTransaction found null.";
-            LOGGER.severe(message);
-            throw new TransactionException(message);
+            LOGGER.warning(message, ne);
         }
 
         return userTransaction;

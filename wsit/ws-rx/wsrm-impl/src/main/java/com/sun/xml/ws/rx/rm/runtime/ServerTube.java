@@ -73,6 +73,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
+import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionPropertySet;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.security.secconv.STRValidationHelper;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
@@ -94,11 +95,11 @@ public class ServerTube extends AbstractFilterTubeImpl {
     /**
      * Property that is exposing current sequence identifier through the message context
      */
-    private static final String SEQUENCE_PROPERTY = "com.sun.xml.ws.sequence";
+    static final String SEQUENCE_PROPERTY = "com.sun.xml.ws.sequence";
     /**
      * Property that is exposing current message number through the message context
      */
-    private static final String MESSAGE_NUMBER_PROPERTY = "com.sun.xml.ws.messagenumber";
+    static final String MESSAGE_NUMBER_PROPERTY = "com.sun.xml.ws.messagenumber";
     //
     private final RuntimeContext rc;
     private final WSEndpoint endpoint;
@@ -204,13 +205,26 @@ public class ServerTube extends AbstractFilterTubeImpl {
             exposeSequenceDataToUser(message);
 
             rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-            
-            boolean useTX = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
-            if (useTX) {
-                int txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
-                rc.transactionHandler.begin(txTimeout);
+
+            boolean useTXConfigEnabled = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
+            if (useTXConfigEnabled) {
+                boolean canBegin = rc.transactionHandler.canBegin();
+                if (canBegin) {
+                    int txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
+                    rc.transactionHandler.begin(txTimeout);
+
+                    TransactionPropertySet ps = new TransactionPropertySet();
+                    ps.setTransactionOwned(true);
+                    message.getPacket().addSatellite(ps);
+                } else {
+                    if (LOGGER.isLoggable(Level.WARNING)) {
+                        //TODO i18n
+                        LOGGER.warning("Found isDistributedTXForServerRMDEnabled() true but could not "
+                                + "begin transaction. Existing transaction found.");
+                    }
+                }
             }
-            
+
             try {
                 rc.destinationMessageHandler.registerMessage(message);
             } catch (DuplicateMessageRegistrationException ex) {
@@ -295,7 +309,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
         }
 
-        // Replay model behavior
+        // Microsoft replay model behavior where a request is sent only to give a ride to a 
+        // previously generated and retained response
         final Sequence outboundSequence = rc.sequenceManager().getBoundSequence(message.getSequenceId());
         if (outboundSequence != null) {
             final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
