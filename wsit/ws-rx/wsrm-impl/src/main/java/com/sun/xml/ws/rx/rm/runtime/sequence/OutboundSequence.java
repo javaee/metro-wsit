@@ -127,7 +127,7 @@ public final class OutboundSequence extends AbstractSequence {
                 currentRange = rangeIterator.next();
             } else {
                 break; // no more acked ranges
-                }
+            }
         }
 
         this.getDeliveryQueue().onSequenceAcknowledgement();

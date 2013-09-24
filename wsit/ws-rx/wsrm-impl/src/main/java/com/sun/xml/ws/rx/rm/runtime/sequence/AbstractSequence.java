@@ -128,6 +128,18 @@ public abstract class AbstractSequence implements Sequence {
         }
     }
 
+    public boolean isAcknowledged(long messageNumber) {
+        boolean result = false;
+        List<AckRange> listOfAckRange = getAcknowledgedMessageNumbers();
+        for (AckRange ackRange : listOfAckRange) {
+            if (messageNumber <= ackRange.upper && messageNumber >= ackRange.lower) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
     public boolean hasUnacknowledgedMessages() {
         return !data.getUnackedMessageNumbers().isEmpty();
     }

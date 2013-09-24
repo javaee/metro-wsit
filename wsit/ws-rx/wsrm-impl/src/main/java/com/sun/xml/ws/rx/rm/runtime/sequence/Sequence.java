@@ -297,6 +297,13 @@ public interface Sequence {
     public List<AckRange> getAcknowledgedMessageNumbers();
 
     /**
+     * Is this message number acknowledged with the sequence?
+     * @param messageNumber in a sequence
+     * @return true if acknowledged, otherwise false
+     */
+    public boolean isAcknowledged(long messageNumber);
+
+    /**
      * The method may be called to determine whether the sequence has some unacknowledged messages or not
      * 
      * @return {@code true} if the sequence has any unacknowledged message identifiers, {@code false} otherwise

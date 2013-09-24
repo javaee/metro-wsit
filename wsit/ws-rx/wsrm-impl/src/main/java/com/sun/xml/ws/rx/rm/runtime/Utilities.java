@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.oracle.webservices.api.rm.RMRetryException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.client.ClientTransportException;
@@ -134,15 +135,16 @@ final class Utilities {
      *         problem.
      */
     static boolean isResendPossible(Throwable throwable) {
-        if (throwable instanceof IOException) {
+        if (throwable instanceof RMRetryException || throwable instanceof IOException) {
             return true;
         } else if (throwable instanceof WebServiceException) {
             if (throwable instanceof ClientTransportException) {
-                return true; // if endpint went down, let's try to resend, as it may come up again
+                return true; // if endpoint went down, let's try to resend, as it may come up again
             }
             // Unwrap exception and see if it makes sense to retry this request
             // (no need to check for null - handled by instanceof)
-            if (throwable.getCause() instanceof IOException) {
+            if (throwable.getCause() instanceof RMRetryException ||
+                    throwable.getCause() instanceof IOException) {
                 return true;
             }
         }

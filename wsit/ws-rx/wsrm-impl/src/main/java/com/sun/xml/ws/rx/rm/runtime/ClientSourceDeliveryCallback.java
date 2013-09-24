@@ -39,6 +39,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.oracle.webservices.api.rm.OutboundDelivered;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
@@ -47,17 +48,16 @@ import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
-import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
+
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 class ClientSourceDeliveryCallback implements Postman.Callback {
-
     private static final Logger LOGGER = Logger.getLogger(ClientSourceDeliveryCallback.class);
 
     private static class OneWayMepCallbackHandler extends AbstractResponseHandler implements Fiber.CompletionCallback {
-
         private final RuntimeContext rc;
         private final JaxwsApplicationMessage request;
 
@@ -78,6 +78,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
                     rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
+                    invokeOutboundDeliveredTrueIfRequestAcked();
+
                     if (rc.configuration.getRuntimeVersion().protocolVersion.isFault(message.getWsaAction())) {
                         // TODO handle RM faults
                     }
@@ -92,28 +94,52 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (!Utilities.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
+                final int nextResendCount = request.getNextResendCount();
+                if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
+                    invokeOutboundDeliveredFalse();
+                    resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
+                    return;
+                }
+
+                try {
+                    HaContext.initFrom(request.getPacket());
+
+                    RedeliveryTaskExecutor.register(
+                            request,
+                            rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                            TimeUnit.MILLISECONDS,
+                            rc.sourceMessageHandler,
+                            request.getPacket().component);
+
+                } finally {
+                    HaContext.clear();
+                }
+            } else {
+                invokeOutboundDeliveredFalse();
                 resumeParentFiber(error);
-                return;
             }
+        }
 
-            final int nextResendCount = request.getNextResendCount();
-            if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
-                resumeParentFiber(error);
-                return;
+        private void invokeOutboundDeliveredTrueIfRequestAcked() {
+            Packet requestPacket = request.getPacket();
+            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
+
+            if (outboundDelivered != null) {
+                long messageNumber = request.getMessageNumber();
+                Sequence outboundSequence = rc.sequenceManager().getOutboundSequence(request.getSequenceId());
+                boolean isRequestAcked = outboundSequence.isAcknowledged(messageNumber);
+                if (isRequestAcked) {
+                    outboundDelivered.setDelivered(Boolean.TRUE);
+                }
             }
+        }
 
-            try {
-                HaContext.initFrom(request.getPacket());
-
-                RedeliveryTaskExecutor.register(
-                        request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                        TimeUnit.MILLISECONDS,
-                        rc.sourceMessageHandler,
-                        request.getPacket().component);
-            } finally {
-                HaContext.clear();
+        private void invokeOutboundDeliveredFalse() {
+            Packet requestPacket = request.getPacket();
+            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
+            if (outboundDelivered != null) {
+                outboundDelivered.setDelivered(Boolean.FALSE);
             }
         }
     }
@@ -141,6 +167,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
                     rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
+                    invokeOutboundDeliveredTrueIfRequestAcked();
+
                     if (rc.configuration.getRuntimeVersion().protocolVersion.isFault(message.getWsaAction())) {
                         // TODO handle RM faults
                     }
@@ -157,6 +185,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 } else {
                     final int nextResendCount = request.getNextResendCount();
                     if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
+                        invokeOutboundDeliveredFalse();
                         resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
                         return;
                     }
@@ -181,6 +210,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             if (Utilities.isResendPossible(error)) {
                 final int nextResendCount = request.getNextResendCount();
                 if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
+                    invokeOutboundDeliveredFalse();
                     resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
                     return;
                 }
@@ -198,71 +228,35 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 } finally {
                     HaContext.clear();
                 }
-
-
             } else {
+                invokeOutboundDeliveredFalse();
                 resumeParentFiber(error);
             }
         }
-    }
 
-    private static class AmbiguousMepCallbackHandler extends AbstractResponseHandler implements Fiber.CompletionCallback {
+        private void invokeOutboundDeliveredTrueIfRequestAcked() {
+            Packet requestPacket = request.getPacket();
+            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
 
-        private final JaxwsApplicationMessage request;
-        private final RuntimeContext rc;
-
-        public AmbiguousMepCallbackHandler(JaxwsApplicationMessage request, RuntimeContext rc) {
-            super(rc.suspendedFiberStorage, request.getCorrelationId());
-            this.request = request;
-            this.rc = rc;
-        }
-
-        public void onCompletion(Packet response) {
-            try {
-                HaContext.initFrom(response);
-
-                if (response.getMessage() != null) {
-                    // TODO handle RM faults
-                    JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
-                    rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
-                    rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-
-                    rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-
-                    if (message.getSequenceId() != null) {
-                        try {
-                            rc.destinationMessageHandler.registerMessage(message);
-                            rc.destinationMessageHandler.putToDeliveryQueue(message);
-                            return;
-                        } catch (DuplicateMessageRegistrationException ex) {
-                            onCompletion(ex);
-                            return;
-                        }
-                    }
+            if (outboundDelivered != null) {
+                long messageNumber = request.getMessageNumber();
+                Sequence outboundSequence = rc.sequenceManager().getOutboundSequence(request.getSequenceId());
+                boolean isRequestAcked = outboundSequence.isAcknowledged(messageNumber);
+                if (isRequestAcked) {
+                    outboundDelivered.setDelivered(Boolean.TRUE);
                 }
-
-                resumeParentFiber(response);
-
-            } catch (RxRuntimeException ex) {
-                onCompletion(ex);
-            } finally {
-                HaContext.clear();
             }
         }
 
-        public void onCompletion(Throwable error) {
-            if (Utilities.isResendPossible(error)) {
-                RedeliveryTaskExecutor.register(
-                        request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                        TimeUnit.MILLISECONDS,
-                        rc.sourceMessageHandler,
-                        request.getPacket().component);
-            } else {
-                resumeParentFiber(error);
+        private void invokeOutboundDeliveredFalse() {
+            Packet requestPacket = request.getPacket();
+            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
+            if (outboundDelivered != null) {
+                outboundDelivered.setDelivered(Boolean.FALSE);
             }
         }
     }
+
     //
     private final RuntimeContext rc;
 
@@ -291,9 +285,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
             Fiber.CompletionCallback responseCallback;
-            if (outboundPacketCopy.expectReply == null) {
-                responseCallback = new AmbiguousMepCallbackHandler(message, rc); // should not really happen on the request packet
-            } else if (outboundPacketCopy.expectReply.booleanValue()) {
+            if (outboundPacketCopy.expectReply.booleanValue()) {
                 responseCallback = new ReqRespMepCallbackHandler(message, rc);
             } else {
                 responseCallback = new OneWayMepCallbackHandler(message, rc);
