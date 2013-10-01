@@ -94,29 +94,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                  */
                 String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
                 if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
+                    //TODO Do below only if it was not already done using InboundAccepted
                     rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
-
-                    //Commit the TX if it was started by us and if it is still active
-                    TransactionPropertySet ps = 
-                            response.getSatellite(TransactionPropertySet.class);
-                    boolean txOwned = (ps != null && ps.isTransactionOwned());
-
-                    if (txOwned) {
-                        if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
-
-                            if (LOGGER.isLoggable(Level.FINE)) {
-                                LOGGER.fine("Transaction status before commit: " + rc.transactionHandler.getStatusAsString());
-                            }
-
-                            rc.transactionHandler.commit();
-                        } else {
-                            if (LOGGER.isLoggable(Level.SEVERE)) {
-                                LOGGER.severe("Unexpected transaction status before commit: " + rc.transactionHandler.getStatusAsString());
-                            }
-                        }
-                    } else {
-                        //Do nothing as we don't own the TX
-                    }
                 } else {
                     /**
                      * Private contract between Metro RM and Sun JavaCAPS (BPM) team
@@ -152,32 +131,6 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
                 // TODO handle RM faults
             } catch (final Throwable t) {
-                //Roll back the TX if it was started by us and if it is not committed
-                TransactionPropertySet ps =
-                        response.getSatellite(TransactionPropertySet.class);
-                boolean txOwned = (ps != null && ps.isTransactionOwned());
-
-                if (txOwned) {
-                    if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
-
-                        if (LOGGER.isLoggable(Level.FINE)) {
-                            LOGGER.fine("Transaction status before rollback: " + rc.transactionHandler.getStatusAsString());
-                        }
-
-                        rc.transactionHandler.rollback();
-                    } else {
-                        if (LOGGER.isLoggable(Level.SEVERE)) {
-                            LOGGER.severe("Unexpected transaction status before rollback: " + rc.transactionHandler.getStatusAsString());
-                        }
-                    }
-                } else {
-                    //Don't roll back as we don't own the TX but if active then mark for roll back
-                    if (rc.transactionHandler.userTransactionAvailable() &&
-                            rc.transactionHandler.isActive()) {
-                        rc.transactionHandler.setRollbackOnly();
-                    }
-                }
-
                 onCompletion(t);
             } finally {
                 HaContext.clear();
@@ -185,7 +138,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            //Resume original Fiber with Throwable. 
+            //Resume original Fiber with Throwable.
             //No retry attempts to send request to application layer.
             resumeParentFiber(error);
         }
@@ -210,6 +163,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
+        //TODO Decide if InboundAccepted should be added conditionally
         InboundAccepted inboundAccepted = new InboundAcceptedImpl(message, rc);
         Packet request = message.getPacket().copy(true);
         request.addSatellite(inboundAccepted);

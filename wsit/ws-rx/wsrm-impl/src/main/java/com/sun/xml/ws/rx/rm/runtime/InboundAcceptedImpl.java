@@ -35,42 +35,25 @@ public class InboundAcceptedImpl extends InboundAccepted {
             rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
 
             if (txOwned) {
-                if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine("Transaction status before commit: " + rc.transactionHandler.getStatusAsString());
+                }
 
-                    if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine("Transaction status before commit: " + rc.transactionHandler.getStatusAsString());
-                    }
-
-                    try {
-                        rc.transactionHandler.commit();
-                    } catch (Throwable t) {
-                        accepted = null;
-                        throw new InboundAcceptedAcceptFailed();
-                    }
-                } else {
-                    if (LOGGER.isLoggable(Level.SEVERE)) {
-                        LOGGER.severe("Unexpected transaction status before commit: " + rc.transactionHandler.getStatusAsString());
-                    }
+                try {
+                    rc.transactionHandler.commit();
+                } catch (Throwable t) {
                     accepted = null;
-                    throw new InboundAcceptedAcceptFailed();
+                    throw new InboundAcceptedAcceptFailed("Not able to commit the TX.", t);
                 }
             } else {
                 //Do nothing as we don't own the TX
             }
         } else {//accept == false
             if (txOwned) {
-                if (rc.transactionHandler.isActive() || rc.transactionHandler.isMarkedForRollback()) {
-
-                    if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine("Transaction status before rollback: " + rc.transactionHandler.getStatusAsString());
-                    }
-
-                    rc.transactionHandler.rollback();
-                } else {
-                    if (LOGGER.isLoggable(Level.SEVERE)) {
-                        LOGGER.severe("Unexpected transaction status before rollback: " + rc.transactionHandler.getStatusAsString());
-                    }
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine("Transaction status before rollback: " + rc.transactionHandler.getStatusAsString());
                 }
+                rc.transactionHandler.rollback();
             } else {
                 //Don't roll back as we don't own the TX but if active then mark for roll back
                 if (rc.transactionHandler.userTransactionAvailable() &&
@@ -82,20 +65,17 @@ public class InboundAcceptedImpl extends InboundAccepted {
     }
 
     @Override
-    @Property("com.oracle.webservices.api.rm.inbound.accepted.accepted")
     public Boolean getAccepted() {
         return accepted;
     }
 
     @Override
-    @Property("com.oracle.webservices.api.rm.inbound.accepted.rm.sequence.id")
     public String getRMSequenceId() {
         String seqID = (String)request.getPacket().invocationProperties.get(ServerTube.SEQUENCE_PROPERTY);
         return seqID;
     }
 
     @Override
-    @Property("com.oracle.webservices.api.rm.inbound.accepted.rm.message.number")
     public long getRMMessageNumber() {
         long msgNumber = (Long)request.getPacket().invocationProperties.get(ServerTube.MESSAGE_NUMBER_PROPERTY);
         return msgNumber;
