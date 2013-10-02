@@ -258,7 +258,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         sequenceHeaderElement.setMessageNumber(message.getMessageNumber());
         final String muTrue = SOAPVersion.SOAP_12.equals(soapVersion) ? "true" : "1";
         sequenceHeaderElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, muTrue);
-        jaxwsMessage.getHeaders().add(createHeader(sequenceHeaderElement));
+        jaxwsMessage.getHeaders().addOrReplace(createHeader(sequenceHeaderElement));
     }
 
     public void appendAcknowledgementHeaders(@NotNull Packet packet, @NotNull AcknowledgementData ackData) {
@@ -275,7 +275,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
             // MU attribute removed to comply with WS-I RSP R0540 - see WSIT issue #1318
             // ackRequestedElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
-            jaxwsMessage.getHeaders().add(createHeader(ackRequestedElement));
+            jaxwsMessage.getHeaders().addOrReplace(createHeader(ackRequestedElement));
 
             packet.invocationProperties.put(RmConfiguration.ACK_REQUESTED_HEADER_SET, Boolean.TRUE);
         }
@@ -305,7 +305,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
             // MU attribute removed to comply with WS-I RSP R0540 - see WSIT issue #1318
             // ackElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
-            jaxwsMessage.getHeaders().add(createHeader(ackElement));
+            jaxwsMessage.getHeaders().addOrReplace(createHeader(ackElement));
         }
     }
 
