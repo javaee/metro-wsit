@@ -57,6 +57,30 @@ class RedeliveryTaskExecutor {
     private RedeliveryTaskExecutor() {
     }
 
+    // This method delivers message using caller's thread. No thread switching.
+    public static boolean deliverUsingCurrentThread(
+            final ApplicationMessage message, long delay, TimeUnit timeUnit,
+            final MessageHandler messageHandler) {
+
+        try {
+            Thread.sleep(timeUnit.toMillis(delay));
+        } catch (InterruptedException e) {
+            //ignore and redeliver
+        }
+
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format(
+                    "Attempting redelivery of a message with number [ %d ] on a sequence [ %s ]",
+                    message.getMessageNumber(),
+                    message.getSequenceId()));
+        }
+
+        messageHandler.putToDeliveryQueue(message);
+        return true;
+    }
+    
+    // Not used anymore in favor of deliverUsingCurrentThread.
+    @Deprecated
     public static boolean register(final ApplicationMessage message, long delay, TimeUnit timeUnit, final MessageHandler messageHandler, Component container) {
         final HaContext.State state = HaContext.currentState();
 

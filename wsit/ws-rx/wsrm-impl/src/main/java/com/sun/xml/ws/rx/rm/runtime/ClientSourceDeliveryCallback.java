@@ -100,12 +100,11 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                         return;
                     }
 
-                    RedeliveryTaskExecutor.register(
+                    RedeliveryTaskExecutor.deliverUsingCurrentThread(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.sourceMessageHandler,
-                            response.component);
+                            rc.sourceMessageHandler);
                 }
             } catch (RxRuntimeException ex) {
                 onCompletion(ex);
@@ -128,12 +127,11 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 try {
                     HaContext.initFrom(request.getPacket());
 
-                    RedeliveryTaskExecutor.register(
+                    RedeliveryTaskExecutor.deliverUsingCurrentThread(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.sourceMessageHandler,
-                            request.getPacket().component);
+                            rc.sourceMessageHandler);
                 } finally {
                     HaContext.clear();
                 }

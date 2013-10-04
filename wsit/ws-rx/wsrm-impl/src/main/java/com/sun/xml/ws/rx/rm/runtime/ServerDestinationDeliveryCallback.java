@@ -103,12 +103,11 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                      * Does not apply to anyone else.
                      */
                     LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
-                    RedeliveryTaskExecutor.register(
+                    RedeliveryTaskExecutor.deliverUsingCurrentThread(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
-                            rc.destinationMessageHandler,
-                            response.component);
+                            rc.destinationMessageHandler);
                     return;
                 }
 
