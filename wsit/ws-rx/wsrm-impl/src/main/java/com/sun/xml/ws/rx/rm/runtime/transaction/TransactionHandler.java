@@ -92,11 +92,19 @@ public interface TransactionHandler {
     boolean isMarkedForRollback() throws TransactionException;
     
     /**
-     * Can UserTransaction be started?
+     * Can UserTransaction be started? 
+     * Can start only if it doesn't already exist.
      * @return true if UserTransaction can be started
      * @throws TransactionException
      */
     boolean canBegin() throws TransactionException;
+    
+    /**
+     * Is transaction associated with the current thread?
+     * @return true if transaction is flowing on the current thread
+     * @throws TransactionException
+     */
+    boolean transactionExists() throws TransactionException;
     
     /**
      * javax.transaction.Status of the UserTransaction 

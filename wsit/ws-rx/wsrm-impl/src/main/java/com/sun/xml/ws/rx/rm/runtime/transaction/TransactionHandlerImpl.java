@@ -156,10 +156,17 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
     @Override
     public boolean canBegin() {
+        boolean txExists = transactionExists();
+        return !txExists;
+    }
+
+    @Override
+    public boolean transactionExists() throws TransactionException {
         int status = getStatus();
-        return (Status.STATUS_NO_TRANSACTION == status ||
+        boolean noTX = (Status.STATUS_NO_TRANSACTION == status ||
                 Status.STATUS_COMMITTED == status ||
                 Status.STATUS_ROLLEDBACK == status);
+        return !noTX;
     }
 
     @Override

@@ -62,6 +62,7 @@ import com.sun.xml.ws.rx.rm.protocol.*;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
+import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 
@@ -182,6 +183,14 @@ final class ClientTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet request) {
         LOGGER.entering();
+
+        if (rc.transactionHandler.userTransactionAvailable()
+                && rc.transactionHandler.transactionExists()) {
+            String errorMessage = "ClientTube message processing cannot be part of a distributed transaction.";
+            LOGGER.severe(errorMessage);
+            throw new TransactionException(errorMessage);
+        }
+
         try {
             HaContext.initFrom(request);
             if (HaContext.failoverDetected()) {

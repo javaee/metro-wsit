@@ -210,7 +210,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             if (useTXConfigEnabled) {
                 boolean canBegin = rc.transactionHandler.canBegin();
                 if (canBegin) {
-                    int txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
+                    int txTimeout = getTransactionTimeout();
                     rc.transactionHandler.begin(txTimeout);
 
                     TransactionPropertySet ps = new TransactionPropertySet();
@@ -257,6 +257,25 @@ public class ServerTube extends AbstractFilterTubeImpl {
             HaContext.clear();
             LOGGER.exiting();
         }
+    }
+
+    private int getTransactionTimeout() {
+        int txTimeout = -1;
+        //TODO System property is temporary.
+        String txTimeoutString = 
+                System.getProperty("metro.rm.server.rmd.tx.timeout.seconds");
+        if (txTimeoutString != null && !txTimeoutString.isEmpty()) {
+            try {
+                txTimeout = Integer.parseInt(txTimeoutString);
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+        }
+
+        if (txTimeout == -1) {
+            txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
+        }
+        return txTimeout;
     }
 
     @Override
