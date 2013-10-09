@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.oracle.webservices.api.rm.RMRetryException;
+import com.oracle.webservices.oracle_internal_api.rm.RMRetryException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.client.ClientTransportException;

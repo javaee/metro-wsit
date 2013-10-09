@@ -2,8 +2,8 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import java.util.logging.Level;
 
-import com.oracle.webservices.api.rm.InboundAccepted;
-import com.oracle.webservices.api.rm.InboundAcceptedAcceptFailed;
+import com.oracle.webservices.oracle_internal_api.rm.InboundAccepted;
+import com.oracle.webservices.oracle_internal_api.rm.InboundAcceptedAcceptFailed;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionPropertySet;
 

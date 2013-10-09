@@ -39,7 +39,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.oracle.webservices.api.rm.InboundAccepted;
+import com.oracle.webservices.oracle_internal_api.rm.InboundAccepted;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;

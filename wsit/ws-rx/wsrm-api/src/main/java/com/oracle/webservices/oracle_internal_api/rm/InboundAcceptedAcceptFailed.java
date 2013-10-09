@@ -37,7 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.oracle.webservices.api.rm;
+package com.oracle.webservices.oracle_internal_api.rm;
 
 /**
  * {@code InboundAcceptedAcceptFailed} is thrown if the user calls {@code InboundAccepted#accepted(true)} but the RMD is
