@@ -151,9 +151,9 @@
                 <configuration>
                     <systemProperties>
                         <metro.version>${project.version}</metro.version>
-                        <jaxb.spec.version>${jaxb-api.osgiVersion}</jaxb.spec.version>
-                        <jaxb.impl.version>${jaxb.osgiVersion}</jaxb.impl.version>
-                        <glassfish.version>4.0-b72</glassfish.version>
+                        <jaxb.spec.version>${jaxb-api.version}</jaxb.spec.version>
+                        <jaxb.impl.version>${jaxb.version}</jaxb.impl.version>
+                        <glassfish.version>4.0.1-b02</glassfish.version>
                         <mvn.repo>${user.home}/.m2/repository</mvn.repo>
                     </systemProperties>
                 </configuration>
