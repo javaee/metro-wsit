@@ -103,7 +103,7 @@ public abstract class OutboundDelivered
      * @see #MESSAGE_IDENTITY_PROPERTY
      */
     @Property(MESSAGE_IDENTITY_PROPERTY)
-    public abstract Object getMessageIdentity();
+    public abstract String getMessageIdentity();
 
 
     ////////////////////////////////////////////////////
