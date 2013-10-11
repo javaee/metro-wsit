@@ -1,0 +1,42 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<wsp:Policy
+
+   xmlns:orasp="http://schemas.oracle.com/ws/2006/01/securitypolicy"
+   xmlns:orawsp="http://schemas.oracle.com/ws/2006/01/policy"
+   xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+   xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+
+   Name="oracle/no_reliable_messaging_internal_api_policy"
+   orawsp:attachTo="binding.any"
+   orawsp:category="wsrm"
+   orawsp:description="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/no_reliable_messaging_internal_api_policy_PolyDescKey"
+   orawsp:displayName="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/no_reliable_messaging_internal_api_policy_PolyDispNameKey"
+   orawsp:local-optimization="on"
+   orawsp:status="enabled"
+   orawsp:readOnly="true"
+   wsu:Id="no_reliable_messaging_internal_api_policy"
+   >
+
+<!--
+
+ Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved. 
+
+-->
+
+<!--
+// GENERATED CODE.  DO NOT EDIT.
+// GENERATED FROM reliable-messaging-internap-api-properties.xml
+-->
+
+  <orasp:nobehavior
+     xmlns:ows="http://com.oracle.webservices/"
+     orawsp:Enforced="true"
+     orawsp:Silent="true"
+     orawsp:category="wsrm/reliable_messaging_internal_api"
+     orawsp:name="No Reliable Messaging Internal Api"
+
+     ows:feature-classname="com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature"
+     >
+  </orasp:nobehavior>
+</wsp:Policy>

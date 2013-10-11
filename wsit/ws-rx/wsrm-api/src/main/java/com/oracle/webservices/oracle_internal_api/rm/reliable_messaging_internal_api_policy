@@ -1,0 +1,73 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<wsp:Policy
+
+   xmlns:orasp="http://schemas.oracle.com/ws/2006/01/securitypolicy"
+   xmlns:orawsp="http://schemas.oracle.com/ws/2006/01/policy"
+   xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+   xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+
+   Name="oracle/reliable_messaging_internal_api_policy"
+   orawsp:attachTo="binding.any"
+   orawsp:category="wsrm"
+   orawsp:description="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/reliable_messaging_internal_api_policy_PolyDescKey"
+   orawsp:displayName="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/reliable_messaging_internal_api_policy_PolyDispNameKey"
+   orawsp:local-optimization="on"
+   orawsp:status="enabled"
+   orawsp:readOnly="true"
+   wsu:Id="reliable_messaging_internal_api_policy"
+   >
+
+<!--
+
+ Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved. 
+
+-->
+
+<!--
+// GENERATED CODE.  DO NOT EDIT.
+// GENERATED FROM reliable-messaging-internap-api-properties.xml
+-->
+
+  <ows:reliable_messaging_internal_api
+     xmlns:ows="http://com.oracle.webservices/"
+     orawsp:Enforced="true"
+     orawsp:Silent="true"
+     orawsp:category="wsrm/reliable_messaging_internal_api"
+     orawsp:name="Reliable Messaging Internal Api"
+
+     ows:feature-classname="com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature"
+     >
+    <orawsp:bindings>
+      <orawsp:Config orawsp:name="reliable_messaging_internal_api_policy">
+        <orawsp:PropertySet orawsp:name="reliable_messaging_internal_api_policy_properties">
+
+          <orawsp:Property orawsp:name="sequence.manager.maintenance.period" orawsp:type="int" orawsp:contentType="optional">
+            <orawsp:DefaultValue>60</orawsp:DefaultValue>
+            <orawsp:Description>
+       Specifies the period (in seconds) of a sequence manager maintenance task execution.
+       Default value: 60</orawsp:Description>
+          </orawsp:Property>
+
+          <orawsp:Property orawsp:name="max.concurrent.session" orawsp:type="int" orawsp:contentType="optional">
+            <orawsp:DefaultValue>100</orawsp:DefaultValue>
+            <orawsp:Description>
+       Specifies how many concurrently active RM sessions (measured based on
+       inbound RM sequences) the sequence manager dedicated to the WS Endpoint
+       accepts before starting to refuse new requests for sequence creation.
+       Default value: 100</orawsp:Description>
+          </orawsp:Property>
+
+          <orawsp:Property orawsp:name="user.transaction.timeout" orawsp:type="int" orawsp:contentType="optional">
+            <orawsp:DefaultValue>0</orawsp:DefaultValue>
+            <orawsp:Description>
+       When an XA TX is used to link the RMD with the user's ProviderRequest, this specifies the timeout value in seconds.
+       The default value of 0 says to use the system default.</orawsp:Description>
+          </orawsp:Property>
+
+
+        </orawsp:PropertySet>
+      </orawsp:Config>
+    </orawsp:bindings>
+  </ows:reliable_messaging_internal_api>
+</wsp:Policy>
