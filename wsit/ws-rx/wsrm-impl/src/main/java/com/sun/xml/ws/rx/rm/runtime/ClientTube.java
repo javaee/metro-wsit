@@ -430,7 +430,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
             LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
         }
 
-        if (rc.configuration.requestResponseOperationsDetected() && !rc.configuration.getRmFeature().isOfferElementGenerationDisabled()) {
+        if (rc.configuration.requestResponseOperationsDetected() &&
+                !rc.configuration.getRmFeature().isOfferElementGenerationDisabled()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration
         }
@@ -441,7 +442,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
         Packet request = rc.protocolHandler.toPacket(requestData, null);
 
         Packet response = sendSessionControlMessage(messageName, request);
-        CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
+        CreateSequenceResponseData responseData = rc.protocolHandler.
+                toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
 
         if (requestData.getOfferedSequenceId() != null && responseData.getAcceptedSequenceAcksTo() == null) {
             // WS-I RSP R0010, R0011 - we must not fail in case of the Offer element has not been accepted by RMD
@@ -456,25 +458,30 @@ final class ClientTube extends AbstractFilterTubeImpl {
             request = rc.protocolHandler.toPacket(requestData, null);
 
             response = sendSessionControlMessage(messageName, request);
-            responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
+            responseData = rc.protocolHandler.
+                    toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
         }
 
         if (responseData.getAcceptedSequenceAcksTo() != null) {
-            if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
+            if (!rc.communicator.getDestinationAddress().getURI().toString()
+                    .equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(responseData.getAcceptedSequenceAcksTo().toString(), rc.communicator.getDestinationAddress()));
             }
         }
 
-        this.outboundSequenceId.value = rc.sequenceManager().createOutboundSequence(
-                responseData.getSequenceId(),
-                (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis()).getId();
+        String outboundSeqId = responseData.getSequenceId();
+        String outboundSeqSTRId = (requestData.getStrType() != null) ? requestData.getStrType().getId() : null;
+        long outboundSeqExpTime = (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis();
+        Sequence outboundSequence =
+                rc.sequenceManager().createOutboundSequence(outboundSeqId, outboundSeqSTRId, outboundSeqExpTime);
+        this.outboundSequenceId.value = outboundSequence.getId();
 
-        if (requestData.getOfferedSequenceId() != null) {
-            Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
-                    requestData.getOfferedSequenceId(),
-                    (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                    (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis());
+        String offeredSeqId = requestData.getOfferedSequenceId();
+        String offeredSeqSTRId = (requestData.getStrType() != null) ? requestData.getStrType().getId() : null;
+        long offeredSeqExpTime = (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis();
+        if (offeredSeqId != null) {
+            Sequence inboundSequence =
+                    rc.sequenceManager().createInboundSequence(offeredSeqId, offeredSeqSTRId, offeredSeqExpTime);
 
             rc.sequenceManager().bindSequences(outboundSequenceId.value, inboundSequence.getId());
             rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequenceId.value);
