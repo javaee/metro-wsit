@@ -96,10 +96,9 @@ public abstract class OutboundDelivered
     public static final String MESSAGE_IDENTITY_PROPERTY = "com.oracle.webservices.api.rm.outbound.delivered.message.identity";
 
     /**
-     * @return The identity of the message.  Note: the return type is
-     * {@code Object}.  The web services stack will only use that object to hash on.
-     * The only thing that matters is that the implementor of the return {@code Object}'s
-     * {@code hashCode} return a consistent "identity".
+     * @return The identity of the message.
+     *
+     * @throws RuntimeException if String is longer than 256 characters.
      *
      * @see #MESSAGE_IDENTITY_PROPERTY
      */
