@@ -53,7 +53,8 @@
 
     <artifactId>osgi-test</artifactId>
 
-    <name>osgi-test</name>
+    <name>Metro Web Services OSGi Bundle tests</name>
+    <description>Tests for Metro OSGi bundles</description>
     
     <properties>
         <exam.version>3.0.0.M3</exam.version>
@@ -154,7 +155,6 @@
                         <jaxb.spec.version>${jaxb-api.version}</jaxb.spec.version>
                         <jaxb.impl.version>${jaxb.version}</jaxb.impl.version>
                         <glassfish.version>4.0.1-b02</glassfish.version>
-                        <mvn.repo>${user.home}/.m2/repository</mvn.repo>
                     </systemProperties>
                 </configuration>
             </plugin>

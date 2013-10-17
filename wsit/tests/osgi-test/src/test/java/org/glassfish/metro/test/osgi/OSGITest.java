@@ -40,6 +40,7 @@
 package org.glassfish.metro.test.osgi;
 
 import com.sun.tools.ws.resources.WscompileMessages;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -78,7 +79,7 @@ public class OSGITest {
     @Configuration
     public static Option[] config() {
         return options(
-                localRepository(System.getProperty("mvn.repo")),
+                localRepository(getLocalRepository()),
                 repositories("http://repo1.maven.org/maven2",
                              "https://maven.java.net/content/repositories/promoted/",
                              "http://maven.java.net/content/repositories/snapshots/"),
@@ -222,5 +223,14 @@ public class OSGITest {
                 + b.getSymbolicName() + "', expected was '" + bundle + "'",
                 bundle, b.getSymbolicName());
         Assert.assertEquals("Bundle '" + bundle + "' is not running", Bundle.ACTIVE, b.getState());
+    }
+    
+    private static String getLocalRepository() {
+        String path = System.getProperty("maven.repo.local");
+        return (path != null && path.trim().length() > 0)
+                ? path
+                : System.getProperty("user.home") + File.separator
+                    + ".m2" + File.separator
+                    + "repository";
     }
 }
