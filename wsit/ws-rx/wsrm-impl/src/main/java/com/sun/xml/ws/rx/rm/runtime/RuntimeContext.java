@@ -84,6 +84,8 @@ public final class RuntimeContext {
         private
         @Nullable
         TransactionHandler transactionHandler;
+        @Nullable
+        OutboundDeliveredHandler outboundDeliveredHandler;
 
         public Builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
@@ -95,6 +97,7 @@ public final class RuntimeContext {
             this.sourceMessageHandler = new SourceMessageHandler(null);
             this.destinationMessageHandler = new DestinationMessageHandler(null);
             this.transactionHandler = new TransactionHandlerImpl();
+            this.outboundDeliveredHandler = new OutboundDeliveredHandler();
         }
 
         public Builder sequenceManager(SequenceManager sequenceManager) {
@@ -115,9 +118,11 @@ public final class RuntimeContext {
                     new ScheduledTaskManager("RM Runtime Context", communicator.getContainer()),
                     sourceMessageHandler,
                     destinationMessageHandler,
-                    transactionHandler);
+                    transactionHandler,
+                    outboundDeliveredHandler);
         }
     }
+
     public final RmConfiguration configuration;
     public final AddressingVersion addressingVersion;
     public final SOAPVersion soapVersion;
@@ -131,6 +136,7 @@ public final class RuntimeContext {
     final DestinationMessageHandler destinationMessageHandler;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     public final TransactionHandler transactionHandler;
+    public final OutboundDeliveredHandler outboundDeliveredHandler;
 
     @SuppressWarnings("LeakingThisInConstructor")
     private RuntimeContext(
@@ -141,7 +147,8 @@ public final class RuntimeContext {
             ScheduledTaskManager scheduledTaskManager,
             SourceMessageHandler srcMsgHandler,
             DestinationMessageHandler dstMsgHandler,
-            TransactionHandler txHandler) {
+            TransactionHandler txHandler,
+            OutboundDeliveredHandler outboundDeliveredHandler) {
 
         this.configuration = configuration;
         this.sequenceManager = sequenceManager;
@@ -157,6 +164,7 @@ public final class RuntimeContext {
 
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
         this.transactionHandler = txHandler;
+        this.outboundDeliveredHandler = outboundDeliveredHandler;
     }
 
     public void close() {

@@ -78,9 +78,8 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
         try {
             userTransaction.begin();
-            //TODO change it to FINE logging later
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.info("UserTransaction started.");
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("UserTransaction started.");
             }
         } catch (final Throwable t) {
             String message = "Not able to begin UserTransaction.";
@@ -94,9 +93,8 @@ public class TransactionHandlerImpl implements TransactionHandler {
         UserTransaction userTransaction = getUserTransaction();
         try {
             userTransaction.commit();
-            //TODO change it to FINE logging later
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.info("UserTransaction committed successfully.");
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("UserTransaction committed successfully.");
             }
         } catch (final Throwable t) {
             String message = "Not able to commit UserTransaction.";
@@ -110,9 +108,8 @@ public class TransactionHandlerImpl implements TransactionHandler {
         UserTransaction userTransaction = getUserTransaction();
         try {
             userTransaction.rollback();
-            //TODO change it to FINE logging later
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.info("UserTransaction rolled back successfully.");
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("UserTransaction rolled back successfully.");
             }
         } catch (final Throwable t) {
             String message = "Not able to roll back UserTransaction.";

@@ -45,6 +45,8 @@ import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -183,6 +185,15 @@ public interface Sequence {
                 Collections.sort(ranges, COMPARATOR);
             }
         }
+        
+        public List<Long> rangeValues() {
+            List<Long> values = new ArrayList<Long>();
+            for(long value = lower; value <= upper; value++) {
+                values.add(value);
+            }
+            return values;
+        }
+        
         //
         public final long lower;
         public final long upper;

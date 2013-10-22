@@ -122,6 +122,8 @@ public class ClientAckRequesterTask implements DelayedTask {
                         rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
                         rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+
+                        rc.outboundDeliveredHandler.processAcknowledgements(message.getAcknowledgementData());
                     } else {
                         LOGGER.severe(LocalizationMessages.WSRM_1120_RESPONSE_NOT_IDENTIFIED_AS_PROTOCOL_MESSAGE());
                     }

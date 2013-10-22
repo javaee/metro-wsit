@@ -142,35 +142,48 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         private void invokeOutboundDeliveredTrueIfRequestAcked() {
-            Packet requestPacket = request.getPacket();
-            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
+            String seqId = request.getSequenceId();
+            long messageNumber = request.getMessageNumber();
+            OutboundDelivered outboundDelivered = retrieveOutboundDelivered(seqId, messageNumber);
 
             if (outboundDelivered != null) {
-                long messageNumber = request.getMessageNumber();
-                Sequence outboundSequence = rc.sequenceManager().getOutboundSequence(request.getSequenceId());
+                Sequence outboundSequence = rc.sequenceManager().getOutboundSequence(seqId);
                 boolean isRequestAcked = outboundSequence.isAcknowledged(messageNumber);
                 if (isRequestAcked) {
-                    //TODO change it to FINE later
-                    if (LOGGER.isLoggable(Level.INFO)) {
-                        LOGGER.info("Invoking outboundDelivered.setDelivered(true) for " +
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.fine("Invoking outboundDelivered.setDelivered(true) for " +
                                 "seq id:"+outboundSequence.getId()+" and " +
                                 "message number:"+messageNumber);
                     }
                     outboundDelivered.setDelivered(Boolean.TRUE);
+                    rc.outboundDeliveredHandler.remove(seqId, messageNumber);
+                } else {
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.fine("isRequestAcked found false, cannot invoke outboundDelivered.setDelivered(true)");
+                    }
                 }
             }
         }
 
         private void invokeOutboundDeliveredFalse() {
-            Packet requestPacket = request.getPacket();
-            OutboundDelivered outboundDelivered = requestPacket.getSatellite(OutboundDelivered.class);
+            String seqId = request.getSequenceId();
+            long messageNumber = request.getMessageNumber();
+            OutboundDelivered outboundDelivered = retrieveOutboundDelivered(seqId, messageNumber);
             if (outboundDelivered != null) {
-                //TODO change it to FINE later
-                if (LOGGER.isLoggable(Level.INFO)) {
-                    LOGGER.info("Invoking outboundDelivered.setDelivered(false)");
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine("Invoking outboundDelivered.setDelivered(false)");
                 }
                 outboundDelivered.setDelivered(Boolean.FALSE);
+                rc.outboundDeliveredHandler.remove(seqId, messageNumber);
             }
+        }
+
+        private OutboundDelivered retrieveOutboundDelivered(String seqId, long messageNumber) {
+            OutboundDelivered outboundDelivered = rc.outboundDeliveredHandler.retrieve(seqId, messageNumber);
+            if (outboundDelivered == null && LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("Could not get OutboundDelivered from OutboundDeliveredHandler");
+            }
+            return outboundDelivered;
         }
     }
 
@@ -196,6 +209,19 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             rc.sourceMessageHandler.attachAcknowledgementInfo(message);
 
             Packet outboundPacketCopy = message.getPacket().copy(true);
+
+            OutboundDelivered outboundDelivered =
+                    outboundPacketCopy.getSatellite(OutboundDelivered.class);
+            if (outboundDelivered != null) {
+                String seqId = message.getSequenceId();
+                long msgNumber = message.getMessageNumber();
+                rc.outboundDeliveredHandler.store(seqId, msgNumber, outboundDelivered);
+                outboundPacketCopy.removeSatellite(outboundDelivered);
+            } else {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine("OutboundDelivered satellite property was not found");
+                }
+            }
 
             rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
             rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
