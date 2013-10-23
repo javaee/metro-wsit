@@ -227,7 +227,9 @@ else
     echo "Metro: $METRO_URL\n" >> $ALL
 fi
 
-for QL_TEST_PROFILE in "test_gd_security" "all"
+#see https://java.net/jira/browse/GLASSFISH-20839
+#for QL_TEST_PROFILE in "test_gd_security" "all"
+for QL_TEST_PROFILE in "all"
 do
     export QL_RESULTS_DIR=$RESULTS_DIR/quick_look-$QL_TEST_PROFILE
     ./quicklook.sh -p $QL_TEST_PROFILE
