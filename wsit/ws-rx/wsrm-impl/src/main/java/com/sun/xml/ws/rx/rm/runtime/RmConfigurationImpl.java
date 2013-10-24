@@ -40,12 +40,12 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -53,11 +53,13 @@ import org.glassfish.gmbal.ManagedObjectManager;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration {
-    private final ReliableMessagingFeature rmFeature;
+    private final com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature rmFeature;
+    private final com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature internalRmFeature;
     private final RmRuntimeVersion runtimeVersion;
 
     RmConfigurationImpl(
-            final ReliableMessagingFeature rmFeature,
+            final com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature rmFeature,
+            final com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature internalRmFeature,
             final MakeConnectionSupportedFeature mcSupportedFeature,
             final SOAPVersion soapVersion,
             final AddressingVersion addressingVersion,
@@ -74,19 +76,21 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
                 haProvider);
 
         this.rmFeature = rmFeature;
+        this.internalRmFeature = internalRmFeature;
         this.runtimeVersion = (rmFeature != null) ? RmRuntimeVersion.forProtocolVersion(rmFeature.getProtocolVersion()) : null;
     }
 
-
-    public ReliableMessagingFeature getRmFeature() {
+    public com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature getRmFeature() {
         checkState();
-
         return rmFeature;
+    }
+    
+    public @Nullable com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature getInternalRmFeature() {
+        return internalRmFeature;
     }
 
     public RmRuntimeVersion getRuntimeVersion() {
         checkState();
-
         return runtimeVersion;
     }
 
@@ -95,11 +99,12 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
             throw new IllegalStateException("Reliable messaging feature is not enabled");
         }
     }
-
+    
     @Override
     public String toString() {
         return "RmConfigurationImpl" + 
                 "{\nrmFeature=" + rmFeature + 
+                "{\ninternalRmFeature=" + internalRmFeature + 
                 ",\nruntimeVersion=" + runtimeVersion + 
                 "\n}";
     }

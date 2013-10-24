@@ -41,14 +41,13 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public interface RmConfiguration extends RxConfiguration {
-    public ReliableMessagingFeature getRmFeature();
-
+    public com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature getRmFeature();
+    public com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature getInternalRmFeature();
     public RmRuntimeVersion getRuntimeVersion();
 }

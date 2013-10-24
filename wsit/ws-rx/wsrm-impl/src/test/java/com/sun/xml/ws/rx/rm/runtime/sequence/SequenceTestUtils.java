@@ -99,6 +99,12 @@ final class SequenceTestUtils  {
                 return RmRuntimeVersion.WSRM200702;
             }
 
+            @Override
+            public com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature getInternalRmFeature() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
        };
     }
 

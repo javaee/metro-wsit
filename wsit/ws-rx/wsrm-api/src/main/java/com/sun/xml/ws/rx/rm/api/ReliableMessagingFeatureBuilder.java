@@ -72,12 +72,6 @@ public final class ReliableMessagingFeatureBuilder {
     //
     private boolean offerElementGenerationDisabled = DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED;
 
-    private boolean rejectOutOfOrderMessagesEnabled = DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES;
-    private boolean stateUpdateOnReceivedAckRequestedDisabled = DEFAULT_STATE_UPDATE_ON_RECEIVED_ACKREQUESTED_DISABLED;
-
-    private boolean distributedTXForServerRMDEnabled = DEFAULT_XA_TX_FOR_SERVER_RMD;
-    private int distributedTXForServerRMDTimeoutInSeconds = DEFAULT_XA_TX_FOR_SERVER_RMD_TIMEOUT_SECONDS;
-
     public ReliableMessagingFeatureBuilder(RmProtocolVersion version) {
         this.protocolVersion = version;
     }
@@ -101,11 +95,7 @@ public final class ReliableMessagingFeatureBuilder {
                 this.persistenceEnabled,
                 this.sequenceMaintenancePeriod,
                 this.maxConcurrentSessions,
-                this.offerElementGenerationDisabled,
-                this.rejectOutOfOrderMessagesEnabled,
-                this.stateUpdateOnReceivedAckRequestedDisabled,
-                this.distributedTXForServerRMDEnabled,
-                this.distributedTXForServerRMDTimeoutInSeconds);
+                this.offerElementGenerationDisabled);
     }
 
     /**
@@ -250,42 +240,6 @@ public final class ReliableMessagingFeatureBuilder {
     public ReliableMessagingFeatureBuilder disableOfferElementGeneration() {
         this.offerElementGenerationDisabled = true;
 
-        return this;
-    }
-
-    /**
-     * @see ReliableMessagingFeature#isRejectOutOfOrderMessagesEnabled()
-     */
-    public ReliableMessagingFeatureBuilder rejectOutOfOrderMessages() {
-        this.rejectOutOfOrderMessagesEnabled = true;
-
-        return this;
-    }
-
-    /**
-     * @see ReliableMessagingFeature#isStateUpdateOnReceivedAckRequestedDisabled()
-     */
-    public ReliableMessagingFeatureBuilder disableStateUpdateOnReceivedAckRequested() {
-        this.stateUpdateOnReceivedAckRequestedDisabled = true;
-
-        return this;
-    }
-
-    /**
-     * @see ReliableMessagingFeature#isDistributedTXForServerRMDEnabled()
-     */
-    public ReliableMessagingFeatureBuilder enableDistributedTXForServerRMD() {
-        this.distributedTXForServerRMDEnabled = true;
-        
-        return this;
-    }
-
-    /**
-     * @see ReliableMessagingFeature#getDistributedTXForServerRMDTimeoutInSeconds()
-     */
-    public ReliableMessagingFeatureBuilder distributedTXForServerRMDTimeoutInSeconds(int seconds) {
-        this.distributedTXForServerRMDTimeoutInSeconds = seconds;
-        
         return this;
     }
 }

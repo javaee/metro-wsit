@@ -9,7 +9,7 @@
 
    Name="oracle/no_reliable_messaging_internal_api_policy"
    orawsp:attachTo="binding.any"
-   orawsp:category="wsrm"
+   orawsp:category="wsconfig"
    orawsp:description="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/no_reliable_messaging_internal_api_policy_PolyDescKey"
    orawsp:displayName="i18n:oracle.wsm.resources.policydescription.PolicyDescriptionBundle_oracle/no_reliable_messaging_internal_api_policy_PolyDispNameKey"
    orawsp:local-optimization="on"
@@ -71,7 +71,7 @@
      xmlns:ows="http://com.oracle.webservices/"
      orawsp:Enforced="true"
      orawsp:Silent="true"
-     orawsp:category="wsrm/reliable_messaging_internal_api"
+     orawsp:category="wsconfig/reliable_messaging_internal_api"
      orawsp:name="No Reliable Messaging Internal Api"
 
      ows:feature-classname="com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature"

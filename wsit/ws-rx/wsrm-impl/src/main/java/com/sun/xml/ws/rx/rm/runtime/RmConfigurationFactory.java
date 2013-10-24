@@ -75,7 +75,8 @@ public enum RmConfigurationFactory {
     private RmConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
 
         return new RmConfigurationImpl(
-                binding.getFeature(ReliableMessagingFeature.class),
+                binding.getFeature(com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.class),
+                binding.getFeature(com.oracle.webservices.oracle_internal_api.rm.ReliableMessagingFeature.class),
                 binding.getFeature(MakeConnectionSupportedFeature.class),
                 binding.getSOAPVersion(),
                 binding.getAddressingVersion(),

@@ -206,11 +206,11 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
             rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
-            boolean useTXConfigEnabled = rc.configuration.getRmFeature().isDistributedTXForServerRMDEnabled();
+            boolean useTXConfigEnabled = (rc.configuration.getInternalRmFeature() != null);
             if (useTXConfigEnabled) {
                 boolean canBegin = rc.transactionHandler.canBegin();
                 if (canBegin) {
-                    int txTimeout = getTransactionTimeout();
+                    int txTimeout = rc.configuration.getInternalRmFeature().getUserTransactionTimeout();
                     rc.transactionHandler.begin(txTimeout);
 
                     TransactionPropertySet ps = new TransactionPropertySet();
@@ -257,25 +257,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
             HaContext.clear();
             LOGGER.exiting();
         }
-    }
-
-    private int getTransactionTimeout() {
-        int txTimeout = -1;
-        //TODO System property is temporary.
-        String txTimeoutString = 
-                System.getProperty("metro.rm.server.rmd.tx.timeout.seconds");
-        if (txTimeoutString != null && !txTimeoutString.isEmpty()) {
-            try {
-                txTimeout = Integer.parseInt(txTimeoutString);
-            } catch (NumberFormatException e) {
-                // Ignore
-            }
-        }
-
-        if (txTimeout == -1) {
-            txTimeout = rc.configuration.getRmFeature().getDistributedTXForServerRMDTimeoutInSeconds();
-        }
-        return txTimeout;
     }
 
     @Override
@@ -566,8 +547,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
     private Packet handleAckRequestedAction(Packet request) { // TODO move packet creation processing to protocol handler
         //when true, RM_SEQUENCES DB table row contention is avoided when handling AckRequested
-        boolean noStateUpdate = rc.configuration.getRmFeature().isStateUpdateOnReceivedAckRequestedDisabled();
-        
+        boolean noStateUpdate = (rc.configuration.getInternalRmFeature() != null);
+
         AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(request.getMessage());
         rc.destinationMessageHandler.processAcknowledgements(ackData, noStateUpdate);
 
