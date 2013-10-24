@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.oracle.webservices.oracle_internal_api.rm.OutboundDelivered;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
@@ -59,9 +60,12 @@ import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.*;
+import com.sun.xml.ws.rx.rm.runtime.LocalIDManager.BoundMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
+import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InMemoryLocalIDManager;
+import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.JDBCLocalIDManager;
 import com.sun.xml.ws.rx.rm.runtime.transaction.TransactionException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -69,6 +73,8 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -92,6 +98,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private final WSEndpointReference rmSourceReference;
     //
     private volatile VolatileReference<String> outboundSequenceId;
+    
+    private volatile VolatileReference<Set<String>> persistedLocalIDs;
+    
+    private volatile VolatileReference<LocalIDManager> localIDManager;
 
     ClientTube(ClientTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -99,12 +109,16 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         this.rmSourceReference = original.rmSourceReference;
         this.outboundSequenceId = original.outboundSequenceId;
+        this.persistedLocalIDs = original.persistedLocalIDs;
+        this.localIDManager = original.localIDManager;
     }
 
     ClientTube(RmConfiguration configuration, ClientTubelineAssemblyContext context) throws RxRuntimeException {
         super(context.getTubelineHead()); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
 
         this.outboundSequenceId = new VolatileReference<String>(null);
+        this.persistedLocalIDs = new VolatileReference<Set<String>>(null);
+        this.localIDManager = new VolatileReference<LocalIDManager>(null);
 
         // the legacy way of getting the scInitiator, works for Metro SC impl
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
@@ -168,6 +182,12 @@ final class ClientTube extends AbstractFilterTubeImpl {
         } else {
             this.rmSourceReference = configuration.getAddressingVersion().anonymousEpr;
         }
+        
+        if (configuration.getRmFeature().isPersistenceEnabled()) {
+            localIDManager.value = new JDBCLocalIDManager();
+        } else {
+            localIDManager.value = InMemoryLocalIDManager.getInstance();
+        }
     }
 
     @Override
@@ -197,6 +217,48 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 rc.sequenceManager().invalidateCache();
             }
 
+            // set up with LocalID in OutboundDelivered
+            String localID = null;
+            boolean existingLocalID = false;
+            boolean sendWithExistingSeqIdAndMsgNumber = false;
+            long outboundMessageNumber = 0;
+            OutboundDelivered outboundDelivered = request.getSatellite(OutboundDelivered.class);
+            if (outboundDelivered != null) {
+                localID = outboundDelivered.getMessageIdentity();
+                if (localID != null) {
+                    BoundMessage boundMessage = localIDManager.value.getBoundMessage(localID);
+                    if (boundMessage != null) {
+                        existingLocalID = true;
+
+                        boolean validSequence = false;
+                        try {
+                            Sequence existingSequence = rc.sequenceManager().getOutboundSequence(boundMessage.sequenceID);
+                            if (existingSequence != null) {
+                                if ( Sequence.State.CREATED.equals(existingSequence.getState())) {
+                                    validSequence = true;
+                                }
+                            }
+                        } catch (Throwable t) {
+                            // In case we have a problem, take it as the sequence it is looking for is invalid
+                        }
+                        
+                        if (validSequence) { 
+                            // use the existing localID to send message
+                            sendWithExistingSeqIdAndMsgNumber = true;
+                            outboundSequenceId.value = boundMessage.sequenceID;
+                            outboundMessageNumber = boundMessage.messageNumber;
+                        } else {
+                            InvalidSequenceException ex = new InvalidSequenceException(
+                                    "Refused to redeliver the message identified by localID ("+ localID +
+                                    ") because the bound sequence (" + boundMessage.sequenceID +
+                                    ") is not in active state.", boundMessage.sequenceID);
+                            LOGGER.logSevereException(ex);
+                            return doThrow(ex);
+                        }
+                    }
+                }
+            }
+
             try {
                 INIT_LOCK.lock();
                 if (outboundSequenceId.value == null) { // RM session not initialized yet - need to synchronize
@@ -207,13 +269,38 @@ final class ClientTube extends AbstractFilterTubeImpl {
             }
             assert outboundSequenceId != null;
 
-            final JaxwsApplicationMessage message = new JaxwsApplicationMessage(
-                    request,
-                    request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
-
-
-            rc.sourceMessageHandler.registerMessage(message, outboundSequenceId.value);
-
+            JaxwsApplicationMessage tempMessage;
+            if (!sendWithExistingSeqIdAndMsgNumber) {
+                tempMessage = new JaxwsApplicationMessage(
+                        request,
+                        request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+                rc.sourceMessageHandler.registerMessage(tempMessage, outboundSequenceId.value);
+            } else {
+                // create message with previous sequence id and message number
+                tempMessage = JaxwsApplicationMessage.newInstance(
+                        request,
+                        1,
+                        request.getMessage().getID(rc.addressingVersion, rc.soapVersion),
+                        null,
+                        outboundSequenceId.value,
+                        outboundMessageNumber);
+                // no need to persistence the message
+                
+                // set DestinationAddress 
+                rc.communicator.setDestinationAddressFrom(request); // set the actual destination endpoint from the first packed
+            }
+            final JaxwsApplicationMessage message = tempMessage;
+ 
+            if (localID != null && !existingLocalID) {
+                // persist the localID
+                localIDManager.value.createLocalID(localID, message.getSequenceId(), message.getMessageNumber());
+                // book keeping this localID for clean up 
+                if (persistedLocalIDs.value == null) {
+                    persistedLocalIDs.value = new HashSet<String>();
+                }
+                persistedLocalIDs.value.add(localID);
+            }
+            
             synchronized (message.getCorrelationId()) {
                 // this synchronization is needed so that all 3 operations occur before
                 // AbstractResponseHandler.getParentFiber() is invoked on the response thread
@@ -267,6 +354,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public void preDestroy() {
         LOGGER.entering();
         try {
+            cleanupPersistedLocalIDs();
             closeRmSession();
         } finally {
             try {
@@ -275,6 +363,12 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 super.preDestroy();
                 LOGGER.exiting();
             }
+        }
+    }
+    
+    private void cleanupPersistedLocalIDs() {
+        if (persistedLocalIDs.value != null) {
+            localIDManager.value.removeLocalIDs(persistedLocalIDs.value.iterator());
         }
     }
 

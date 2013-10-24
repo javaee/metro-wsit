@@ -151,6 +151,11 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
         return new JaxwsApplicationMessage(jaxwsMessage, initialResendCounterValue, correlationId, sequenceId, messageNumber);
     }
 
+    public static JaxwsApplicationMessage newInstance(@NotNull Packet packet, int initialResendCounterValue, @NotNull String correlationId, @NotNull String wsaAction, @NotNull String sequenceId, long messageNumber) {
+        SerializableMessage jaxwsMessage = new SerializableMessage(packet, wsaAction);
+        return new JaxwsApplicationMessage(jaxwsMessage, initialResendCounterValue, correlationId, sequenceId, messageNumber);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("JAX-WS Application Message { ");
