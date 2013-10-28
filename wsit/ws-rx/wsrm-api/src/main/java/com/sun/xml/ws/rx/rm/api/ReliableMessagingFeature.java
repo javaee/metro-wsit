@@ -360,7 +360,10 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     private final long maxConcurrentSessions;
     //
     private final boolean offerElementGenerationDisabled;
-    
+    //Do not retain out-of-order messages waiting for 'gap'
+    //message(s) to arrive
+    private final boolean rejectOutOfOrderMessagesEnabled;
+
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
      */
@@ -390,7 +393,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 false, // this.persistenceEnabled
                 DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD,
                 DEFAULT_MAX_CONCURRENT_SESSIONS,
-                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
+                DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES);
     }
 
     @FeatureConstructor({
@@ -438,7 +442,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 persistenceEnabled, // this.persistenceEnabled
                 sequenceManagerMaintenancePeriod,
                 maxConcurrentSessions,
-                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED,
+                DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES);
     }
 
     ReliableMessagingFeature(
@@ -459,7 +464,8 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
             boolean persistenceEnabled,
             long sequenceManagerMaintenancePeriod,
             long maxConcurrentRmSessions,
-            boolean offerElementGenerationDisabled) {
+            boolean offerElementGenerationDisabled,
+            boolean rejectOutOfOrderMessagesEnabled) {
 
         super.enabled = enabled;
         this.version = version;
@@ -479,6 +485,7 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
         this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
         this.maxConcurrentSessions = maxConcurrentRmSessions;
         this.offerElementGenerationDisabled = offerElementGenerationDisabled;
+        this.rejectOutOfOrderMessagesEnabled = rejectOutOfOrderMessagesEnabled;
     }
 
     @Override
@@ -758,6 +765,15 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
         return offerElementGenerationDisabled;
     }
 
+    /**
+     * Specifies whether RMD should reject out-of-order messages that it receives.
+     *
+     * @return {@code true} if RMD should reject out-of-order messages. Default is false.
+     */
+    public boolean isRejectOutOfOrderMessagesEnabled() {
+        return rejectOutOfOrderMessagesEnabled;
+    }
+
     @Override
     public String toString() {
         return "ReliableMessagingFeature" +
@@ -778,6 +794,7 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
                 ",\n\tsequenceManagerMaintenancePeriod=" + sequenceManagerMaintenancePeriod + 
                 ",\n\tmaxConcurrentSessions=" + maxConcurrentSessions + 
                 ",\n\tofferElementGenerationDisabled=" + offerElementGenerationDisabled + 
+                ",\n\trejectOutOfOrderMessagesEnabled=" + rejectOutOfOrderMessagesEnabled +
                 "\n}";
     }
 }

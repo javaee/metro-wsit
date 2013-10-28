@@ -71,6 +71,8 @@ public final class ReliableMessagingFeatureBuilder {
     private long maxConcurrentSessions = DEFAULT_MAX_CONCURRENT_SESSIONS;
     //
     private boolean offerElementGenerationDisabled = DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED;
+    
+    private boolean rejectOutOfOrderMessagesEnabled = DEFAULT_REJECT_OUT_OF_ORDER_MESSAGES;
 
     public ReliableMessagingFeatureBuilder(RmProtocolVersion version) {
         this.protocolVersion = version;
@@ -95,7 +97,8 @@ public final class ReliableMessagingFeatureBuilder {
                 this.persistenceEnabled,
                 this.sequenceMaintenancePeriod,
                 this.maxConcurrentSessions,
-                this.offerElementGenerationDisabled);
+                this.offerElementGenerationDisabled,
+                this.rejectOutOfOrderMessagesEnabled);
     }
 
     /**
@@ -240,6 +243,14 @@ public final class ReliableMessagingFeatureBuilder {
     public ReliableMessagingFeatureBuilder disableOfferElementGeneration() {
         this.offerElementGenerationDisabled = true;
 
+        return this;
+    }
+
+    /**
+     * @see ReliableMessagingFeature#isRejectOutOfOrderMessagesEnabled()
+     */
+    public ReliableMessagingFeatureBuilder rejectOutOfOrderMessages() {
+        this.rejectOutOfOrderMessagesEnabled = true;
         return this;
     }
 }

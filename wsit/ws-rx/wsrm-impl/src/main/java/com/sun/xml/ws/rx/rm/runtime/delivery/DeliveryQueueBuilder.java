@@ -77,7 +77,7 @@ public final class DeliveryQueueBuilder {
 
     public DeliveryQueue build() {
         if (configuration.getRmFeature().isOrderedDeliveryEnabled()) {
-            boolean rejectOutOfOrderMessages = (configuration.getInternalRmFeature() != null);
+            boolean rejectOutOfOrderMessages = configuration.getRmFeature().isRejectOutOfOrderMessagesEnabled();
             return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, configuration.getRmFeature().getDestinationBufferQuota(), rejectOutOfOrderMessages);
         } else {
             return new SimpleDeliveryQueue(postman, deliveryCallback);
