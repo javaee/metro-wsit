@@ -56,6 +56,7 @@ CREATE TABLE RM_LOCALIDS (
 LOCAL_ID VARCHAR(512) NOT NULL,
 SEQ_ID VARCHAR(256) NOT NULL,
 MSG_NUMBER BIGINT NOT NULL,
+CREATE_TIME BIGINT,
 PRIMARY KEY (LOCAL_ID)
 );
  */
@@ -79,12 +80,13 @@ public class JDBCLocalIDManager implements LocalIDManager {
         try {
             ps = cm.prepareStatement(con, 
                     "INSERT INTO " + TABLE_NAME + 
-                    " (LOCAL_ID, SEQ_ID, MSG_NUMBER)" +
-                    " VALUES (?, ?, ?)");
+                    " (LOCAL_ID, SEQ_ID, MSG_NUMBER, CREATE_TIME)" +
+                    " VALUES (?, ?, ?, ?)");
 
             ps.setString(1, localID); 
             ps.setString(2, sequenceID);
             ps.setLong(3, messageNumber);
+            ps.setLong(4, System.currentTimeMillis()); 
 
             int rowCount = ps.executeUpdate();
             if (rowCount != 1) {

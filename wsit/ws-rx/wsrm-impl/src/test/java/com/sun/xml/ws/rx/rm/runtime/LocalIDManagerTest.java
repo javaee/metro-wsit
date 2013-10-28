@@ -122,7 +122,7 @@ public class LocalIDManagerTest extends TestCase {
         dbInstance.execute(
                 "CREATE TABLE RM_LOCALIDS (LOCAL_ID VARCHAR(512) NOT NULL,"+
                 "SEQ_ID VARCHAR(256) NOT NULL, MSG_NUMBER BIGINT NOT NULL,"+
-                "PRIMARY KEY (LOCAL_ID))");
+                "CREATE_TIME BIGINT, PRIMARY KEY (LOCAL_ID))");
     }
 
     public void tearDown() {
