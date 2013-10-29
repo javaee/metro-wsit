@@ -54,6 +54,7 @@ import com.sun.xml.ws.runtime.dev.Session;
 import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmSecurityException;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
@@ -206,8 +207,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
             rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
-            boolean useTXConfigEnabled = (rc.configuration.getInternalRmFeature() != null);
-            if (useTXConfigEnabled) {
+            boolean txConfigEnabled = isTransactionConfigEnabled();
+            if (txConfigEnabled) {
                 boolean canBegin = rc.transactionHandler.canBegin();
                 if (canBegin) {
                     int txTimeout = rc.configuration.getInternalRmFeature().getUserTransactionTimeout();
@@ -219,7 +220,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 } else {
                     if (LOGGER.isLoggable(Level.WARNING)) {
                         //TODO i18n
-                        LOGGER.warning("Found isDistributedTXForServerRMDEnabled() true but could not "
+                        LOGGER.warning("Config asked to begin the transaction but could not "
                                 + "begin transaction. Existing transaction found.");
                     }
                 }
@@ -617,5 +618,19 @@ public class ServerTube extends AbstractFilterTubeImpl {
         } else {
             return expiryDuration + rc.sequenceManager().currentTimeInMillis();
         }
+    }
+
+    /**
+     * Is distributed TX required that makes delivery to the application layer and
+     * recording that fact one unit? This is to avoid duplicate delivery to the
+     * application layer when a duplicate request comes in.
+     */
+    private boolean isTransactionConfigEnabled() {
+        boolean internalRmFeatureFound = (rc.configuration.getInternalRmFeature() != null);
+        DeliveryAssurance deliveryAssurance = rc.configuration.getRmFeature().getDeliveryAssurance();
+        boolean atMostOnce = deliveryAssurance.equals(DeliveryAssurance.AT_MOST_ONCE);
+        boolean exactlyOnce = deliveryAssurance.equals(DeliveryAssurance.EXACTLY_ONCE);
+        boolean noDupQoS = (atMostOnce || exactlyOnce);
+        return internalRmFeatureFound && noDupQoS;
     }
 }
