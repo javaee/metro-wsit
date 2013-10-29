@@ -626,11 +626,11 @@ public class ServerTube extends AbstractFilterTubeImpl {
      * application layer when a duplicate request comes in.
      */
     private boolean isTransactionConfigEnabled() {
-        boolean internalRmFeatureFound = (rc.configuration.getInternalRmFeature() != null);
+        boolean internalRmFeatureExists = (rc.configuration.getInternalRmFeature() != null);
         DeliveryAssurance deliveryAssurance = rc.configuration.getRmFeature().getDeliveryAssurance();
-        boolean atMostOnce = deliveryAssurance.equals(DeliveryAssurance.AT_MOST_ONCE);
-        boolean exactlyOnce = deliveryAssurance.equals(DeliveryAssurance.EXACTLY_ONCE);
-        boolean noDupQoS = (atMostOnce || exactlyOnce);
-        return internalRmFeatureFound && noDupQoS;
+        boolean noDupQoS = 
+                (deliveryAssurance.equals(DeliveryAssurance.EXACTLY_ONCE) ||
+                        deliveryAssurance.equals(DeliveryAssurance.AT_MOST_ONCE));
+        return internalRmFeatureExists && noDupQoS;
     }
 }

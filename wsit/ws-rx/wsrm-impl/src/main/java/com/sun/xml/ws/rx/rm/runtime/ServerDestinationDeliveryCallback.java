@@ -94,8 +94,12 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                  */
                 String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
                 if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
-                    //TODO Do below only if it was not already done using InboundAccepted
-                    rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
+                    //mark request as acknowledged here if InboundAcceptedImpl is not in use
+                    //internalRmFeatureExists means InboundAcceptedImpl is in use
+                    boolean internalRmFeatureExists = (rc.configuration.getInternalRmFeature() != null);
+                    if (!internalRmFeatureExists) {
+                        rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
+                    }
                 } else {
                     /**
                      * Private contract between Metro RM and Sun JavaCAPS (BPM) team
@@ -162,10 +166,14 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
-        //TODO Decide if InboundAccepted should be added conditionally
-        InboundAccepted inboundAccepted = new InboundAcceptedImpl(message, rc);
         Packet request = message.getPacket().copy(true);
-        request.addSatellite(inboundAccepted);
+
+        boolean internalRmFeatureExists = (rc.configuration.getInternalRmFeature() != null);
+        if (internalRmFeatureExists) {
+            InboundAccepted inboundAccepted = new InboundAcceptedImpl(message, rc);
+            request.addSatellite(inboundAccepted);
+        }
+
         rc.communicator.sendAsync(request, responseCallback, null);
     }
     
