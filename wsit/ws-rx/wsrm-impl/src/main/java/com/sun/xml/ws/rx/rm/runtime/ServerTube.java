@@ -225,9 +225,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     }
                 }
             }
-
+            
+            boolean persistenceEnabled = rc.configuration.getRmFeature().isPersistenceEnabled();
             try {
-                rc.destinationMessageHandler.registerMessage(message);
+                rc.destinationMessageHandler.registerMessage(message, !persistenceEnabled);
             } catch (DuplicateMessageRegistrationException ex) {
                 if (LOGGER.isLoggable(Level.FINE)) {
                     LOGGER.fine(LocalizationMessages.WSRM_1145_DUPLICATE_MSG_NUMBER_RECEIVED(

@@ -87,7 +87,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                     }
 
                     if (message.getSequenceId() != null) { //two-way
-                        rc.destinationMessageHandler.registerMessage(message);
+                        boolean persistenceEnabled = rc.configuration.getRmFeature().isPersistenceEnabled();
+                        rc.destinationMessageHandler.registerMessage(message, !persistenceEnabled);
                         rc.destinationMessageHandler.putToDeliveryQueue(message); //resuming parent fiber there
                     } else { //one-way response likely with empty soap body but with ack header
                         resumeParentFiber(response);

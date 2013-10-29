@@ -76,13 +76,13 @@ class DestinationMessageHandler implements MessageHandler {
     }
 
     /**
-     * Registers incomming message with the given inbound sequence and
+     * Registers incoming message with the given inbound sequence and
      * processes any acknowledgement information that the message carries.
      *
      * Once the message is registered and ack information processed, the message
      * is placed into a delivery queue and delivery callback is invoked
      */
-    public void registerMessage(@NotNull ApplicationMessage inMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException, WsrmRequiredException {
+    public void registerMessage(@NotNull ApplicationMessage inMessage, boolean storeMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException, WsrmRequiredException {
         assert sequenceManager != null;
         assert inMessage != null;
 
@@ -92,9 +92,8 @@ class DestinationMessageHandler implements MessageHandler {
         }
         final Sequence inboundSequence = sequenceManager.getInboundSequence(inboundSequenceId);
         
-
         // register and possibly store message in the unacked message sequence queue
-        inboundSequence.registerMessage(inMessage, true); // TODO this may not be always needed in case of AtMostOnce delivery
+        inboundSequence.registerMessage(inMessage, storeMessage);
 
         inboundSequence.setAckRequestedFlag(); // simulate acknowledgement request for new each message
     }

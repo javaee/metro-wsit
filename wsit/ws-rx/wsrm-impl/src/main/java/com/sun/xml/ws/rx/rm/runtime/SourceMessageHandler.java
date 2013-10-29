@@ -79,13 +79,16 @@ class SourceMessageHandler implements MessageHandler {
      *
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
-    public void registerMessage(@NotNull ApplicationMessage outMessage, @NotNull String outboundSequenceId) throws DuplicateMessageRegistrationException, UnknownSequenceException {
+    public void registerMessage(@NotNull ApplicationMessage outMessage,
+            @NotNull String outboundSequenceId, boolean storeMessage)
+            throws DuplicateMessageRegistrationException,
+            UnknownSequenceException {
         assert sequenceManager != null;
         assert outMessage != null;
         assert outboundSequenceId != null;
 
         final Sequence outboundSequence = sequenceManager.getOutboundSequence(outboundSequenceId);
-        outboundSequence.registerMessage(outMessage, true); // TODO it may not be needed to store message if AtMostOnce delivery
+        outboundSequence.registerMessage(outMessage, storeMessage);
     }
 
     /**

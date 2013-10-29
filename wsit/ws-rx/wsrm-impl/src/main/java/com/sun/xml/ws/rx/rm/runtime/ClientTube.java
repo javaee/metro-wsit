@@ -274,7 +274,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 tempMessage = new JaxwsApplicationMessage(
                         request,
                         request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
-                rc.sourceMessageHandler.registerMessage(tempMessage, outboundSequenceId.value);
+                boolean persistenceEnabled = rc.configuration.getRmFeature().isPersistenceEnabled();
+                rc.sourceMessageHandler.registerMessage(tempMessage,
+                        outboundSequenceId.value, !persistenceEnabled);
             } else {
                 // create message with previous sequence id and message number
                 tempMessage = JaxwsApplicationMessage.newInstance(

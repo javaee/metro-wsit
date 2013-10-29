@@ -126,9 +126,13 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
                     resumeParentFiber(response);
                 } else {
-                    //two-way, response is stored as part of registerMessage to support replay
-                    JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
-                    rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
+                    //two-way, response message itself (bytes) is stored as part of registerMessage
+                    //to support Microsoft replay
+                    JaxwsApplicationMessage message =
+                            new JaxwsApplicationMessage(response, getCorrelationId());
+                    rc.sourceMessageHandler.registerMessage(message,
+                            rc.getBoundSequenceId(request.getSequenceId()),
+                            true);
                     rc.sourceMessageHandler.putToDeliveryQueue(message);
                 }
 
