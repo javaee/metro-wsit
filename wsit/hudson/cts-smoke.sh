@@ -177,6 +177,8 @@ if [ ! -z "$MAIL_HOST" ]; then
     sed -in 's/mailuser1=/mailuser1='"$MAIL_USER@$MAIL_HOST"'/g' ts.jte
     echo "CTS mailHost: $MAIL_HOST"
     sed -in 's/mailHost=/mailHost='"$MAIL_HOST"'/g' ts.jte
+    echo "CTS javamail.password: $MAIL_PWD"
+    sed -in 's/javamail.password=/javamail.password='"$MAIL_PWD"'/g' ts.jte
 fi
 
 echo "CTS report.dir: $Y"
