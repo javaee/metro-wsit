@@ -180,10 +180,10 @@ if [ ! -z "$MAIL_HOST" ]; then
 fi
 
 echo "CTS report.dir: $Y"
-sed -in 's/report.dir=\/files\/JTReport/report.dir='"$Y"'/g' ts.jte
+sed -in 's/report.dir=\/tmp\/JTReport/report.dir='"$Y"'/g' ts.jte
 
 echo "CTS work.dir: /tmp/JTWork"
-sed -in 's/work.dir=\/files\/JTWork/work.dir=\/tmp\/JTWork/g' ts.jte
+sed -in 's/work.dir=\/tmp\/JTWork/work.dir=\/tmp\/JTWork/g' ts.jte
 
 popd
 
