@@ -57,11 +57,11 @@ LOCAL_ID VARCHAR(512) NOT NULL,
 SEQ_ID VARCHAR(256) NOT NULL,
 MSG_NUMBER BIGINT NOT NULL,
 CREATE_TIME BIGINT,
+SEQ_TERMINATE_TIME BIGINT,
 PRIMARY KEY (LOCAL_ID)
 );
  */
 public class JDBCLocalIDManager implements LocalIDManager {
-    private final static String TABLE_NAME = "RM_LOCALIDS";
     private final static Logger LOGGER = Logger.getLogger(JDBCLocalIDManager.class);
     private ConnectionManager cm;
 
@@ -79,9 +79,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, 
-                    "INSERT INTO " + TABLE_NAME + 
-                    " (LOCAL_ID, SEQ_ID, MSG_NUMBER, CREATE_TIME)" +
-                    " VALUES (?, ?, ?, ?)");
+                    "INSERT INTO RM_LOCALIDS (LOCAL_ID, SEQ_ID, MSG_NUMBER, CREATE_TIME) VALUES (?, ?, ?, ?)");
 
             ps.setString(1, localID); 
             ps.setString(2, sequenceID);
@@ -127,8 +125,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "DELETE FROM "  + TABLE_NAME +
-                    " WHERE LOCAL_ID IN (" + ids + ")");
+            ps = cm.prepareStatement(con, "DELETE FROM RM_LOCALIDS WHERE LOCAL_ID IN (" + ids + ")");
 
             ps.executeUpdate();
 
@@ -148,15 +145,17 @@ public class JDBCLocalIDManager implements LocalIDManager {
         Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT SEQ_ID, MSG_NUMBER FROM " + TABLE_NAME + 
-                    " WHERE LOCAL_ID=?");
+            ps = cm.prepareStatement(con, "SELECT SEQ_ID, MSG_NUMBER, CREATE_TIME, SEQ_TERMINATE_TIME FROM RM_LOCALIDS WHERE LOCAL_ID=?");
 
             ps.setString(1, localID);
 
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                result = new BoundMessage(rs.getString("SEQ_ID"), rs.getLong("MSG_NUMBER"));
+                result = new BoundMessage(rs.getString("SEQ_ID"), 
+                        rs.getLong("MSG_NUMBER"), 
+                        rs.getLong("CREATE_TIME"), 
+                        rs.getLong("SEQ_TERMINATE_TIME"));
             }
 
             cm.commit(con);
@@ -168,5 +167,28 @@ public class JDBCLocalIDManager implements LocalIDManager {
             cm.recycle(con);
         }
         return result; 
+    }
+
+    public void markSequenceTermination(String sequenceID) {
+        Connection con = cm.getConnection();
+        PreparedStatement ps = null;
+        try {
+            ps = cm.prepareStatement(con, 
+                    "UPDATE RM_LOCALIDS SET SEQ_TERMINATE_TIME=? WHERE SEQ_ID=?");
+
+            ps.setLong(1, System.currentTimeMillis()); 
+            ps.setString(2, sequenceID);
+
+            ps.executeUpdate();
+
+            cm.commit(con);
+        } catch (final Throwable ex) {
+            cm.rollback(con);
+            LOGGER.warning("Failed to mark sequence termination in RM_LOCALIDS table due to error: "
+                    + ex.getMessage());
+        } finally {
+            cm.recycle(ps);
+            cm.recycle(con);
+        }
     }
 }

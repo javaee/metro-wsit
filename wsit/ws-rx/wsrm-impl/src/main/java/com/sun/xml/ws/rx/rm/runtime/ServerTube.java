@@ -154,7 +154,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 inboundQueueBuilder,
                 outboundQueueBuilder,
                 configuration,
-                context.getEndpoint().getContainer());
+                context.getEndpoint().getContainer(),
+                null);
 
         this.rc.setSequenceManager(sequenceManager);
         

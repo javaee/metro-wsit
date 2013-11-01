@@ -45,6 +45,7 @@ import com.sun.xml.ws.commons.AbstractMOMRegistrationAware;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.LocalIDManager;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
@@ -118,10 +119,13 @@ public final class PersistentSequenceManager extends AbstractMOMRegistrationAwar
      */
     private volatile boolean disposed = false;
 
-    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration, Container container) {
+    private final LocalIDManager localIDManager;
+
+    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration, Container container, final LocalIDManager localIDManager) {
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
+        this.localIDManager = localIDManager;
 
         this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
 
@@ -464,6 +468,12 @@ public final class PersistentSequenceManager extends AbstractMOMRegistrationAwar
                         PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
                         if (boundSequences.containsKey(sequence.getId())) {
                             boundSequences.remove(sequence.getId());
+                        }
+                        
+                        if (localIDManager != null) {
+                            // In RM_LOCALIDS table, mark all the LocalIDs tied with sequence as terminated
+                            // In future, consider add some config/logic to purege those long been terminated
+                            localIDManager.markSequenceTermination(sequence.getId());
                         }
                     } else if (shouldTeminate(sequence)) {
                         LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));

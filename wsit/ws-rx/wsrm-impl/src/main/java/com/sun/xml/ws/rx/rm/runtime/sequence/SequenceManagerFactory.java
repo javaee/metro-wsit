@@ -43,6 +43,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.commons.WSEndpointCollectionBasedMOMListener;
+import com.sun.xml.ws.rx.rm.runtime.LocalIDManager;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
@@ -83,13 +84,13 @@ public enum SequenceManagerFactory {
      * @param managedObjectManager object manager managing the newly created {@link SequenceManager} instance
      * @return newly created {@link SequenceManager} instance
      */
-    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container) {
+    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container, LocalIDManager localIDManager) {
         synchronized (INSTANCE) {
             SequenceManager result;
             if (persistent) {
-                result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container);
+                result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container, localIDManager);
             } else {
-                result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container);
+                result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration, container, localIDManager);
             }
             
             ManagedObjectManager mom = configuration.getManagedObjectManager();

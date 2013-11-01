@@ -52,6 +52,7 @@ import com.sun.xml.ws.rx.ha.HighlyAvailableMap;
 import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.LocalIDManager;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
@@ -137,13 +138,16 @@ public final class InVmSequenceManager extends AbstractMOMRegistrationAware impl
     private final AtomicBoolean disposed = new AtomicBoolean(false);
     //
     private final String loggerProlog;
+    
+    private final LocalIDManager localIDManager;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container) {
+    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration, Container container, LocalIDManager localIDManager) {
         this.loggerProlog = "[" + uniqueEndpointId + "_SEQUENCE_MANAGER]: ";
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
+        this.localIDManager = localIDManager;
 
         this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
 
@@ -481,6 +485,10 @@ public final class InVmSequenceManager extends AbstractMOMRegistrationAware impl
 
                         if (boundSequences.containsKey(sequence.getId())) {
                             boundSequences.remove(sequence.getId());
+                        }
+                        
+                        if (localIDManager != null) {
+                            localIDManager.markSequenceTermination(sequence.getId());
                         }
                     } else if (shouldTeminate(sequence)) {
                         LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));

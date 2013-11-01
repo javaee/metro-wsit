@@ -46,16 +46,27 @@ public interface LocalIDManager {
     abstract void createLocalID(String localID, String sequenceID, long messageNumber); 
     abstract void removeLocalIDs(Iterator<String> localIDs); 
     abstract BoundMessage getBoundMessage(String localID);
+    /**
+     * Mark all the localIDs associated the specified sequenceID terminated
+     * @param sequenceID
+     */
+    abstract void markSequenceTermination(String sequenceID);
     public class BoundMessage {
         final public String sequenceID;
         final public long messageNumber;
-        public BoundMessage(String sequenceID, long messageNumber) {
+        final public long createTime;
+        final public long seqTerminateTime;
+        public BoundMessage(String sequenceID, long messageNumber, long createTime, long seqTerminateTime) {
             this.sequenceID = sequenceID;
             this.messageNumber = messageNumber;
+            this.createTime = createTime;
+            this.seqTerminateTime = seqTerminateTime;
         }
         public String toString() {
-            return "LocalID BoundMessage [sequenceID=" + sequenceID
-                    + ", messageNumber=" + messageNumber + "]";
+            return "BoundMessage [sequenceID=" + sequenceID
+                    + ", messageNumber=" + messageNumber + ", createTime="
+                    + createTime + ", seqTerminateTime=" + seqTerminateTime
+                    + "]";
         }
     }
 }

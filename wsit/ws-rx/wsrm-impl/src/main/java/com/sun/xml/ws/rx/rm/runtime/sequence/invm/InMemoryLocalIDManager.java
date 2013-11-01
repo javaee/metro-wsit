@@ -46,27 +46,40 @@ import java.util.Map;
 
 import com.sun.xml.ws.rx.rm.runtime.LocalIDManager;
 
-/**
- * Extremely simple map-based LocalIDManager.  
- * Unlikely to be used.
- * TODO use Glassfish HA API
- */
 public class InMemoryLocalIDManager implements LocalIDManager {
-    private Map<String, BoundMessage> ids = new HashMap<String, BoundMessage>();
+    private Map<String, BoundMessage> store = new HashMap<String, BoundMessage>();
     private InMemoryLocalIDManager() {
     }
     public void createLocalID(String localID, String sequenceID, long messageNumber) {
-        ids.put(localID, new BoundMessage(sequenceID, messageNumber));
+        //System.out.println("--- creating LocalID: "+localID);
+        store.put(localID, new BoundMessage(sequenceID, messageNumber, System.currentTimeMillis(), 0));
+        //System.out.println("------ LocalID Manager content: "+store);
     }
     public void removeLocalIDs(Iterator<String> localIDs) {
+        //System.out.println("--- removing LocalID: "+localIDs);
         if (localIDs != null) {
             while (localIDs.hasNext()) {
-                ids.remove(localIDs.next());
+                store.remove(localIDs.next());
             }
         }
+        //System.out.println("------ LocalID Manager content: "+store);
     }
     public BoundMessage getBoundMessage(String localID) {
-        return ids.get(localID);
+        return store.get(localID);
+    }
+    public void markSequenceTermination(String sequenceID) {
+        //System.out.println("--- seq termination: "+sequenceID);
+        for (String localID : store.keySet()) {
+            BoundMessage msg = store.get(localID);
+            if (sequenceID.equals(msg.sequenceID)) {
+                BoundMessage updatedMsg = new BoundMessage(msg.sequenceID, 
+                        msg.messageNumber, 
+                        msg.createTime, 
+                        System.currentTimeMillis());
+                store.put(localID, updatedMsg);
+            }
+        }
+        //System.out.println("------ LocalID Manager content: "+store);
     }
     private static LocalIDManager instance = new InMemoryLocalIDManager();
     public static LocalIDManager getInstance() {

@@ -122,7 +122,7 @@ public class LocalIDManagerTest extends TestCase {
         dbInstance.execute(
                 "CREATE TABLE RM_LOCALIDS (LOCAL_ID VARCHAR(512) NOT NULL,"+
                 "SEQ_ID VARCHAR(256) NOT NULL, MSG_NUMBER BIGINT NOT NULL,"+
-                "CREATE_TIME BIGINT, PRIMARY KEY (LOCAL_ID))");
+                "CREATE_TIME BIGINT, SEQ_TERMINATE_TIME BIGINT, PRIMARY KEY (LOCAL_ID))");
     }
 
     public void tearDown() {
@@ -141,6 +141,7 @@ public class LocalIDManagerTest extends TestCase {
     }
     
     private void runTest(LocalIDManager mgr) throws Exception {
+        // test createLocalID
         mgr.createLocalID("localid1", "seq1", 1);
         validateLocalID(mgr.getBoundMessage("localid1"), "seq1", 1);
 
@@ -150,6 +151,7 @@ public class LocalIDManagerTest extends TestCase {
         validateLocalID(mgr.getBoundMessage("localid2"), "seq2", 2);
         validateLocalID(mgr.getBoundMessage("localid3"), "seq3", 3);
         
+        // test removeLocalIDs
         List<String> toRemove = new ArrayList<String>();
         mgr.removeLocalIDs(toRemove.iterator());
         validateLocalID(mgr.getBoundMessage("localid1"), "seq1", 1);
@@ -176,12 +178,38 @@ public class LocalIDManagerTest extends TestCase {
         assertNull(mgr.getBoundMessage("localid1"));
         assertNull(mgr.getBoundMessage("localid2"));
         assertNull(mgr.getBoundMessage("localid3"));
+        
+        // test markSequenceRemoval
+        mgr.createLocalID("localida", "testSequence", 1);
+        mgr.createLocalID("localidb", "testSequence", 2);
+        validateLocalID(mgr.getBoundMessage("localida"), "testSequence", 1);
+        validateLocalID(mgr.getBoundMessage("localidb"), "testSequence", 2);
+        mgr.markSequenceTermination("testSequence");
+        validateLocalID(mgr.getBoundMessage("localida"), "testSequence", 1, true);
+        validateLocalID(mgr.getBoundMessage("localidb"), "testSequence", 2, true);
     }
     
-    private void validateLocalID(BoundMessage boundMessage, String expectedSequenceID, long expectedMessageNumber) {
+    private void validateLocalID(BoundMessage boundMessage, 
+            String expectedSequenceID, 
+            long expectedMessageNumber) {
+        validateLocalID(boundMessage, expectedSequenceID, expectedMessageNumber, false);
+    }
+    
+    private void validateLocalID(BoundMessage boundMessage, 
+            String expectedSequenceID, 
+            long expectedMessageNumber,
+            boolean terminated) {
         System.out.println(boundMessage);
         assertEquals(expectedSequenceID, boundMessage.sequenceID);
         assertEquals(expectedMessageNumber, boundMessage.messageNumber);
+        assertTrue(boundMessage.createTime > 0);
+        assertTrue(boundMessage.createTime <= System.currentTimeMillis());
+        if (terminated) {
+            assertTrue(boundMessage.seqTerminateTime > 0);
+            assertTrue(boundMessage.seqTerminateTime <= System.currentTimeMillis());
+        } else {
+            assertEquals(0, boundMessage.seqTerminateTime);
+        }
     }
 
 }

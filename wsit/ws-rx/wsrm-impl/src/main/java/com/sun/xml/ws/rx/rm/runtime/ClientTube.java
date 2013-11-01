@@ -99,7 +99,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     //
     private volatile VolatileReference<String> outboundSequenceId;
     
-    private volatile VolatileReference<Set<String>> persistedLocalIDs;
+    private volatile VolatileReference<Set<String>> processedLocalIDs;
     
     private volatile VolatileReference<LocalIDManager> localIDManager;
 
@@ -109,7 +109,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         this.rmSourceReference = original.rmSourceReference;
         this.outboundSequenceId = original.outboundSequenceId;
-        this.persistedLocalIDs = original.persistedLocalIDs;
+        this.processedLocalIDs = original.processedLocalIDs;
         this.localIDManager = original.localIDManager;
     }
 
@@ -117,7 +117,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         super(context.getTubelineHead()); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
 
         this.outboundSequenceId = new VolatileReference<String>(null);
-        this.persistedLocalIDs = new VolatileReference<Set<String>>(null);
+        this.processedLocalIDs = new VolatileReference<Set<String>>(null);
         this.localIDManager = new VolatileReference<LocalIDManager>(null);
 
         // the legacy way of getting the scInitiator, works for Metro SC impl
@@ -163,13 +163,20 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     new ClientDestinationDeliveryCallback(rc));
         }
 
+        if (configuration.getRmFeature().isPersistenceEnabled()) {
+            localIDManager.value = new JDBCLocalIDManager();
+        } else {
+            localIDManager.value = InMemoryLocalIDManager.getInstance();
+        }
+
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
                 configuration.getRmFeature().isPersistenceEnabled(),
                 context.getAddress().getURI().toString(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
                 rc.configuration,
-                context.getContainer());
+                context.getContainer(),
+                localIDManager.value);
         rc.setSequenceManager(sequenceManager);
 
         // TODO P3 we should also take into account addressable clients
@@ -181,12 +188,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
             wsmcRuntimeProvider.registerProtocolMessageHandler(createRmProtocolMessageHandler(rc));
         } else {
             this.rmSourceReference = configuration.getAddressingVersion().anonymousEpr;
-        }
-        
-        if (configuration.getRmFeature().isPersistenceEnabled()) {
-            localIDManager.value = new JDBCLocalIDManager();
-        } else {
-            localIDManager.value = InMemoryLocalIDManager.getInstance();
         }
     }
 
@@ -293,14 +294,16 @@ final class ClientTube extends AbstractFilterTubeImpl {
             }
             final JaxwsApplicationMessage message = tempMessage;
  
-            if (localID != null && !existingLocalID) {
-                // persist the localID
-                localIDManager.value.createLocalID(localID, message.getSequenceId(), message.getMessageNumber());
-                // book keeping this localID for clean up 
-                if (persistedLocalIDs.value == null) {
-                    persistedLocalIDs.value = new HashSet<String>();
+            if (localID != null) {
+                // persist the localID if it is a new one
+                if (!existingLocalID) {
+                    localIDManager.value.createLocalID(localID, message.getSequenceId(), message.getMessageNumber());
                 }
-                persistedLocalIDs.value.add(localID);
+                // book keeping this localID for clean up 
+                if (processedLocalIDs.value == null) {
+                    processedLocalIDs.value = new HashSet<String>();
+                }
+                processedLocalIDs.value.add(localID);
             }
             
             synchronized (message.getCorrelationId()) {
@@ -369,8 +372,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
     
     private void cleanupPersistedLocalIDs() {
-        if (persistedLocalIDs.value != null) {
-            localIDManager.value.removeLocalIDs(persistedLocalIDs.value.iterator());
+        if (processedLocalIDs.value != null) {
+            localIDManager.value.removeLocalIDs(processedLocalIDs.value.iterator());
         }
     }
 
