@@ -207,7 +207,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         if (rc.transactionHandler.userTransactionAvailable()
                 && rc.transactionHandler.transactionExists()) {
-            String errorMessage = "ClientTube message processing cannot be part of a distributed transaction.";
+            String errorMessage = LocalizationMessages.WSRM_5002_CLIENTTUBE_PROCESSING_CANNNOT_HAVE_TRANSACTION();
             LOGGER.severe(errorMessage);
             throw new TransactionException(errorMessage);
         }

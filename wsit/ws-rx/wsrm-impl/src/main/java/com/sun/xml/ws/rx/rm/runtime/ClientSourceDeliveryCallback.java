@@ -82,8 +82,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
                     if (rc.configuration.getRuntimeVersion().protocolVersion.isFault(message.getWsaAction())) {
                         // TODO handle RM faults
-                        // TODO i18n
-                        LOGGER.severe("Received WS-RM fault response: "+message.getWsaAction());
+                        LOGGER.severe(LocalizationMessages.WSRM_5003_RECEIVED_WSRM_FAULT_RESPONSE(message.getWsaAction()));
                     }
 
                     if (message.getSequenceId() != null) { //two-way

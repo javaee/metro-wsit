@@ -150,7 +150,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
             resumeParentFiber(error);
         }
     }
-    
+
     private static final Logger LOGGER = Logger.getLogger(ServerDestinationDeliveryCallback.class);
     private final RuntimeContext rc;
 

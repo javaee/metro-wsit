@@ -220,9 +220,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     message.getPacket().addSatellite(ps);
                 } else {
                     if (LOGGER.isLoggable(Level.WARNING)) {
-                        //TODO i18n
-                        LOGGER.warning("Config asked to begin the transaction but could not "
-                                + "begin transaction. Existing transaction found.");
+                        LOGGER.warning(LocalizationMessages.WSRM_5001_COULD_NOT_BEGIN_TRANSACTION());
                     }
                 }
             }

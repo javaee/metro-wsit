@@ -142,10 +142,8 @@ final class ConnectionManager {
                     getUserTransaction().setRollbackOnly();
                 }
             } catch (IllegalStateException ise) {
-                //TODO i18n
                 LOGGER.warning("Was not able to mark distributed transaction for rollback", ise);
             } catch (SystemException se) {
-                //TODO i18n
                 LOGGER.warning("Was not able to mark distributed transaction for rollback", se);
             }
         } else {
@@ -179,7 +177,6 @@ final class ConnectionManager {
                 status = userTransaction.getStatus();
             }
         } catch (SystemException se) {
-            //TODO i18n
             LOGGER.warning("Not able to determine if distributed transaction is in use", se);
         }
 
