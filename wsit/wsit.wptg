@@ -1,0 +1,16 @@
+#
+#
+# Metro Translation Files (Metro is used in FMW Web Services).
+#
+#  Date         Author          Comments
+#  11-20-2013   Uday Joshi      Added Metro RM file entry for translation
+#
+#
+
+#****************** Metro Files ****************** 
+
+Contact: uday.joshi@oracle.com
+
+Languages: Std_Admin
+wsit/ws-rx/wsrm-impl/src/main/resources/com/sun/xml/ws/rx/rm/localization
+                Localization%j.properties
