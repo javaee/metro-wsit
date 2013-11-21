@@ -12,5 +12,5 @@
 Contact: uday.joshi@oracle.com
 
 Languages: Std_Admin
-wsit/ws-rx/wsrm-impl/src/main/resources/com/sun/xml/ws/rx/rm/localization
+ws-rx/wsrm-impl/src/main/resources/com/sun/xml/ws/rx/rm/localization
                 Localization%j.properties
