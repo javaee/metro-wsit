@@ -352,21 +352,26 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private Packet processProtocolMessage(Packet request, String wsaAction) throws AbstractSoapFaultException {
+        Packet responsePacket = null;
+        
         if (rc.rmVersion.protocolVersion.createSequenceAction.equals(wsaAction)) {
-            return handleCreateSequenceAction(request);
+            responsePacket = handleCreateSequenceAction(request);
         } else if (rc.rmVersion.protocolVersion.closeSequenceAction.equals(wsaAction)) {
-            return handleCloseSequenceAction(request);
+            responsePacket = handleCloseSequenceAction(request);
         } else if (rc.rmVersion.protocolVersion.terminateSequenceAction.equals(wsaAction)) {
-            return handleTerminateSequenceAction(request);
+            responsePacket = handleTerminateSequenceAction(request);
         } else if (rc.rmVersion.protocolVersion.ackRequestedAction.equals(wsaAction)) {
-            return handleAckRequestedAction(request);
+            responsePacket = handleAckRequestedAction(request);
         } else if (rc.rmVersion.protocolVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
-            return handleSequenceAcknowledgementAction(request);
+            responsePacket = handleSequenceAcknowledgementAction(request);
         } else if (rc.rmVersion.protocolVersion.terminateSequenceResponseAction.equals(wsaAction)) {
-            return handleTerminateSequenceResponseAction(request);
+            responsePacket = handleTerminateSequenceResponseAction(request);
         } else {
             throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(wsaAction)));
         }
+        
+        responsePacket.setIsProtocolMessage();
+        return responsePacket;
     }
 
     private Packet handleCreateSequenceAction(Packet request) throws CreateSequenceRefusedFault {

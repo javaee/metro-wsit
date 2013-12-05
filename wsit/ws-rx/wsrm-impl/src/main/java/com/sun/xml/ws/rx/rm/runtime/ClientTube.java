@@ -433,6 +433,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
                     CloseSequenceResponseData responseData = responseBuilder.build();
                     Packet responsePacket = rc.protocolHandler.toPacket(responseData, protocolMessagePacket, true);
+                    responsePacket.setIsProtocolMessage();
                     rc.communicator.sendAsync(responsePacket, null);
                 } catch (UnknownSequenceException ex) {
                     LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(requestData.getSequenceId()), ex);
@@ -450,6 +451,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
                     TerminateSequenceResponseData tsrData = TerminateSequenceResponseData.getBuilder(requestData.getSequenceId()).build();
                     Packet tsrPacket = rc.protocolHandler.toPacket(tsrData, protocolMessagePacket, true);
+                    tsrPacket.setIsProtocolMessage();
                     rc.communicator.sendAsync(tsrPacket, null);
                 } catch (UnknownSequenceException ex) {
                     LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(requestData.getSequenceId()), ex);
@@ -539,6 +541,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         CreateSequenceData requestData = csBuilder.build();
         Packet request = rc.protocolHandler.toPacket(requestData, null);
+        request.setIsProtocolMessage();
 
         Packet response = sendSessionControlMessage(messageName, request);
         CreateSequenceResponseData responseData = rc.protocolHandler.
@@ -594,7 +597,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-
+        request.setIsProtocolMessage();
         final String messageName = "CloseSequence";
         final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.WARNING);
 
@@ -640,7 +643,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-
+        request.setIsProtocolMessage();
         final String messageName = "TerminateSequence";
         final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.FINE);
 
