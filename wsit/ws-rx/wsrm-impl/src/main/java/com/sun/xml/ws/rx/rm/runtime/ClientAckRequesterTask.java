@@ -98,6 +98,10 @@ public class ClientAckRequesterTask implements DelayedTask {
     private void requestAcknowledgement() {
         Packet request = rc.communicator.createEmptyRequestPacket(rc.rmVersion.protocolVersion.ackRequestedAction, true);
         request.setIsProtocolMessage();
+        if (rc.getUserStateID() != null) {
+            request.setUserStateId(rc.getUserStateID());
+        }
+
         JaxwsApplicationMessage requestMessage = new JaxwsApplicationMessage(
                 request,
                 request.getMessage().getID(rc.addressingVersion, rc.soapVersion));

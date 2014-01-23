@@ -138,6 +138,13 @@ public final class RuntimeContext {
     public final TransactionHandler transactionHandler;
     public final OutboundDeliveredHandler outboundDeliveredHandler;
 
+    // It is used to retain user supplied information that needs to be
+    // propagated with every RM message including protocol messages.
+    // It is used only on the client side. It is optional (may never be set).
+    // It can get reset with every application client request message
+    // but last value is considered current and is propagated.
+    private volatile String userStateID;
+
     @SuppressWarnings("LeakingThisInConstructor")
     private RuntimeContext(
             RmConfiguration configuration,
@@ -198,5 +205,14 @@ public final class RuntimeContext {
 
         this.sourceMessageHandler.setSequenceManager(newValue);
         this.destinationMessageHandler.setSequenceManager(newValue);
+    }
+
+    public String getUserStateID() {
+        return userStateID;
+    }
+
+    public void setUserStateID(String userStateId) {
+        assert userStateId != null && userStateId.length() <= 256;
+        userStateID = userStateId;
     }
 }

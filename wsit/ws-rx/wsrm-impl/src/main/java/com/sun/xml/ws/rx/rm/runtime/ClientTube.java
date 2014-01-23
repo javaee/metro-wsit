@@ -218,6 +218,11 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 rc.sequenceManager().invalidateCache();
             }
 
+            String userStateId = request.getUserStateId();
+            if(userStateId != null) {
+                rc.setUserStateID(userStateId);
+            }
+
             // set up with LocalID in OutboundDelivered
             String localID = null;
             boolean existingLocalID = false;
@@ -243,7 +248,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                             // In case we have a problem, take it as the sequence it is looking for is invalid
                         }
                         
-                        if (validSequence) { 
+                        if (validSequence) {
                             // use the existing localID to send message
                             sendWithExistingSeqIdAndMsgNumber = true;
                             outboundSequenceId.value = boundMessage.sequenceID;
@@ -542,6 +547,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
         CreateSequenceData requestData = csBuilder.build();
         Packet request = rc.protocolHandler.toPacket(requestData, null);
         request.setIsProtocolMessage();
+        if (rc.getUserStateID() != null) {
+            request.setUserStateId(rc.getUserStateID());
+        }
 
         Packet response = sendSessionControlMessage(messageName, request);
         CreateSequenceResponseData responseData = rc.protocolHandler.
@@ -598,6 +606,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
         request.setIsProtocolMessage();
+        if (rc.getUserStateID() != null) {
+            request.setUserStateId(rc.getUserStateID());
+        }
         final String messageName = "CloseSequence";
         final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.WARNING);
 
@@ -644,6 +655,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
         request.setIsProtocolMessage();
+        if (rc.getUserStateID() != null) {
+            request.setUserStateId(rc.getUserStateID());
+        }
+
         final String messageName = "TerminateSequence";
         final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.FINE);
 
