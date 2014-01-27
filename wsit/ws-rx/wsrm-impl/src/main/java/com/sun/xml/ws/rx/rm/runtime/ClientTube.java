@@ -704,7 +704,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1128_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS_REACHED(messageName));
             }
             try {
-                response = rc.communicator.send(request.copy(true));
+                Packet requestCopy = request.copy(true);
+                requestCopy.setIsProtocolMessage();
+                response = rc.communicator.send(requestCopy);
                 break;
             } catch (RuntimeException ex) {
                 if (!Utilities.isResendPossible(ex)) {
