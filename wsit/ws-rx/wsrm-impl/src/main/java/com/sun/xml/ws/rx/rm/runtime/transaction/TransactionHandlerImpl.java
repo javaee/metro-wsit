@@ -238,9 +238,11 @@ public class TransactionHandlerImpl implements TransactionHandler {
             userTransaction = (UserTransaction) initialContext
                     .lookup("java:comp/UserTransaction");
         } catch (final NamingException ne) {
-            //this is expected off server, just log a warning
-            String message = "Not able to lookup UserTransaction from InitialContext.";
-            LOGGER.warning(message, ne);
+            if(LOGGER.isLoggable(Level.FINE)) {
+                String message = "NamingException while looking up UserTransaction from InitialContext. "
+                        + "Which is expected off server.";
+                LOGGER.fine(message, ne);
+            }
         }
 
         return userTransaction;
