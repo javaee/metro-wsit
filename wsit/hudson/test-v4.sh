@@ -2,7 +2,7 @@
 #
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2012-2013 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2012-2014 Oracle and/or its affiliates. All rights reserved.
 #
 # The contents of this file are subject to the terms of either the GNU
 # General Public License Version 2 only ("GPL") or the Common Development
@@ -265,35 +265,35 @@ do
     fi
 done
 
-./devtests.sh
-mkdir -p $DEVTESTS_RESULTS_DIR
-pushd $DTEST_SVN_ROOT
-cp test_results.* $DEVTESTS_RESULTS_DIR
-pushd devtests/webservice
-cp webservice.output $DEVTESTS_RESULTS_DIR/webservice.output.txt
-cp count.txt $DEVTESTS_RESULTS_DIR
-popd
-popd
-cp $GF_WORK_DIR/glassfish4/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
-mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
-
-if [ "`grep 'Java Result: -1' $RESULTS_DIR/test-devtests.log.txt`" ]; then
-    #TODO: break the build after fixing appserv-tests/devtests/webservice/ejb_annotations/ejbwebservicesinwar-2
-    echo -e "\ndevtests tests: TODO - fix devtests/webservice/ejb_annotations/ejbwebservicesinwar-2" >> $ALL
-fi
-if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
-    echo -e "\ndevtests tests: OK\n" >> $ALL
-else
-    echo -e "\ndevtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
-    grep ": FAIL" $DEVTESTS_RESULTS_DIR/webservice.output.txt >> $ALL
-    cat $ALL
-#    exit 1
-fi
-if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then
-    echo "devtests tests: build failure" >> $ALL
-    cat $ALL
-#    exit 1
-fi
+#./devtests.sh
+#mkdir -p $DEVTESTS_RESULTS_DIR
+#pushd $DTEST_SVN_ROOT
+#cp test_results.* $DEVTESTS_RESULTS_DIR
+#pushd devtests/webservice
+#cp webservice.output $DEVTESTS_RESULTS_DIR/webservice.output.txt
+#cp count.txt $DEVTESTS_RESULTS_DIR
+#popd
+#popd
+#cp $GF_WORK_DIR/glassfish4/glassfish/domains/domain1/logs/server.log* $DEVTESTS_RESULTS_DIR
+#mv $WORK_DIR/test-devtests.log.txt $RESULTS_DIR
+#
+#if [ "`grep 'Java Result: -1' $RESULTS_DIR/test-devtests.log.txt`" ]; then
+#    #TODO: break the build after fixing appserv-tests/devtests/webservice/ejb_annotations/ejbwebservicesinwar-2
+#    echo -e "\ndevtests tests: TODO - fix devtests/webservice/ejb_annotations/ejbwebservicesinwar-2" >> $ALL
+#fi
+#if [ "`grep -E 'FAILED=( )+0' $DEVTESTS_RESULTS_DIR/count.txt`" ]; then
+#    echo -e "\ndevtests tests: OK\n" >> $ALL
+#else
+#    echo -e "\ndevtests tests: `awk '/FAILED=( )+/ { print $2 }' $DEVTESTS_RESULTS_DIR/count.txt` failure(s)" >> $ALL
+#    grep ": FAIL" $DEVTESTS_RESULTS_DIR/webservice.output.txt >> $ALL
+#    cat $ALL
+##    exit 1
+#fi
+#if [ "`grep 'BUILD FAILED' $RESULTS_DIR/test-devtests.log.txt`" ]; then
+#    echo "devtests tests: build failure" >> $ALL
+#    cat $ALL
+##    exit 1
+#fi
 
 ./cts-smoke.sh
 mkdir -p $CTS_RESULTS_DIR
