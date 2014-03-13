@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -86,7 +86,7 @@
     </developers>
 
     <properties>
-        <jaxws.ri.version>2.2.11-b140312.1832</jaxws.ri.version>
+        <jaxws.ri.version>2.2.10-b140312.1832</jaxws.ri.version>
         <jaxws.maven.plugin.version>2.3.1-b03</jaxws.maven.plugin.version>
     </properties>
         
