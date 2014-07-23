@@ -41,11 +41,10 @@
 
 source common.sh
 
-## GF-3.x
-GF_312_URL=http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2.zip
-METRO_MAJOR_VERSION=2.3.1
+METRO_MAJOR_VERSION=2.3.2
 
 export WORK_DIR=$WORKSPACE
+echo "WORK_DIR: $WORK_DIR"
 
 export GF_SVN_ROOT=$WORK_DIR/glassfish
 export DTEST_SVN_ROOT=$WORK_DIR/appserv-tests
@@ -83,6 +82,10 @@ if [ ! -z "$GF_URL" ]; then
     _wget $GF_URL
     export GF_ZIP=$WORK_DIR/${GF_URL##*/}
 fi
+
+echo "METRO_VERSION: $METRO_VERSION"
+echo "METRO_REVISION: $METRO_REVISION"
+echo "CTS_ZIP: $CTS_ZIP"
 
 METRO_BUNDLE="org/glassfish/metro/metro-standalone"
 if [ -z "$METRO_VERSION" ]; then
@@ -142,13 +145,13 @@ if [ -z "$METRO_URL" ]; then
         svn --non-interactive -q co -r $METRO_REVISION "$METRO_SVN_REPO" $METRO_SVN_ROOT
     fi
     pushd $METRO_SVN_ROOT
-    JAXB_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
+    JAXB_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -f metro-runtime/metro-runtime-api/pom.xml -Dincludes=com.sun.xml.bind:jaxb-impl | grep com.sun.xml.bind:jaxb-impl | tail -1 | cut -f4 -d':'`
     JAXB_API_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=javax.xml.bind:jaxb-api | grep javax.xml.bind:jaxb-api | tail -1 | cut -f4 -d':'`
     SOAP_API_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=javax.xml.soap:javax.xml.soap-api | grep javax.xml.soap:javax.xml.soap-api | tail -1 | cut -f4 -d':'`
     MIMEPULL_VERSION=`mvn -s $MVN_SETTINGS dependency:tree -Dincludes=org.jvnet.mimepull:mimepull | grep org.jvnet.mimepull:mimepull | tail -1 | cut -f4 -d':'`
     echo "Setting project version in sources to new promoted version $METRO_VERSION"
     #mvn versions:set -Pstaging -DnewVersion="$METRO_VERSION" -f boms/bom/pom.xml -s /net/bat-sca/repine/export2/hudson/tools/maven-3.0.3/settings-nexus.xml
-    ./hudson/changeVersion.sh 2.3.1-SNAPSHOT $METRO_VERSION pom.xml
+    ./hudson/changeVersion.sh $METRO_MAJOR_VERSION-SNAPSHOT $METRO_VERSION pom.xml
     popd
 
     pushd $GF_SVN_ROOT/appserver
