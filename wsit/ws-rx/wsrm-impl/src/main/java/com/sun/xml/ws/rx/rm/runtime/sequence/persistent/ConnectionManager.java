@@ -88,10 +88,16 @@ final class ConnectionManager {
 
     }
 
-    PreparedStatement prepareStatement(Connection sqlConnection, String sqlStatement) throws SQLException {
+    PreparedStatement prepareStatement(Connection sqlConnection, String sqlStatement, boolean isItForExecuteUpdate) throws SQLException {
         LOGGER.finer(String.format("Preparing SQL statement:\n%s", sqlStatement));
 
-        return sqlConnection.prepareStatement(sqlStatement, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        PreparedStatement resultPS;
+        if(isItForExecuteUpdate) {
+            resultPS = sqlConnection.prepareStatement(sqlStatement);//there is no ResultSet for executeUpdate
+        } else {
+            resultPS = sqlConnection.prepareStatement(sqlStatement, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        }
+        return resultPS;
     }
 
     void recycle(ResultSet... resources) {

@@ -79,7 +79,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, 
-                    "INSERT INTO RM_LOCALIDS (LOCAL_ID, SEQ_ID, MSG_NUMBER, CREATE_TIME) VALUES (?, ?, ?, ?)");
+                    "INSERT INTO RM_LOCALIDS (LOCAL_ID, SEQ_ID, MSG_NUMBER, CREATE_TIME) VALUES (?, ?, ?, ?)", true);
 
             ps.setString(1, localID); 
             ps.setString(2, sequenceID);
@@ -125,7 +125,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "DELETE FROM RM_LOCALIDS WHERE LOCAL_ID IN (" + ids + ")");
+            ps = cm.prepareStatement(con, "DELETE FROM RM_LOCALIDS WHERE LOCAL_ID IN (" + ids + ")", true);
 
             ps.executeUpdate();
 
@@ -145,7 +145,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT SEQ_ID, MSG_NUMBER, CREATE_TIME, SEQ_TERMINATE_TIME FROM RM_LOCALIDS WHERE LOCAL_ID=?");
+            ps = cm.prepareStatement(con, "SELECT SEQ_ID, MSG_NUMBER, CREATE_TIME, SEQ_TERMINATE_TIME FROM RM_LOCALIDS WHERE LOCAL_ID=?", false);
 
             ps.setString(1, localID);
 
@@ -174,7 +174,7 @@ public class JDBCLocalIDManager implements LocalIDManager {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, 
-                    "UPDATE RM_LOCALIDS SET SEQ_TERMINATE_TIME=? WHERE SEQ_ID=?");
+                    "UPDATE RM_LOCALIDS SET SEQ_TERMINATE_TIME=? WHERE SEQ_ID=?", true);
 
             ps.setLong(1, System.currentTimeMillis()); 
             ps.setString(2, sequenceID);

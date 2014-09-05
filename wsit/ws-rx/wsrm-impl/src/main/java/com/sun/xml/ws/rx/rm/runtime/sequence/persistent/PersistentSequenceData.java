@@ -205,7 +205,7 @@ final class PersistentSequenceData implements SequenceData {
             ps = cm.prepareStatement(con, "INSERT INTO RM_SEQUENCES " +
                     "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_NUMBER, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
                     "VALUES " +
-                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", true);
 
             int i = 0;
             ps.setString(++i, enpointUid); // ENDPOINT_UID VARCHAR(256) NOT NULL,
@@ -279,7 +279,7 @@ final class PersistentSequenceData implements SequenceData {
             ps = cm.prepareStatement(connection, "SELECT " +
                     "TYPE, EXP_TIME, BOUND_ID, STR_ID " +
                     "FROM RM_SEQUENCES " +
-                    "WHERE ENDPOINT_UID=? AND ID=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?", false);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -319,7 +319,7 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection();
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?");
+            ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?", true);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -331,7 +331,7 @@ final class PersistentSequenceData implements SequenceData {
 
             cm.recycle(ps);
 
-            ps = cm.prepareStatement(con, "DELETE FROM RM_SEQUENCES WHERE ENDPOINT_UID=? AND ID=?");
+            ps = cm.prepareStatement(con, "DELETE FROM RM_SEQUENCES WHERE ENDPOINT_UID=? AND ID=?", true);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -368,7 +368,7 @@ final class PersistentSequenceData implements SequenceData {
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
                     "BOUND_ID=? " +
-                    "WHERE ENDPOINT_UID=? AND ID=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?", true);
 
             ps.setString(1, boundSequenceId);
             ps.setString(2, endpointUid);
@@ -446,7 +446,7 @@ final class PersistentSequenceData implements SequenceData {
             ps = cm.prepareStatement(con, "SELECT " +
                     fi.columnName + " " +
                     "FROM RM_SEQUENCES " +
-                    "WHERE ENDPOINT_UID=? AND ID=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?", false);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -515,7 +515,7 @@ final class PersistentSequenceData implements SequenceData {
 
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
                     fi.columnName + "=?" + lastActivityTimeUpdateString + " " +
-                    "WHERE ENDPOINT_UID=? AND ID=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?", true);
 
             int i = 0;
             ps.setObject(++i, value, fi.sqlType);
@@ -603,7 +603,7 @@ final class PersistentSequenceData implements SequenceData {
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
                     "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1, " + fLastActivityTime.columnName + "=? " +
-                    "WHERE ENDPOINT_UID=? AND ID=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?", true);
 
             ps.setLong(1, ts.currentTimeInMillis());
             ps.setString(2, endpointUid);
@@ -655,7 +655,7 @@ final class PersistentSequenceData implements SequenceData {
     private boolean containsUnackedMessageNumberRegistration(Connection con, long messageNumber) throws PersistenceException {
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
+            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?", false);
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
             ps.setLong(3, messageNumber);
@@ -678,7 +678,7 @@ final class PersistentSequenceData implements SequenceData {
     private void registerSingleUnackedMessageNumber(Connection con, long messageNumber, boolean received) throws PersistenceException, DuplicateMessageRegistrationException {
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
+            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?", false);
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
             ps.setLong(3, messageNumber);
@@ -698,7 +698,7 @@ final class PersistentSequenceData implements SequenceData {
                 // insert
                 ps = cm.prepareStatement(con, "INSERT INTO RM_UNACKED_MESSAGES " +
                         "(ENDPOINT_UID, SEQ_ID, MSG_NUMBER, IS_RECEIVED) " +
-                        "VALUES (?, ?, ?, ?)");
+                        "VALUES (?, ?, ?, ?)", true);
                 ps.setString(1, endpointUid);
                 ps.setString(2, sequenceId);
                 ps.setLong(3, messageNumber);
@@ -717,7 +717,7 @@ final class PersistentSequenceData implements SequenceData {
             } else {
                 ps = cm.prepareStatement(con, "UPDATE RM_UNACKED_MESSAGES SET " +
                         "IS_RECEIVED=? " +
-                        "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=? AND IS_RECEIVED=?");
+                        "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=? AND IS_RECEIVED=?", true);
                 ps.setString(1, b2s(received));
                 ps.setString(2, endpointUid);
                 ps.setString(3, sequenceId);
@@ -792,7 +792,7 @@ final class PersistentSequenceData implements SequenceData {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES " +
-                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?", true);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -842,7 +842,7 @@ final class PersistentSequenceData implements SequenceData {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT MSG_NUMBER FROM RM_UNACKED_MESSAGES " +
-                    "WHERE ENDPOINT_UID=? AND SEQ_ID=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=?", false);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -877,7 +877,7 @@ final class PersistentSequenceData implements SequenceData {
                     "FROM RM_UNACKED_MESSAGES " +
                     "INNER JOIN RM_SEQUENCES ON " +
                     "RM_UNACKED_MESSAGES.ENDPOINT_UID=RM_SEQUENCES.ENDPOINT_UID AND RM_UNACKED_MESSAGES.SEQ_ID=RM_SEQUENCES.ID " +
-                    "WHERE RM_UNACKED_MESSAGES.ENDPOINT_UID=? AND SEQ_ID=?");
+                    "WHERE RM_UNACKED_MESSAGES.ENDPOINT_UID=? AND SEQ_ID=?", false);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
@@ -919,7 +919,7 @@ final class PersistentSequenceData implements SequenceData {
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_UNACKED_MESSAGES SET " +
                     "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, WSA_ACTION=?, MSG_DATA=? " +
-                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?", true);
 
             int i = 0;
 
@@ -982,7 +982,7 @@ final class PersistentSequenceData implements SequenceData {
         InputStream messageDataStream = null;
         try {
             ps = cm.prepareStatement(con, "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, WSA_ACTION, MSG_DATA FROM RM_UNACKED_MESSAGES " +
-                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND CORRELATION_ID=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND CORRELATION_ID=?", false);
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
