@@ -491,10 +491,10 @@
                 <plugin>
                     <groupId>org.glassfish.build</groupId>
                     <artifactId>gfnexus-maven-plugin</artifactId>
-                    <version>0.18</version>
+                    <version>0.19</version>
                     <configuration>
-                        <nexusRepoUrl>https://maven.java.net/</nexusRepoUrl>
-                        <nexusRepoId>jvnet-nexus-staging</nexusRepoId>
+                        <nexusRepoUrl>https://maven.java.net/</nexusRepoUrl>
+                        <nexusRepoId>jvnet-nexus-staging</nexusRepoId>
                         <stagingRepos>
                             <stagingRepo>
                                 <ref>org.glassfish.metro:webservices-rt:${project.version}:jar</ref>
