@@ -61,7 +61,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <excludePackageNames>*.msv.*:xsdlib.*:*com.sun.xml.ws*:com.sun.tools.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*:*com.sun.istack.tools*</excludePackageNames>
+                    <excludePackageNames>*.msv.*:xsdlib.*:*com.sun.xml.ws*:com.sun.tools.*:com.sun.enterprise.*:java.*:isorelax.*:src.*:*javanet*:*test*:*ctc*:*glassfish*:*com.sun.istack.tools*:javax.xml.crypto.*:org.apache.xml.security.*:org.apache.jcp.xml.dsig.internal.*:org.apache.commons.*</excludePackageNames>
                 </configuration>
             </plugin>
             <plugin> <!-- want to unpack sources from individual modules -->
@@ -258,8 +258,8 @@
                                     com.sun.mail.util;resolution:=optional,
                                     com.sun.msv.*;resolution:=optional,
                                     com.sun.org.apache.xalan.internal.*;resolution:=optional,
-                                    com.sun.org.apache.xerces.internal.*;resolution:=optional,
                                     com.sun.org.apache.xml.internal.*;resolution:=optional,
+                                    com.sun.org.apache.xerces.internal.*;resolution:=optional,
                                     com.sun.xml.bind.api.impl;resolution:=optional,
                                     com.sun.xml.bind.serializer;resolution:=optional,
                                     com.sun.xml.bind.validator;resolution:=optional,
@@ -272,6 +272,10 @@
                                     javax.xml.ws.*;version=${jaxws-api.osgiVersion},
                                     javax.xml.bind.*;version=${jaxb-api.osgiVersion},
                                     org.apache.coyote;resolution:=optional,
+                                    javax.xml.crypto.*;resolution:=optional,
+                                    org.apache.xml.security.*;version=1.5.6,
+                                    org.apache.jcp.xml.dsig.internal.*;version=1.5.6,
+                                    org.apache.commons.logging;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
@@ -281,6 +285,7 @@
                                 <Private-Package>
                                     com.sun.xml.stream.*,
                                     com.sun.xml.xwss.*;version=${metro.osgiVersion},
+                                    com.sun.xml.util.*;version=${metro.osgiVersion};include="XMLCipherAdapter",
                                     javanet.staxutils.*
                                 </Private-Package>
                                 <DynamicImport-Package>
@@ -399,6 +404,15 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>sdo-eclipselink-plugin</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.2</version>
         </dependency>
     </dependencies>
     <properties>

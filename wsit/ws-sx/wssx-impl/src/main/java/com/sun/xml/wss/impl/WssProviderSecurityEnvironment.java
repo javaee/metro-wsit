@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -87,8 +87,8 @@ import javax.security.auth.callback.PasswordCallback;
 
 import javax.crypto.SecretKey;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.utils.Base64;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.SecurityEnvironment;
@@ -272,7 +272,7 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
            if (subject != null) {
               Set set = subject.getPrivateCredentials(X500PrivateCredential.class);
               if (set != null) {
-                 String issuerName =                                                                                     com.sun.org.apache.xml.internal.security.utils.
+                 String issuerName = org.apache.xml.security.utils.
                                 RFC2253Parser.normalize(
                                   cert.getIssuerDN().getName());
                  Iterator it = set.iterator();

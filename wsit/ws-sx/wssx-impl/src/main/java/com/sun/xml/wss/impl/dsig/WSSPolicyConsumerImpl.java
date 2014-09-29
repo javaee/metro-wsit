@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,19 +62,20 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.Parameter;
 import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
-
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
-
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
+
 import java.security.AccessController;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
+
 import javax.xml.crypto.URIDereferencer;
 import javax.xml.crypto.dsig.spec.ExcC14NParameterSpec;
+
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +86,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.xml.crypto.XMLStructure;
 import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -106,6 +108,7 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPException;
 import javax.xml.transform.dom.DOMSource;
+
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 
@@ -117,6 +120,7 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -137,7 +141,7 @@ import java.io.OutputStream;
 public class WSSPolicyConsumerImpl {
     private static Logger logger = Logger.getLogger(LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE,
             LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE);
-    public static final String defaultJSR105Provider = "org.jcp.xml.dsig.internal.dom.XMLDSigRI";
+    public static final String defaultJSR105Provider = "org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI";
     //public static final String ibmProvider ="com.ibm.xml.crypto.IBMXMLCryptoProvider";
 
     private String providerName = null;
@@ -155,10 +159,11 @@ public class WSSPolicyConsumerImpl {
         //since this code needs to compile with JDK5 and on JDK5
         // XMLSignatureFactory.getInstance().getProvider() would throw
         //NoSuchMechanismException: Mechanism type DOM not available
+    	  
+    	//Replace of jsr105 implementation with Apache XML Security 
         providerName = /*vendorIsIBM ? ibmProvider :*/
                 System.getProperty("jsr105Provider", defaultJSR105Provider);
         pMT = System.getProperty("jsr105MechanismType","DOM");
-        final Provider prov = Security.getProvider("XMLDSig");
 
         try {
             
@@ -179,18 +184,14 @@ public class WSSPolicyConsumerImpl {
             logger.log(Level.FINEST, "JSR 105 provider is : " + providerName);
             logger.log(Level.FINEST, "JSR 105 provider mechanism is : " + pMT);
         }
-
+        
         AccessController.doPrivileged(new java.security.PrivilegedAction<Object>() {
             public Object run() {
                 try {
-                    if (prov == null && provider != null) {
-                        Security.insertProviderAt(provider, 5);
-                    }
+                    Security.insertProviderAt(provider, 5);
                     Security.insertProviderAt(new WSSProvider(), 6);
                 } catch (SecurityException ex) {
-                    if (prov == null && provider != null) {
-                        Security.addProvider(provider);
-                    }
+                    Security.addProvider(provider);
                     Security.addProvider(new WSSProvider());
                 }
                 return null;

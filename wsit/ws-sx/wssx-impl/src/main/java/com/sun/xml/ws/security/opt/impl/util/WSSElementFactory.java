@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,10 @@
 
 package com.sun.xml.ws.security.opt.impl.util;
 
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
+import org.apache.xml.security.algorithms.JCEMapper;
+import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.c14n.implementations.CanonicalizerPhysical;
+import org.apache.xml.security.exceptions.AlgorithmAlreadyRegisteredException;
 
 import com.sun.xml.security.core.dsig.KeyInfoType;
 import com.sun.xml.security.core.dsig.TransformType;
@@ -49,7 +52,6 @@ import com.sun.xml.security.core.xenc.CipherReferenceType;
 import com.sun.xml.security.core.xenc.EncryptedDataType;
 import com.sun.xml.security.core.xenc.EncryptedKeyType;
 import com.sun.xml.security.core.xenc.EncryptionMethodType;
-
 import com.sun.xml.security.core.xenc.TransformsType;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
@@ -85,12 +87,15 @@ import java.util.Collections;
 
 import com.sun.xml.ws.security.opt.impl.outgoing.SecurityHeader;
 import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.crypto.Data;
 
 import com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.logging.LogDomainConstants;
+
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -107,9 +112,19 @@ public class WSSElementFactory {
         /**
          * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
-        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml");
+        System.setProperty("org.apache.xml.security.resource.config", "resource/config.xml");
         
-        com.sun.org.apache.xml.internal.security.Init.init();
+        org.apache.xml.security.Init.init();
+        
+        //workaround for: Apache XML Security 1.5.6 do not support Canonicalizer.ALGO_ID_C14N_PHYSICAL in file 'java/org/apache/xml/security/resource/config.xml'
+        try {
+          org.apache.xml.security.c14n.Canonicalizer.register(org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL, org.apache.xml.security.c14n.implementations.CanonicalizerPhysical.class.getName());
+        } catch (org.apache.xml.security.exceptions.AlgorithmAlreadyRegisteredException e){
+          //log.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+          //Do nothing, log info can cause some SQE test cases faile.
+        } catch (ClassNotFoundException e) {
+          log.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+        }
     }
     
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;

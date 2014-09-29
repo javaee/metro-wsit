@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,57 +38,43 @@
  * holder.
  */
 
-package com.sun.xml.wss.impl.resolver;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-import java.util.Vector;
-import java.util.Iterator;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
+package com.sun.xml.util;
 
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.AttachmentPart;
+import java.security.NoSuchAlgorithmException;
 
-import org.apache.xml.security.signature.XMLSignatureInput;
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
-public class AttachmentSignatureInput extends XMLSignatureInput {
-   private String _cType = null;
-   private Vector _mhs = new Vector();
+import org.apache.xml.security.algorithms.JCEMapper;
+import org.apache.xml.security.encryption.XMLCipher;
 
-   public AttachmentSignatureInput(byte[] input) { 
-       super(input);
-   }
+public class XMLCipherAdapter {
+  /**
+   * Construct an <code>Cipher</code> object. Some JDKs don't support RSA/ECB/OAEPPadding, so add an additional action.
+   * @param algorithm
+   * @return the Cipher
+   * @throws NoSuchPaddingException 
+   * @throws NoSuchAlgorithmException 
+  */
+  public static Cipher constructCipher(String algorithm)
+      throws  NoSuchPaddingException, NoSuchAlgorithmException {
+    String jceAlgorithm = JCEMapper.translateURItoJCEID(algorithm);
 
-   public void setMimeHeaders(Vector mimeHeaders) {
-       _mhs = mimeHeaders;
-   }
-
-   public Vector getMimeHeaders() {
-      return _mhs;
-   }
-
-   public void setContentType(String _cType) {
-       this._cType = _cType;
-   }
-
-   public String getContentType() {
-       return _cType;
-   }
-
-   @SuppressWarnings("unchecked")
-   public static final Object[] _getSignatureInput(AttachmentPart _part) throws SOAPException, IOException {
-       Iterator mhItr = _part.getAllMimeHeaders();
-
-       Vector mhs = new Vector();
-       while (mhItr.hasNext()) mhs.add(mhItr.next());        
-
-       // extract Content
-       //Object content = _part.getContent();
-       OutputStream baos = new ByteArrayOutputStream();  
-       _part.getDataHandler().writeTo(baos);          
-
-       return new Object[] {mhs, ((ByteArrayOutputStream)baos).toByteArray()};
-   }
+    Cipher cipher;
+    try {
+      cipher = Cipher.getInstance(jceAlgorithm);
+    } catch (NoSuchAlgorithmException nsae) {
+      if (XMLCipher.RSA_OAEP.equals(algorithm)) {
+          cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
+      } else {
+        throw nsae;
+      }
+    }
+    return cipher;
+  }
 }
-
-

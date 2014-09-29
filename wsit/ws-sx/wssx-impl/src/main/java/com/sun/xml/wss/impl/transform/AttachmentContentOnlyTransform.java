@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,9 +51,9 @@ import com.sun.xml.wss.impl.c14n.CanonicalizerFactory;
 
 import com.sun.xml.wss.impl.resolver.AttachmentSignatureInput;
 
-import com.sun.org.apache.xml.internal.security.transforms.TransformSpi;
-import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput; 
-import com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+import org.apache.xml.security.transforms.TransformSpi;
+import org.apache.xml.security.signature.XMLSignatureInput; 
+import org.apache.xml.security.transforms.TransformationException;
 
 public class AttachmentContentOnlyTransform extends TransformSpi {
 

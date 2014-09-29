@@ -96,8 +96,8 @@
             <artifactId>jaxws-rt</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>jsr105-impl</artifactId>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>

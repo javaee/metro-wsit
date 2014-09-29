@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -104,7 +104,7 @@ public class DSigResolver implements URIDereferencer{
     private static Logger logger = Logger.getLogger (LogDomainConstants.IMPL_SIGNATURE_DOMAIN,
             LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE);
     
-    private String optNSClassName = "org.jcp.xml.dsig.internal.dom.DOMSubTreeData";
+    private String optNSClassName = "org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData";
     private Class _nodeSetClass = null;
     private Constructor _constructor = null;
     private Boolean  _false = Boolean.valueOf(false);
@@ -555,7 +555,7 @@ public class DSigResolver implements URIDereferencer{
                     "Cannot handle reference mechanism: " +
                     refElement.getTagName ());
         }
-        Attr attr = element.getOwnerDocument ().createAttributeNS (MessageConstants.NAMESPACES_NS, "xmlns");
+        Attr attr = newElement.getOwnerDocument ().createAttributeNS (MessageConstants.NAMESPACES_NS, "xmlns");
         attr.setValue ("");
         if (newElement != null) {
             newElement.setAttributeNodeNS (attr);

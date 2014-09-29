@@ -54,6 +54,7 @@ import com.sun.xml.ws.security.secext10.TransformationParametersType;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 import com.sun.xml.wss.logging.LogDomainConstants;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -62,6 +63,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -69,7 +71,9 @@ import javax.xml.crypto.Data;
 import javax.xml.crypto.XMLCryptoContext;
 import javax.xml.crypto.dsig.TransformException;
 import javax.xml.stream.XMLStreamException;
+
 import com.sun.xml.wss.logging.impl.opt.signature.LogStringsMessages;
+
 import java.util.ArrayList;
 
 /**

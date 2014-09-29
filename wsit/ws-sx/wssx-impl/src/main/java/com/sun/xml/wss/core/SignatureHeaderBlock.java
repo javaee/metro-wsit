@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,15 +54,15 @@ import javax.xml.soap.SOAPElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.org.apache.xml.internal.security.utils.ElementProxy;
-import com.sun.org.apache.xml.internal.security.c14n.Canonicalizer;
-import com.sun.org.apache.xml.internal.security.signature.SignedInfo;
-import com.sun.org.apache.xml.internal.security.transforms.Transforms;
-import com.sun.org.apache.xml.internal.security.signature.XMLSignature;
-import com.sun.org.apache.xml.internal.security.signature.ObjectContainer;
-import com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
-import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
-import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
+import org.apache.xml.security.utils.ElementProxy;
+import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.signature.SignedInfo;
+import org.apache.xml.security.transforms.Transforms;
+import org.apache.xml.security.signature.XMLSignature;
+import org.apache.xml.security.signature.ObjectContainer;
+import org.apache.xml.security.signature.XMLSignatureException;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.MessageConstants;
 

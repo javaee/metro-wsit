@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014444 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.opt.impl.incoming;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
@@ -113,7 +113,7 @@ import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBStructure;
 import javax.xml.crypto.KeySelector.Purpose;
-import com.sun.org.apache.xml.internal.security.utils.RFC2253Parser;
+import org.apache.xml.security.utils.RFC2253Parser;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
+import org.apache.xml.security.keys.content.X509Data;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.wss.impl.MessageConstants;
@@ -63,12 +63,11 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedData;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
-
+import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.encryption.XMLCipher;
+import org.apache.xml.security.encryption.EncryptedData;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.encryption.XMLEncryptionException;
 
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
@@ -128,7 +127,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
-    
+
     public Token createSAMLAssertion(final String appliesTo, final String tokenType, final String keyType, final String assertionId, final String issuer, final  Map<QName, List<String>> claimedAttrs, final IssuedTokenContext context) throws WSTrustException {
         Token token = null;
         
@@ -229,7 +228,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             log.log(Level.SEVERE,
                             LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
             throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
-        }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+        }catch(org.apache.xml.security.exceptions.XMLSecurityException ex){
             log.log(Level.SEVERE,
                             LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
             throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
@@ -244,7 +243,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         try{
             final XMLCipher cipher;
             if(encryptionAlgorithm != null){
-                cipher = XMLCipher.getInstance(encryptionAlgorithm);
+                cipher = XMLCipher.getInstance(encryptionAlgorithm);  
             }else{
                 cipher = XMLCipher.getInstance(XMLCipher.AES_256);
             }
@@ -367,7 +366,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         if (kiEle != null){
             try{
                 return new KeyInfo(kiEle, null);
-            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+            }catch(org.apache.xml.security.exceptions.XMLSecurityException ex){
                 log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }
@@ -403,7 +402,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final X509Data x509data = new X509Data(doc);
             try{
                 x509data.addCertificate(ctx.getRequestorCertificate());
-            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+            }catch(org.apache.xml.security.exceptions.XMLSecurityException ex){
                 log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }

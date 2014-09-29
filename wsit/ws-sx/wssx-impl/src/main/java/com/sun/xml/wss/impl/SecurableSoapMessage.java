@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,15 +41,15 @@
 package com.sun.xml.wss.impl;
 
 import com.sun.xml.wss.impl.dsig.NamespaceContextImpl;
+
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.Random;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.namespace.NamespaceContext;
 
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.soap.Name;
 import javax.xml.soap.SOAPPart;
 import javax.xml.soap.SOAPBody;
@@ -73,15 +73,16 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.apache.xml.security.Init;
 
-import com.sun.org.apache.xml.internal.security.Init;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.swa.MimeConstants;
-
 import com.sun.xml.wss.core.SecurityHeader;
 import com.sun.xml.wss.logging.LogDomainConstants;
+
 import org.w3c.dom.Node;
+
 import com.sun.xml.wss.*;
 import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.util.NodeListImpl;
@@ -104,9 +105,19 @@ public final class SecurableSoapMessage extends SOAPMessage {
         /**
          * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
-        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml"); 
+        System.setProperty("org.apache.xml.security.resource.config", "resource/config.xml"); 
 
         Init.init();
+
+        //Workaround for: Apache XML Security 1.5.6 do not support Canonicalizer.ALGO_ID_C14N_PHYSICAL in file 'java/org/apache/xml/security/resource/config.xml'
+        try {
+          org.apache.xml.security.c14n.Canonicalizer.register(org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL, org.apache.xml.security.c14n.implementations.CanonicalizerPhysical.class.getName());
+        } catch (org.apache.xml.security.exceptions.AlgorithmAlreadyRegisteredException e){
+          //log.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+          //Do nothing, log info can cause some SQE test cases faile.
+        } catch (ClassNotFoundException e) {
+          log.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+        }
         xpathFactory = WSITXMLFactory.createXPathFactory(WSITXMLFactory.DISABLE_SECURE_PROCESSING);        
     }
     

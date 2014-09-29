@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -77,7 +77,7 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.core.X509SecurityToken;
 import com.sun.xml.wss.impl.WSSAssertion;
 
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
+import org.apache.xml.security.algorithms.JCEMapper;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;

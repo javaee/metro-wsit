@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,12 +46,14 @@
 
 package com.sun.xml.wss.impl.apachecrypto;
 
+import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.encryption.XMLCipher;
+import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.algorithms.JCEMapper;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.xml.util.XMLCipherAdapter;
 import com.sun.xml.wss.core.EncryptedHeaderBlock;
 import com.sun.xml.wss.impl.misc.Base64;
 
@@ -1042,7 +1044,6 @@ public class EncryptionProcessor {
         XMLCipher _keyEncryptor = null;
         XMLCipher _dataEncryptor = null;
         Cipher _attachmentEncryptor = null;
-        Cipher _dataCipher = null;
         try {
             // lazy n static instantiation can happen
             //TODO :: Algorithms -- Venu
@@ -1069,9 +1070,8 @@ public class EncryptionProcessor {
             }
             
             String dataAlgorithm =  JCEMapper.translateURItoJCEID(dataEncAlgo);
-            _dataCipher = Cipher.getInstance(dataAlgorithm);
-            _dataEncryptor = XMLCipher.getInstance(dataEncAlgo,_dataCipher);
-            _dataCipher.init(XMLCipher.ENCRYPT_MODE, _symmetricKey);
+            _dataEncryptor = XMLCipher.getInstance(dataEncAlgo);
+            
             _dataEncryptor.init(XMLCipher.ENCRYPT_MODE, _symmetricKey);
             
         } catch (Exception xee) {
@@ -1189,8 +1189,7 @@ public class EncryptionProcessor {
             try{
                 //_attachmentEncryptor = Cipher.getInstance("DESede/CBC/ISO10126Padding");
                 //TODO:GETMAP -venu
-                String dataAlgorithm =  JCEMapper.translateURItoJCEID(dataEncAlgo);
-                _attachmentEncryptor = Cipher.getInstance(dataAlgorithm);
+                _attachmentEncryptor = XMLCipherAdapter.constructCipher(dataEncAlgo);
                 _attachmentEncryptor.init(Cipher.ENCRYPT_MODE, _symmetricKey);
             } catch (Exception xee) {
                 log.log(Level.SEVERE, "WSS1205.unableto.initialize.xml.cipher", xee);
@@ -1256,7 +1255,7 @@ public class EncryptionProcessor {
                 if(_fi){
                     ed = encryptBodyContent(secureMsg,context.getCanonicalizedData(),_dataEncryptor);
                 }else{
-                    signEncrypt(context, _dataCipher,_ekReferenceList,_standaloneReferenceList,keyInfoStrategy, dataEncAlgo);
+                    signEncrypt(context, null,_ekReferenceList,_standaloneReferenceList,keyInfoStrategy, dataEncAlgo);
                     continue;
                 }
             }else{

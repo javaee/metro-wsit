@@ -136,6 +136,8 @@
                 <include name="woodstox-core-asl.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
+                <include name="xmlsec.jar"/>
+                <include name="commons-logging.jar"/>
             </fileset>
             <fileset dir="${as.lib.home}/endorsed">
                 <include name="webservices-api-osgi.jar"/>
@@ -161,6 +163,8 @@
                 <include name="woodstox-core-asl.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
+                <include name="xmlsec.jar"/>
+                <include name="commons-logging.jar"/>
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
@@ -215,6 +219,8 @@
                 <include name="woodstox-core-asl.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
+                <include name="xmlsec.jar"/>
+                <include name="commons-logging.jar"/>
             </fileset>
         </copy>
 

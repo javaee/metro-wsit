@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,7 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 
 
 /**
@@ -74,7 +74,7 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
  * @author Anli Shundi
  * @author Christian Geuer-Pollmann
  * @see <A HREF="ftp://ftp.isi.edu/in-notes/rfc2045.txt">RFC 2045</A>
- * @see com.sun.org.apache.xml.internal.security.transforms.implementations.TransformBase64Decode
+ * @see org.apache.xml.security.transforms.implementations.TransformBase64Decode
  */
 public class Base64 {
     

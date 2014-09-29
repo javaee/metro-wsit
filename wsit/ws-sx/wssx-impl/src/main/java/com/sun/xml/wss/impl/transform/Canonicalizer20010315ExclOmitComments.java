@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,10 +65,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.sun.org.apache.xml.internal.security.c14n.CanonicalizationException;
-import com.sun.org.apache.xml.internal.security.c14n.helper.C14nHelper;
-import com.sun.org.apache.xml.internal.security.transforms.params.InclusiveNamespaces;
-import com.sun.org.apache.xml.internal.security.utils.Constants;
+import org.apache.xml.security.c14n.CanonicalizationException;
+import org.apache.xml.security.c14n.helper.C14nHelper;
+import org.apache.xml.security.transforms.params.InclusiveNamespaces;
+import org.apache.xml.security.utils.Constants;
 import java.util.logging.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -84,8 +84,8 @@ import java.util.ListIterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.sun.org.apache.xml.internal.security.c14n.helper.AttrCompare;
-import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
+import org.apache.xml.security.c14n.helper.AttrCompare;
+import org.apache.xml.security.utils.XMLUtils;
 import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.MessageConstants;
 import javax.xml.crypto.Data;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -74,9 +74,9 @@ import com.sun.xml.wss.saml.SubjectConfirmation;
 import com.sun.xml.wss.saml.KeyInfoConfirmationData;
 import com.sun.xml.wss.saml.util.SAMLUtil;
 
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.keys.content.X509Data;
+import org.apache.xml.security.keys.KeyInfo;
 import com.sun.xml.bind.v2.runtime.JAXBContextImpl;
 import com.sun.xml.bind.v2.util.XmlFactory;
 import com.sun.xml.wss.WSITXMLFactory;
@@ -466,7 +466,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         if (kiEle != null && "KeyInfo".equals(kiEle.getLocalName())){
             try{
                 return new KeyInfo(kiEle, null);
-            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+            }catch(org.apache.xml.security.exceptions.XMLSecurityException ex){
                 log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }
@@ -504,7 +504,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             final X509Data x509data = new X509Data(doc);
             try{
                 x509data.addCertificate(ctx.getRequestorCertificate());
-            }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
+            }catch(org.apache.xml.security.exceptions.XMLSecurityException ex){
                 log.log(Level.SEVERE, LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT(), ex);
             }

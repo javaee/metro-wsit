@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,19 +55,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.org.apache.xml.internal.security.keys.content.KeyName;
-import com.sun.org.apache.xml.internal.security.keys.content.KeyValue;
-import com.sun.org.apache.xml.internal.security.keys.content.MgmtData;
-import com.sun.org.apache.xml.internal.security.keys.content.PGPData;
-import com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
-import com.sun.org.apache.xml.internal.security.keys.content.SPKIData;
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-import com.sun.org.apache.xml.internal.security.keys.content.keyvalues.DSAKeyValue;
-import com.sun.org.apache.xml.internal.security.keys.content.keyvalues.RSAKeyValue;
-import com.sun.org.apache.xml.internal.security.transforms.Transforms;
-import com.sun.org.apache.xml.internal.security.utils.ElementProxy;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.keys.content.KeyName;
+import org.apache.xml.security.keys.content.KeyValue;
+import org.apache.xml.security.keys.content.MgmtData;
+import org.apache.xml.security.keys.content.PGPData;
+import org.apache.xml.security.keys.content.RetrievalMethod;
+import org.apache.xml.security.keys.content.SPKIData;
+import org.apache.xml.security.keys.content.X509Data;
+import org.apache.xml.security.keys.content.keyvalues.DSAKeyValue;
+import org.apache.xml.security.keys.content.keyvalues.RSAKeyValue;
+import org.apache.xml.security.transforms.Transforms;
+import org.apache.xml.security.utils.ElementProxy;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.XWSSecurityException;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,9 +43,10 @@ package com.sun.xml.ws.security.impl;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
+import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.encryption.XMLEncryptionException;
+import org.apache.xml.security.encryption.XMLCipher;
 import com.sun.xml.wss.XWSSecurityException;
 import java.net.URI;
 import java.security.Key;

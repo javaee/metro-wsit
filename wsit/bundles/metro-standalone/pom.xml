@@ -420,6 +420,15 @@
             <groupId>commonj.sdo</groupId>
             <artifactId>commonj.sdo</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.2</version>
+        </dependency>
     </dependencies>
 
     <properties>

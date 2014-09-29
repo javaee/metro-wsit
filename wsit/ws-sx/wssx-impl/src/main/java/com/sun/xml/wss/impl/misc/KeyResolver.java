@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,9 +59,9 @@ import java.security.MessageDigest;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.org.apache.xml.internal.security.keys.content.KeyValue;
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.keys.content.KeyValue;
+import org.apache.xml.security.keys.content.X509Data;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;

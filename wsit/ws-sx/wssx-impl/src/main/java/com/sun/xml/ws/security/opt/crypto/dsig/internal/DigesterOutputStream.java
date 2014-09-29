@@ -29,13 +29,13 @@ import java.security.MessageDigest;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.sun.org.apache.xml.internal.security.utils.UnsyncByteArrayOutputStream;
+import org.apache.xml.security.utils.UnsyncByteArrayOutputStream;
 import com.sun.xml.wss.logging.LogDomainConstants;
 
 /**
  * This class has been modified slightly to use java.security.MessageDigest
  * objects as input, rather than 
- * com.sun.org.apache.xml.internal.security.algorithms.MessageDigestAlgorithm objects.
+ * org.apache.xml.security.algorithms.MessageDigestAlgorithm objects.
  * It also optionally caches the input bytes.
  *
  * @author raul

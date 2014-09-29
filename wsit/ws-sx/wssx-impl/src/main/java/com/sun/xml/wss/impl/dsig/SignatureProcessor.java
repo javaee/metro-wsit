@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,9 +44,9 @@
 
 package com.sun.xml.wss.impl.dsig;
 
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.encryption.XMLCipher;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
@@ -634,7 +634,7 @@ public class SignatureProcessor{
                         keyInfoBlock = new KeyInfoHeaderBlock(secureMessage.getSOAPPart());
                         strategy.setCertificate(cert);
                         strategy.insertKey(keyInfoBlock, secureMessage, x509TokenId);
-                        com.sun.org.apache.xml.internal.security.keys.KeyInfo apacheKeyInfo = keyInfoBlock.getKeyInfo();
+                        org.apache.xml.security.keys.KeyInfo apacheKeyInfo = keyInfoBlock.getKeyInfo();
                         //create an encrypted Key
                         EncryptedKey encryptedKey = null;
                         XMLCipher keyEncryptor = null;
@@ -1137,12 +1137,12 @@ public class SignatureProcessor{
             Node nsd1Root = null;
             Node nsd2Root = null;
             
-            if (ns1 instanceof org.jcp.xml.dsig.internal.dom.DOMSubTreeData) {
-                nsd1Root = ((org.jcp.xml.dsig.internal.dom.DOMSubTreeData)ns1).getRoot();
+            if (ns1 instanceof org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData) {
+                nsd1Root = ((org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData)ns1).getRoot();
             }
             
-            if (ns2 instanceof org.jcp.xml.dsig.internal.dom.DOMSubTreeData) {
-                nsd2Root = ((org.jcp.xml.dsig.internal.dom.DOMSubTreeData)ns2).getRoot();
+            if (ns2 instanceof org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData) {
+                nsd2Root = ((org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData)ns2).getRoot();
             }
             
             if (nsd1Root != null && nsd2Root != null) {
@@ -1486,7 +1486,7 @@ public class SignatureProcessor{
                             keyInfoBlock = new KeyInfoHeaderBlock(secureMessage.getSOAPPart());
                             strategy.setCertificate(cert);
                             strategy.insertKey(keyInfoBlock, secureMessage, x509TokenId);
-                            com.sun.org.apache.xml.internal.security.keys.KeyInfo apacheKeyInfo = keyInfoBlock.getKeyInfo();
+                            org.apache.xml.security.keys.KeyInfo apacheKeyInfo = keyInfoBlock.getKeyInfo();
                             
                             
                             //create an encrypted Key --- it encrypts the original key

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,7 +46,7 @@
 
 package com.sun.xml.ws.security.opt.crypto.dsig;
 
-import com.sun.org.apache.xml.internal.security.utils.UnsyncBufferedOutputStream;
+import org.apache.xml.security.utils.UnsyncBufferedOutputStream;
 import com.sun.xml.security.core.dsig.TransformsType;
 import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
@@ -105,6 +105,7 @@ public class Reference extends com.sun.xml.security.core.dsig.ReferenceType impl
         }
         Data data = dereference(xMLValidateContext);
         _calcDigestValue = transform(data, xMLValidateContext);
+        
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST,"Calculated digest value is: "+new String(_calcDigestValue));
         }
@@ -202,8 +203,7 @@ public class Reference extends com.sun.xml.security.core.dsig.ReferenceType impl
             logger.log(Level.SEVERE,LogStringsMessages.WSS_1761_TRANSFORM_IO_ERROR(),ex);
             throw new XMLSignatureException(ex);
         }
-        
-        
+				
         return dos.getDigestValue();
     }
     

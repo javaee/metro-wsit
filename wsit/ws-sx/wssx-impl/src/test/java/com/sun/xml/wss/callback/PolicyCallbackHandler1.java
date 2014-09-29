@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,7 +47,7 @@ package com.sun.xml.wss.callback;
 import java.io.IOException;
 import java.io.FileInputStream;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.xml.security.utils.Base64;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Arrays;

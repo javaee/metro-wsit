@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -658,7 +658,7 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.Asse
         Element elem = null;
         Map map = null;
         Class _nodeSetClass = null;
-        String optNSClassName = "org.jcp.xml.dsig.internal.dom.DOMSubTreeData";
+        String optNSClassName = "org.apache.jcp.xml.dsig.internal.dom.DOMSubTreeData";
         Constructor _constructor = null;
         Boolean  _false = Boolean.valueOf(false);
         DSigResolver(Map map,Element elem){

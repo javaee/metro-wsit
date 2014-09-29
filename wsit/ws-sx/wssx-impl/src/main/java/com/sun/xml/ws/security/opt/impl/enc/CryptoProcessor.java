@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,9 @@
 
 package com.sun.xml.ws.security.opt.impl.enc;
 
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
+import org.apache.xml.security.algorithms.JCEMapper;
+
+import com.sun.xml.util.XMLCipherAdapter;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.c14n.StAXC14nCanonicalizerImpl;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
@@ -58,9 +60,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.ExemptionMechanism;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import com.sun.xml.ws.security.opt.crypto.JAXBData;
 import com.sun.xml.ws.security.opt.crypto.StreamWriterData;
 import com.sun.xml.ws.security.opt.impl.util.OutputStreamWrapper;
@@ -123,8 +129,7 @@ public class CryptoProcessor {
      */
     protected void initCipher() throws NoSuchAlgorithmException,NoSuchPaddingException, InvalidKeyException{
         if ( cipher == null ) {
-            String transformation = convertAlgURIToTransformation(getAlgorithm());
-            cipher = Cipher.getInstance(transformation);
+            cipher = XMLCipherAdapter.constructCipher(getAlgorithm());
             cipher.init(mode, getKey());
         }
     }
@@ -197,7 +202,6 @@ public class CryptoProcessor {
                     initCipher();
                 }
                 ed = cipher.wrap(dk);
-                //String data = com.sun.org.apache.xml.internal.security.utils.Base64.encode(ed);
             }
             outputStream.write(ed);
             outputStream.flush();
@@ -374,8 +378,7 @@ public class CryptoProcessor {
         try {
             if(mode == Cipher.DECRYPT_MODE){
                 if ( cipher == null ) {
-                    String transformation = convertAlgURIToTransformation(getAlgorithm());
-                    cipher = Cipher.getInstance(transformation);
+                    cipher = XMLCipherAdapter.constructCipher(getAlgorithm());
                     int len = cipher.getBlockSize();
                     byte [] iv  = new byte[len];
                     is.read(iv,0,len);
@@ -412,9 +415,7 @@ public class CryptoProcessor {
     public byte[] decryptData(byte[] encryptedContent) throws IOException{
         try {
             if(mode == Cipher.DECRYPT_MODE){
-                
-                String transformation = convertAlgURIToTransformation(getAlgorithm());
-                cipher = Cipher.getInstance(transformation);
+                cipher = XMLCipherAdapter.constructCipher(getAlgorithm());
                 int len = cipher.getBlockSize();
                 byte [] iv  = new byte[len];
                 System.arraycopy(encryptedContent, 0, iv, 0, len);

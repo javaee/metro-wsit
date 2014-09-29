@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -102,8 +102,8 @@ import javax.security.auth.x500.X500PrivateCredential;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.crypto.SecretKey;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.utils.Base64;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
@@ -559,7 +559,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
            if (subject != null) {
               Set set = subject.getPrivateCredentials(X500PrivateCredential.class);
               if (set != null) {
-                 String issuerName = com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
+                 String issuerName = org.apache.xml.security.utils.RFC2253Parser.normalize(
                                   cert.getIssuerDN().getName());
                  Iterator it = set.iterator();
                  while (it.hasNext()) {

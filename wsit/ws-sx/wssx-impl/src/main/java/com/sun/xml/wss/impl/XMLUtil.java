@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,7 @@
 
 package com.sun.xml.wss.impl;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.exceptions.Base64DecodingException;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -81,9 +81,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-import com.sun.org.apache.xml.internal.security.keys.content.keyvalues.DSAKeyValue;
-import com.sun.org.apache.xml.internal.security.keys.content.keyvalues.RSAKeyValue;
+import org.apache.xml.security.keys.content.X509Data;
+import org.apache.xml.security.keys.content.keyvalues.DSAKeyValue;
+import org.apache.xml.security.keys.content.keyvalues.RSAKeyValue;
 import com.sun.xml.wss.impl.misc.Base64;
 //import com.sun.org.apache.xpath.internal.XPathAPI;
 import com.sun.xml.wss.*;

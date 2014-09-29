@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -69,6 +69,7 @@ import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -77,11 +78,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
@@ -96,17 +99,21 @@ import com.sun.xml.ws.security.opt.impl.attachment.AttachmentImpl;
 import com.sun.xml.ws.security.opt.impl.attachment.AttachmentSetImpl;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.wss.BasicSecurityProfile;
+
 import java.util.Map;
+
 import javax.xml.ws.WebServiceException;
+
 import com.sun.xml.wss.logging.impl.opt.LogStringsMessages;
+
 import static com.sun.xml.wss.BasicSecurityProfile.*;
+
 import com.sun.xml.ws.security.opt.impl.util.VerifiedMessageXMLStreamReader;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.policy.PolicyUtils;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.impl.policy.verifier.PolicyVerifierFactory;
-
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
 /**
@@ -121,9 +128,18 @@ public final class SecurityRecipient {
         /**
          * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
          */
-        System.setProperty("com.sun.org.apache.xml.internal.security.resource.config", "resource/config.xml"); 
+        System.setProperty("org.apache.xml.security.resource.config", "resource/config.xml"); 
+        org.apache.xml.security.Init.init();
 
-        com.sun.org.apache.xml.internal.security.Init.init();
+        //workaround for: Apache XML Security 1.5.6 do not support Canonicalizer.ALGO_ID_C14N_PHYSICAL in file 'java/org/apache/xml/security/resource/config.xml'
+        try {
+          org.apache.xml.security.c14n.Canonicalizer.register(org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL, org.apache.xml.security.c14n.implementations.CanonicalizerPhysical.class.getName());
+        } catch (org.apache.xml.security.exceptions.AlgorithmAlreadyRegisteredException e){
+          //logger.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+          //Do nothing, log info can cause some SQE test cases faile.
+        } catch (ClassNotFoundException e) {
+          logger.log(Level.SEVERE, org.apache.xml.security.c14n.Canonicalizer.ALGO_ID_C14N_PHYSICAL+" registered failed!", e);
+        }
     }
     private static final int TIMESTAMP_ELEMENT = 1;
     private static final int USERNAME_TOKEN_ELEMENT = 2;

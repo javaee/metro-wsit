@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,10 +40,10 @@
 
 package com.sun.xml.wss.core;
 
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
-import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import org.apache.xml.security.encryption.EncryptedKey;
+import org.apache.xml.security.encryption.XMLCipher;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.keys.KeyInfo;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
@@ -81,13 +81,13 @@ public class EncryptedKeyToken extends SecurityHeaderBlockImpl implements Securi
                 if (nl != null)
                     algorithm = ((Element)nl.item(0)).getAttribute("Algorithm");
                 xmlc = XMLCipher.getInstance(algorithm); 
+                xmlc.init(XMLCipher.UNWRAP_MODE, privKey); 
                 if ( encryptedKey == null)
                     encryptedKey = xmlc.loadEncryptedKey(elem);
             }
             if (xmlc == null){
                 throw new XWSSecurityException("XMLCipher is null while getting SecretKey from EncryptedKey");
             }
-            xmlc.init(XMLCipher.UNWRAP_MODE, privKey);
             SecretKey symmetricKey = (SecretKey) xmlc.decryptKey(encryptedKey, dataEncAlgo);
             return symmetricKey;
         } catch (Exception ex) {

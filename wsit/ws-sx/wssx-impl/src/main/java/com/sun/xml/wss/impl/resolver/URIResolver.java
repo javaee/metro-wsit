@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -69,13 +69,12 @@ import com.sun.xml.wss.XWSSecurityException;
 import javax.xml.transform.TransformerException;
 
 import com.sun.xml.wss.swa.MimeConstants;
-//import com.sun.org.apache.xml.internal.utils.URI;
 import com.sun.xml.wss.impl.misc.URI;
-import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
-import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
-import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver;
-import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
-import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
+import org.apache.xml.security.utils.XMLUtils;
+import org.apache.xml.security.signature.XMLSignatureInput;
+import org.apache.xml.security.utils.resolver.ResourceResolver;
+import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
+import org.apache.xml.security.utils.resolver.ResourceResolverException;
 import com.sun.xml.wss.WSITXMLFactory;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.dsig.NamespaceContextImpl;
