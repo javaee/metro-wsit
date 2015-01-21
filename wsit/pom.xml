@@ -810,7 +810,6 @@
         <mf.dir>${project.build.outputDirectory}</mf.dir>
 
         <netbeans.hint.jdkPlatform>JDK_1.6</netbeans.hint.jdkPlatform>
-        <santuario.version>1.5.8</santuario.version>
     </properties>
     
     <dependencyManagement>
