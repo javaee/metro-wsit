@@ -191,8 +191,6 @@
                                     com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.osgiVersion},
                                     com.sun.istack.ws.*;version=${jaxws.osgiVersion},
                                     com.sun.istack.localization;version=${jaxb.osgiVersion};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
-                                    org.apache.xml.security;version=${santuario.version},
-                                    org.apache.xml.security.*;version=${santuario.version},
                                     com.sun.tools.ws.*;version=${jaxws.osgiVersion},
                                     com.sun.wsit.security.*;version=${metro.osgiVersion},
                                     com.sun.xml.messaging.saaj.*;version=1.3,
