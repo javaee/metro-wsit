@@ -251,13 +251,13 @@
 
                                         <!-- new version -->
 
-                                        <soimp  dir="${project.build.directory}/www"
+                                        <!-- soimp  dir="${project.build.directory}/www"
                                                 repository="${www.thisversion.scm.connection.url}"
                                                 username="${userguide.scm.username}"
                                                 password="${userguide.scm.password}"
                                                 create="true"
-                                                additionalOptions="--no-auth-cache"
-                                                commitMessage="${project.artifactId}-${project.version}" />
+                                                additionalOptions="no-auth-cache"
+                                                commitMessage="${project.artifactId}-${project.version}" / -->
                                     </tasks>
                                 </configuration>
                             </execution>

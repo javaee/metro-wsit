@@ -88,13 +88,13 @@
 
                                             <!-- update the latest docbook-version -->
 
-                                            <soimp  dir="${www.upload.dir}"
+                                            <!-- soimp  dir="${www.upload.dir}"
                                                     repository="${www.repository.url}"
                                                     username="${userguide.scm.username}"
                                                     password="${userguide.scm.password}"
                                                     create="true"
-                                                    additionalOptions="--no-auth-cache"
-                                                    commitMessage="${project.artifactId}-${project.version}" />
+                                                    additionalOptions="no-auth-cache"
+                                                    commitMessage="${project.artifactId}-${project.version}" / -->
                                         </tasks>
                                     </configuration>
                                 </execution>
