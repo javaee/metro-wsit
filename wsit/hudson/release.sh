@@ -49,6 +49,8 @@ do
         b)  METRO_PROMOTION_BUILD="${OPTARG:?}" ;;
         m)  SOURCES_VERSION="${OPTARG:?}" ;;
         w)  WORKROOT="${OPTARG:?}" ;;
+        u)  WWW_SVN_USER="${OPTARG:?}" ;;
+        p)  WWW_SVN_PASSWORD="${OPTARG:?}" ;;
         d)  debug=true ;;
         h)
             echo "Usage: release.sh [-r RELEASE_VERSION] --mandatory, the release version string, for example 2.3.1"
@@ -57,6 +59,8 @@ do
             echo "                   [-w WORKROOT] -- optional, default is current dir (`pwd`)"
             echo "                   [-m SOURCES_VERSION] -- optional, version in pom.xml need to be repaced with \$RELEASE_VERSION, default is \${RELEASE_VERSION}-SNAPSHOT"
             echo "                   [-s MAVEN_SETTINGS] --optional, alternative maven settings.xml"
+            echo "                   [-u WWW_SVN_USER] --optional, the svn scm username for commit the www docs, if not specified it uses cached credential"
+            echo "                   [-p WWW_SVN_PASSWORD] --optional the svn scm password for commit the www docs"
             echo "                   [-d] -- debug mode"
             exit ;;
         "?")
@@ -85,6 +89,12 @@ export https_proxy=$http_proxy
 
 export MAVEN_OPTS="-Xms256m -Xmx768m -XX:PermSize=256m -XX:MaxPermSize=512m -Dhttp.proxyHost=$PROXYURL -Dhttp.proxyPort=$PROXYPORT -Dhttps.proxyHost=$PROXYURL -Dhttps.proxyPort=$PROXYPORT"
 
+if [ -n "$WWW_SVN_USER"  -a -n "$WWW_SVN_PASSWORD" ]; then
+    AUTH="--username $WWW_SVN_USER --password $WWW_SVN_PASSWORD --no-auth-cache"
+else
+    AUTH=""
+fi
+
 if [ "$MAVEN_USER_HOME" = "" ]; then
      user=${LOGNAME:-${USER-"`whoami`"}}
      MAVEN_USER_HOME="/scratch/$user/.m2/repository"
@@ -93,9 +103,6 @@ fi
 if [ -n "$MAVEN_SETTINGS" ]; then
     MAVEN_SETTINGS="-s $MAVEN_SETTINGS"
 fi
-
-rm -rf $MAVEN_USER_HOME/org/glassfish/metro
-rm -rf $MAVEN_USER_HOME/com/sun/xml
 
 if [ "$WORKROOT" = "" ]; then
     WORKROOT=`pwd`
@@ -117,7 +124,7 @@ if [ "$RELEASE_REVISION" = "" ]; then
 fi
 
 echo "Release Revision: $RELEASE_REVISION"
-if [ "$RELEASE_REVISION" = "" -o $RELEASE_REVISION -eq 0 ]; then
+if [ "$RELEASE_REVISION" = "" -o "$RELEASE_REVISION" = "0" ]; then
    exit 1;
 fi
 
@@ -140,13 +147,11 @@ echo "INFO: ./hudson/changeVersion.sh $SOURCES_VERSION $RELEASE_VERSION pom.xml"
   
 if [ "$debug" = "true" ]; then
     echo "DEBUG: build while no deploy"
-
-    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Dgpg.passphrase=jaxbgpgpassword -DretryFailedDeploymentCount=10 -Prelease-profile,release -DaltDeploymentRepository=jvnet-nexus-staging::default::https://maven.java.net/service/local/staging/deploy/maven2/ clean package javadoc:jar source:jar gpg:sign install:install 
-    mvn $MAVEN_SETTINGS -B -C $MAVEN_LOCAL_REPO -Prelease-docs install
+    echo "INFO: mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install" 
+    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install 
 else
     echo "INFO: Build and Deploy ..."
-    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Dgpg.passphrase=jaxbgpgpassword -DretryFailedDeploymentCount=10 -Prelease-profile,release -DaltDeploymentRepository=jvnet-nexus-staging::default::https://maven.java.net/service/local/staging/deploy/maven2/ clean package javadoc:jar source:jar gpg:sign install:install deploy:deploy 
-    mvn $MAVEN_SETTINGS -B -C $MAVEN_LOCAL_REPO -Prelease-docs install
+    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install deploy 
 fi
 if [ $? -ne 0 ]; then
       exit 1
@@ -154,19 +159,21 @@ fi
 cd $WORKROOT
 if [ "$debug" = "true" ]; then
     echo "DEBUG: debug only, not actually tagging ..."
-    echo "DEBUG: svn --username jaxbrobot --password jaxbrobotheslo --non-interactive --no-auth-cache copy wsit https://svn.java.net/svn/wsit~svn/tags/$RELEASE_VERSION -m \"Tag release $RELEASE_VERSION \""
+    echo "DEBUG: svn $AUTH --non-interactive copy wsit https://svn.java.net/svn/wsit~svn/tags/$RELEASE_VERSION -m \"Tag release $RELEASE_VERSION \""
 else
     echo "INFO: Tagging release $RELEASE_VERSION ..."
-    svn --username jaxbrobot --password jaxbrobotheslo --non-interactive --no-auth-cache copy wsit https://svn.java.net/svn/wsit~svn/tags/$RELEASE_VERSION -m "Tag release $RELEASE_VERSION"
+    svn $AUTH --non-interactive copy wsit https://svn.java.net/svn/wsit~svn/tags/$RELEASE_VERSION -m "Tag release $RELEASE_VERSION"
 fi
 
 echo "INFO: Updating www docs ..."
 if [ -d "www" ]; then
     rm -rf www
 fi
+echo "INFO: svn checkout --non-interactive --depth=empty https://svn.java.net/svn/metro~svn/trunk/www"
 svn checkout --non-interactive --depth=empty https://svn.java.net/svn/metro~svn/trunk/www
-cd www
+cd www || exit 1
 mkdir -p $RELEASE_VERSION
+echo "INFO: cp -r $WORKROOT/wsit/docs/guide/target/www/* $RELEASE_VERSION/"
 cp -r $WORKROOT/wsit/docs/guide/target/www/* $RELEASE_VERSION/
 svn add --non-interactive $RELEASE_VERSION
 
@@ -184,8 +191,8 @@ $appendLine" __modules/left_sidebar.htmlx
 
 if [ "$debug" = "true" ]; then
     echo "DEBUG: debug only, not commit the docs."
-    echo "DEBUG: svn --username jaxbrobot --password jaxbrobotheslo --non-interactive --no-auth-cache copy wsit https://svn.java.net/svn/wsit~svn/tags/$RELEASE_VERSION -m \"Tag release $RELEASE_VERSION\""
+    echo "DEBUG: svn $AUTH --non-interactive commit -m \"Metro $RELEASE_VERSION\" ."
 else
     echo "INFO: commit the updated docs"
-    svn --username jaxbrobot --password jaxbrobotheslo --non-interactive --no-auth-cache commit -m "Metro $RELEASE_VERSION" .
+    svn $AUTH --non-interactive commit -m "Metro $RELEASE_VERSION" .
 fi
