@@ -39,11 +39,13 @@
 # holder.
 #
 
-while getopts :r:l:v:s:b:m:w:dh arg
+while getopts :r:j:k:l:v:s:b:m:w:dh arg
 do
     case "$arg" in
         r)  RELEASE_VERSION="${OPTARG:?}" ;;
         v)  RELEASE_REVISION="${OPTARG:?}" ;;
+        j)  JAXWS_VERSION="${OPTARG:?}" ;;
+        k)  JAXB_VERSION="${OPTARG:?}" ;;
         l)  MAVEN_USER_HOME="${OPTARG:?}" ;;
         s)  MAVEN_SETTINGS="${OPTARG:?}" ;;
         b)  METRO_PROMOTION_BUILD="${OPTARG:?}" ;;
@@ -55,6 +57,8 @@ do
         h)
             echo "Usage: release.sh [-r RELEASE_VERSION] --mandatory, the release version string, for example 2.3.1"
             echo "                   [-v RELEASE_REVISION] or [-b METRO_PROMOTION_BUILD] --either one is needed, the svn revision number or the hudson promotion job(metro-trunk-promotion) build number"
+            echo "                   [-j JAXWS_VERSION] --mandatory, the dependent JAXWS release version string, for example 2.2.10"
+            echo "                   [-k JAXB_VERSION] --optional, the dependent JAXB release version string, for example 2.2.11, it uses imported jaxb version from jaxws for default if not specified"
             echo "                   [-l MVEN_USER_HOME] -- optional, alternative maven local repository location"
             echo "                   [-w WORKROOT] -- optional, default is current dir (`pwd`)"
             echo "                   [-m SOURCES_VERSION] -- optional, version in pom.xml need to be repaced with \$RELEASE_VERSION, default is \${RELEASE_VERSION}-SNAPSHOT"
@@ -114,6 +118,11 @@ else
     MAVEN_LOCAL_REPO="-Dmaven.repo.local=${MAVEN_USER_HOME}"
 fi
 
+if [ "$JAXWS_VERSION" = "" ]; then
+    echo "ERROR: JAXWS version is null"
+    exit 1
+fi
+
 if [ "$RELEASE_REVISION" = "" ]; then
     if [ "$METRO_PROMOTION_BUILD" = "" ]; then
         echo "ERROR: you need to either give the -r with the release revision, or give the -b with the promotion hudson build number"
@@ -144,14 +153,23 @@ SOURCES_VERSION=${SOURCES_VERSION:-"${RELEASE_VERSION}-SNAPSHOT"}
 echo "INFO: Replacing project version $SOURCES_VERSION in sources with new release version $RELEASE_VERSION"
 echo "INFO: ./hudson/changeVersion.sh $SOURCES_VERSION $RELEASE_VERSION pom.xml"
 ./hudson/changeVersion.sh $SOURCES_VERSION $RELEASE_VERSION pom.xml
+if [ -n "$JAXWS_VERSION" ]; then
+    echo "INFO: dependent JAXWS RI version is $JAXWS_VERSION "
+    perl -i -pe "s|<jaxws.ri.version>.*</jaxws.ri.version>|<jaxws.ri.version>$JAXWS_VERSION</jaxws.ri.version>|g" boms/bom/pom.xml
+fi
   
+DEPENDENCIES_PROPERTIES="-Djaxws.version=$JAXWS_VERSION"
+if [ -n "$JAXB_VERSION" ]; then
+    DEPENDENCIES_PROPERTIES="$DEPENDENCIES_PROPERTIES -Djaxb.version=$JAXB_VERSION"
+fi
+
 if [ "$debug" = "true" ]; then
     echo "DEBUG: build while no deploy"
-    echo "INFO: mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install" 
-    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install 
+    echo "INFO: mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO $DEPENDENCIES_PROPERTIES -Prelease-profile,release-sign-artifacts,release-docs clean install" 
+    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO $DEPENDENCIES_PROPERTIES -Prelease-profile,release-sign-artifacts,release-docs clean install 
 else
     echo "INFO: Build and Deploy ..."
-    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO -Prelease-profile,release-sign-artifacts,release-docs clean install deploy 
+    mvn $MAVEN_SETTINGS -B -C -DskipTests=true $MAVEN_LOCAL_REPO $DEPENDENCIES_PROPERTIES -Prelease-profile,release-sign-artifacts,release-docs clean install deploy 
 fi
 if [ $? -ne 0 ]; then
       exit 1
