@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,8 +45,9 @@
  */
 
 package com.sun.xml.security.core.xenc;
-import com.sun.xml.ws.security.opt.impl.util.CVDataContentHandlerFactory;
 import com.sun.xml.ws.security.opt.impl.enc.CryptoProcessor;
+
+import javax.activation.CommandInfo;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -57,23 +58,18 @@ import javax.activation.DataHandler;
  * @author K.Venugopal@sun.com
  */
 public class CVAdapter extends XmlAdapter<DataHandler,byte[]>{
-    
-    static{
-//        DataHandler.setDataContentHandlerFactory(new CVDataContentHandlerFactory());
-        
-        CommandMap map = CommandMap.getDefaultCommandMap();
-        if (map instanceof MailcapCommandMap) {
-            MailcapCommandMap mailMap = (MailcapCommandMap) map;            
-            mailMap.addMailcap("application/ciphervalue"+";;x-java-content-handler="+"com.sun.xml.ws.security.opt.impl.util.CVDataHandler");
-        }        
-    }
-    
+
+    public static final String MIME_CIPHERVALUE = "application/ciphervalue";
+    public static final String CV_HANDLER_CLASS = "com.sun.xml.ws.security.opt.impl.util.CVDataHandler";
+
     private CryptoProcessor cp;
-    
-    public CVAdapter(){
+
+    public CVAdapter() {
+        ensureHandlerRegistered();
     }
     
     public CVAdapter(CryptoProcessor cp){
+        this();
         this.cp = cp;
     }
     
@@ -84,5 +80,20 @@ public class CVAdapter extends XmlAdapter<DataHandler,byte[]>{
     public byte[] unmarshal(DataHandler dh){
         throw new UnsupportedOperationException();
     }
-    
+
+    private void ensureHandlerRegistered() {
+        CommandMap map = CommandMap.getDefaultCommandMap();
+        CommandInfo[] commands = map.getAllCommands(MIME_CIPHERVALUE);
+        if (commands != null && commands.length > 0) {
+            for (CommandInfo command : commands) {
+                if (CV_HANDLER_CLASS.equals(command.getCommandClass())) {
+                    return;
+                }
+            }
+        }
+        if (map instanceof MailcapCommandMap) {
+            ((MailcapCommandMap)map).addMailcap(MIME_CIPHERVALUE + ";;x-java-content-handler=" + CV_HANDLER_CLASS);
+        }
+    }
+
 }
