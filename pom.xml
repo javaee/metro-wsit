@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -201,7 +201,7 @@
                         <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ssZ}</timestampFormat>
                         <providerImplementations>
                             <svn>javasvn</svn>
-                        </providerImplementations>                            
+                        </providerImplementations>
                     </configuration>
                     <executions>
                         <execution>
@@ -217,8 +217,8 @@
                             <artifactId>maven-scm-provider-svnjava</artifactId>
                             <version>1.11</version>
                         </dependency>
-                    </dependencies>                    
-                </plugin>                
+                    </dependencies>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
@@ -730,7 +730,7 @@
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>
 
-        <jaxws.ri.version>2.2.6-6</jaxws.ri.version>
+        <jaxws.ri.version>2.2.6-7</jaxws.ri.version>
 
         <jaxb.ri.release.version>2.2.5-5</jaxb.ri.release.version><!-- readme.html -->
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
