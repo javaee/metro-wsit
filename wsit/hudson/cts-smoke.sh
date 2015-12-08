@@ -150,12 +150,12 @@ X=`echo "$AS_HOME" | awk '{gsub(/\//,"\\\/");print}'`
 Y=`echo "$WORK_DIR/test_results-cts" | awk '{gsub(/\//,"\\\/");print}'`
 
 echo "CTS java.home(.ri): $X"
-sed -in 's/javaee.home=/javaee.home='"$X"'/g' ts.jte
-sed -in 's/javaee.home.ri=/javaee.home.ri='"$X"'/g' ts.jte
+sed -in 's/^javaee.home=.*/javaee.home='"$X"'/g' ts.jte
+sed -in 's/^javaee.home.ri=.*/javaee.home.ri='"$X"'/g' ts.jte
 
 echo "CTS orb.host(.ri): $ORB_HOST"
-sed -in 's/orb.host=/orb.host='"$ORB_HOST"'/g' ts.jte
-sed -in 's/orb.host.ri=/orb.host.ri='"$ORB_HOST"'/g' ts.jte
+sed -in 's/^orb.host=.*/orb.host='"$ORB_HOST"'/g' ts.jte
+sed -in 's/^orb.host.ri=.*/orb.host.ri='"$ORB_HOST"'/g' ts.jte
 
 echo "CTS orb.port.ri: $ORB_PORT"
 sed -in 's/3700/'$ORB_PORT'/g' ts.jte
@@ -174,20 +174,20 @@ sed -in 's/1044/'$WEB_SERVICE_SECURE_PORT'/g' ts.jte
 
 if [ ! -z "$MAIL_HOST" ]; then
     echo "CTS mailuser1: $MAIL_USER@$MAIL_HOST"
-    sed -in 's/mailuser1=/mailuser1='"$MAIL_USER@$MAIL_HOST"'/g' ts.jte
+    sed -in 's/^mailuser1=/mailuser1='"$MAIL_USER@$MAIL_HOST"'/g' ts.jte
     echo "CTS mailHost: $MAIL_HOST"
-    sed -in 's/mailHost=/mailHost='"$MAIL_HOST"'/g' ts.jte
+    sed -in 's/^mailHost=/mailHost='"$MAIL_HOST"'/g' ts.jte
     echo "CTS mailFrom: $MAIL_USER_FROM@$MAIL_HOST"
-    sed -in 's/mailFrom=/mailFrom='"$MAIL_USER_FROM@$MAIL_HOST"'/g' ts.jte
+    sed -in 's/^mailFrom=/mailFrom='"$MAIL_USER_FROM@$MAIL_HOST"'/g' ts.jte
     echo "CTS javamail.password: $MAIL_PWD"
-    sed -in 's/javamail.password=/javamail.password='"$MAIL_PWD"'/g' ts.jte
+    sed -in 's/^javamail.password=/javamail.password='"$MAIL_PWD"'/g' ts.jte
 fi
 
 echo "CTS report.dir: $Y"
-sed -in 's/report.dir=\/tmp\/JTReport/report.dir='"$Y"'/g' ts.jte
+sed -in 's/^report.dir=.*/report.dir='"$Y"'/g' ts.jte
 
 echo "CTS work.dir: /tmp/JTWork"
-sed -in 's/work.dir=\/tmp\/JTWork/work.dir=\/tmp\/JTWork/g' ts.jte
+sed -in 's/^work.dir=.*/work.dir=\/tmp\/JTWork/g' ts.jte
 
 popd
 
