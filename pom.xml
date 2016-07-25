@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -469,7 +469,7 @@
                         <dependency>
                             <groupId>org.glassfish.findbugs</groupId>
                             <artifactId>findbugs</artifactId>
-                            <version>1.2</version>
+                            <version>${glassfish.findbugs.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -801,6 +801,7 @@
         <www.guide.jaxws.version>${jaxws.ri.version}</www.guide.jaxws.version>
         <www.guide.jaxws.home.uri>${jaxws.home.uri}</www.guide.jaxws.home.uri>
 
+        <glassfish.findbugs.version>1.7</glassfish.findbugs.version>
         <findbugs.skip>false</findbugs.skip>
         <findbugs.threshold>High</findbugs.threshold>
         <findbugs.common>exclude-common.xml</findbugs.common>
