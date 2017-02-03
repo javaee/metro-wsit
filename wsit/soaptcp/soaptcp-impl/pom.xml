@@ -126,13 +126,13 @@
 
         <!-- Provided scope -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gfv2-deployment</artifactId>
+            <groupId>org.glassfish.main.deployment</groupId>
+            <artifactId>dol</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.main.deployment</groupId>
-            <artifactId>dol</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gfv2-deployment</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
