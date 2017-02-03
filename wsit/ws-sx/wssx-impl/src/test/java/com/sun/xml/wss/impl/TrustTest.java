@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,51 +40,67 @@
 
 package com.sun.xml.wss.impl;
 
-import java.util.*;
-import java.io.*;
-
-import com.sun.xml.wss.callback.PolicyCallbackHandler1;
-import com.sun.xml.wss.*;
-
-import javax.xml.soap.*;
-import com.sun.xml.wss.impl.policy.mls.*;
-import com.sun.xml.ws.security.impl.*;
-import com.sun.xml.wss.core.*;
-import com.sun.xml.ws.security.impl.policy.*;
-import javax.xml.namespace.QName;
-import java.security.SecureRandom;
-import com.sun.xml.wss.impl.misc.*;
+import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.impl.policy.Token;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
+import com.sun.xml.ws.security.trust.GenericToken;
+import com.sun.xml.ws.security.trust.WSTrustConstants;
+
+import com.sun.xml.wss.SecurityEnvironment;
+import com.sun.xml.wss.callback.PolicyCallbackHandler1;
+import com.sun.xml.wss.core.KeyInfoHeaderBlock;
+import com.sun.xml.wss.core.SecurityTokenReference;
+import com.sun.xml.wss.core.reference.KeyIdentifier;
+import com.sun.xml.wss.core.reference.SamlKeyIdentifier;
+
+import com.sun.xml.wss.impl.misc.Base64;
+import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
+import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
+import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
+import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
+
+import com.sun.xml.wss.saml.Assertion;
+import com.sun.xml.wss.saml.Conditions;
+import com.sun.xml.wss.saml.NameIdentifier;
+import com.sun.xml.wss.saml.SAMLAssertionFactory;
+import com.sun.xml.wss.saml.Subject;
+import com.sun.xml.wss.saml.SubjectConfirmation;
+import com.sun.xml.wss.saml.util.SAMLUtil;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeader;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPBodyElement;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPMessage;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import com.sun.xml.wss.core.reference.*;
-
-import java.math.BigInteger;
-
-
-
-
-
-
-import javax.security.auth.callback.CallbackHandler;
-
-
-
-
-import com.sun.xml.wss.saml.*;
-
-import javax.xml.crypto.dsig.*;
-
-
-import org.w3c.dom.*;
-
-
-
-import com.sun.xml.wss.saml.util.*;
-import com.sun.xml.ws.security.trust.*;
 
 public class TrustTest extends TestCase {
 

@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -789,7 +789,7 @@
     <properties>
         <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
 
-        <istack.plugins.version>2.19</istack.plugins.version>
+        <istack.plugins.version>3.0.4</istack.plugins.version>
             
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
@@ -809,7 +809,7 @@
 
         <mf.dir>${project.build.outputDirectory}</mf.dir>
 
-        <netbeans.hint.jdkPlatform>JDK_1.6</netbeans.hint.jdkPlatform>
+        <netbeans.hint.jdkPlatform>JDK_1.7</netbeans.hint.jdkPlatform>
     </properties>
     
     <dependencyManagement>
@@ -820,6 +820,12 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>gfv2-deployment</artifactId>
                 <version>2.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.main.deployment</groupId>
+                <artifactId>dol</artifactId>
+                <version>4.1.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

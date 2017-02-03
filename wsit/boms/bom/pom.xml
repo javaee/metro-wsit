@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -43,6 +43,12 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java</groupId>
+        <artifactId>jvnet-parent</artifactId>
+        <version>5</version>
+    </parent>
 
     <groupId>org.glassfish.metro</groupId>
     <artifactId>metro-bom</artifactId>
@@ -86,7 +92,7 @@
     </developers>
 
     <properties>
-        <jaxws.ri.version>2.3.0-b161121.2027</jaxws.ri.version>
+        <jaxws.ri.version>2.3.0-b170202.2253</jaxws.ri.version>
         <jaxws.maven.plugin.version>2.3.1-b20150201.1248</jaxws.maven.plugin.version>
     </properties>
         
