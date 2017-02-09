@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -63,6 +63,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.crypto.XMLStructure;
 
 /**
  * <p>Java class for KeyInfoType complex type.
@@ -105,11 +106,11 @@ public class KeyInfoType {
         @XmlElementRef(name = "X509Data", namespace = "http://www.w3.org/2000/09/xmldsig#", type = com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.X509Data.class),
         @XmlElementRef(name = "KeyValue", namespace = "http://www.w3.org/2000/09/xmldsig#", type = com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyValue.class),
         @XmlElementRef(name = "SPKIData", namespace = "http://www.w3.org/2000/09/xmldsig#", type = com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.SPKIData.class),
-        @XmlElementRef(name = "MgmtData", namespace = "http://www.w3.org/2000/09/xmldsig#", type = JAXBElement.class)
+        @XmlElementRef(name = "MgmtData", namespace = "http://www.w3.org/2000/09/xmldsig#", type = com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.MgmtData.class)
     })
     @XmlMixed
     @XmlAnyElement(lax = true)
-    protected List<Object> content;
+    protected List<XMLStructure> content;
     @XmlAttribute(name = "Id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlID
@@ -145,10 +146,11 @@ public class KeyInfoType {
      * {@link JAXBElement }{@code <}{@link String }{@code >}
      * 
      * 
+     * @return 
      */
-    public List<Object> getContent() {
+    public List<XMLStructure> getContent() {
         if (content == null) {
-            content = new ArrayList<Object>();
+            content = new ArrayList<>();
         }
         return this.content;
     }

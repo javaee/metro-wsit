@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,54 +37,33 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * KeyInfo.java
- *
- * Created on January 24, 2006, 4:07 PM
- */
-
 package com.sun.xml.ws.security.opt.crypto.dsig.keyinfo;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.XMLCryptoContext;
-import javax.xml.crypto.XMLStructure;
 
 /**
  *
- * @author Abhijit Das
+ * @author lukas
  */
-@XmlRootElement(name="KeyInfo", namespace = "http://www.w3.org/2000/09/xmldsig#")
-@XmlType(name = "KeyInfoType")
-public class KeyInfo extends com.sun.xml.security.core.dsig.KeyInfoType implements javax.xml.crypto.dsig.keyinfo.KeyInfo {
-    
-    /** Creates a new instance of KeyInfo */
-    public KeyInfo() {
+@XmlRootElement(name="MgmtData", namespace = "http://www.w3.org/2000/09/xmldsig#")
+public class MgmtData implements javax.xml.crypto.XMLStructure {
+
+    private String data;
+
+    public MgmtData() {
     }
 
     @Override
-    public void marshal(XMLStructure xMLStructure, XMLCryptoContext xMLCryptoContext) throws MarshalException {
-        
-    }
-
-    @Override
-    public boolean isFeatureSupported(String string) {
+    public boolean isFeatureSupported(String feature) {
         return false;
     }
-    
-    public void setContent(List<XMLStructure> content ) {
-        this.content = content;
+
+    public String getData() {
+        return data;
     }
 
-    @Override
-    public List<XMLStructure> getContent() {
-        if (content == null) {
-            content = new ArrayList<>();
-        }
-        return content;
+    public void setData(String data) {
+        this.data = data;
     }
+
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -56,8 +56,8 @@ import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.crypto.XMLStructure;
 import javax.xml.namespace.QName;
-import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 
 
 /**
@@ -81,7 +81,7 @@ import com.sun.xml.ws.security.trust.impl.bindings.BinarySecretType;
 @XmlType(name = "BinarySecretType", propOrder = {
     "value"
 })
-public class BinarySecretType {
+public class BinarySecretType implements XMLStructure {
 
     @XmlValue
     protected byte[] value;
@@ -154,4 +154,8 @@ public class BinarySecretType {
         return otherAttributes;
     }
 
+    @Override
+    public boolean isFeatureSupported(String feature) {
+        return false;
+    }
 }

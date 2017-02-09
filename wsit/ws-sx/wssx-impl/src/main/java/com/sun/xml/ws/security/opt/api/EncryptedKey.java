@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,12 +42,13 @@ package com.sun.xml.ws.security.opt.api;
 
 import com.sun.xml.security.core.xenc.ReferenceList;
 import java.security.Key;
+import javax.xml.crypto.XMLStructure;
 
 /**
  * 
  * @author K.Venugopal@sun.com
  */
-public interface EncryptedKey {
+public interface EncryptedKey extends XMLStructure {
     /**
      * 
      * @return 
