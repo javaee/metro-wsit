@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,12 +46,13 @@ package com.sun.xml.ws.security.trust.elements;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 import java.util.Map;
+import javax.xml.crypto.XMLStructure;
 import javax.xml.namespace.QName;
 
 /**
  * @author WS-Trust Implementation Team
  */
-public interface BinarySecret {
+public interface BinarySecret extends XMLStructure {
 
     /** Predefined constants for the Type of BinarySecret desired in the Security Token
      * Values for the wst:BinarySecret/@Type parameter
