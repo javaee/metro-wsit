@@ -370,10 +370,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.1</version>
+                    <version>3.6.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
@@ -442,7 +442,7 @@
                         <forkMode>once</forkMode>
                         <childDelegation>false</childDelegation>
                         <argLine>
-                            -Djava.awt.headless=true -XX:MaxPermSize=256m -Xmx256m
+                            -Djava.awt.headless=true -Xmx256m
                         </argLine>
                     </configuration>
                 </plugin>
