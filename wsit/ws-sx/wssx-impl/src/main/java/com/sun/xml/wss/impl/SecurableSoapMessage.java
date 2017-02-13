@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -102,11 +102,6 @@ public final class SecurableSoapMessage extends SOAPMessage {
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     static {
-        /**
-         * Work-around for the JDK JCE name mapping for oaep padding. See JDK-8017173
-         */
-        System.setProperty("org.apache.xml.security.resource.config", "resource/config.xml"); 
-
         Init.init();
 
         //Workaround for: Apache XML Security 1.5.6 do not support Canonicalizer.ALGO_ID_C14N_PHYSICAL in file 'java/org/apache/xml/security/resource/config.xml'
