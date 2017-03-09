@@ -92,7 +92,7 @@
     </developers>
 
     <properties>
-        <jaxws.ri.version>2.3.0-b170308.0712</jaxws.ri.version>
+        <jaxws.ri.version>2.3.0-b170309.1503</jaxws.ri.version>
         <jaxws.maven.plugin.version>2.3.1-b20150201.1248</jaxws.maven.plugin.version>
     </properties>
         
