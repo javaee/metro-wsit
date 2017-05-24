@@ -89,7 +89,7 @@ public class Subject extends SubjectType implements com.sun.xml.wss.saml.Subject
      * Constructs a Subject object from a <code>NameID</code>
      * object and a <code>SubjectConfirmation</code> object.
      *
-     * @param NameID <code>NameID</code> object.
+     * @param nameId <code>NameID</code> object.
      * @param subjectConfirmation <code>SubjectConfirmation</code> object.
      * @exception SAMLException if it could not process the
      *            Element properly, implying that there is an error in the
@@ -109,7 +109,7 @@ public class Subject extends SubjectType implements com.sun.xml.wss.saml.Subject
      * This constructor builds a subject element from an existing XML block
      * which has already been built into a DOM.
      *
-     * @param subjectElement An Element representing DOM tree for Subject object
+     * @param element An Element representing DOM tree for Subject object
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the
      *            element definition.

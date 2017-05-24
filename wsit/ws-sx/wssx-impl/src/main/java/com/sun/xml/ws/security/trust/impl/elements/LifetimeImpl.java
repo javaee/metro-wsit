@@ -93,7 +93,7 @@ public class LifetimeImpl extends LifetimeType implements Lifetime {
      * Constructs a <code>Lifetime</code> element from
      * an existing XML block.
      *
-     * @param lifetimeElement A
+     * @param element
      *        <code>org.w3c.dom.Element</code> representing DOM tree
      *        for <code>Lifetime</code> object.
      * @exception WSTrustException if it could not process the

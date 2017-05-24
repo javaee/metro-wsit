@@ -84,6 +84,9 @@
                             com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
                         </exclude>
                     </excludes>
+                    <argLine>
+                       --add-modules java.activation
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>

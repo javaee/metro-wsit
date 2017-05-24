@@ -104,7 +104,6 @@ public class AuthzDecisionStatement extends AuthzDecisionStatementType
     /**
      * Constructs an instance of <code>AuthzDecisionStatement</code>.
      *
-     * @param subject (required) A Subject object
      * @param resource (required) A String identifying the resource to which
      *        access authorization is sought.
      * @param decision (required) The decision rendered by the issuer with
@@ -114,7 +113,6 @@ public class AuthzDecisionStatement extends AuthzDecisionStatementType
      *        actions authorized to be performed on the specified resource.
      * @param evidence (optional) An Evidence object representing a set of
      *        assertions that the issuer replied on in making decisions.
-     * @exception SAMLException if there is an error in the sender.
      */
     public AuthzDecisionStatement(
         String resource, String decision, List action,

@@ -49,13 +49,15 @@ import java.util.Iterator;
  * <p>
  *  <B>Syntax:
  * <p>
- *  <pre><xmp>
- *       <sp:SignedParts ... >
- *            <sp:Body />?
- *            <sp:Header Name="xs:NCName"? Namespace="xs:anyURI" ... />*
+ *  <pre>
+ *   &lt;xmp&gt;
+ *       &lt;sp:SignedParts ... &gt;
+ *            &lt;sp:Body /&gt;?
+ *            &lt;sp:Header Name="xs:NCName"? Namespace="xs:anyURI" ... /&gt;*
  *                  ...
- *       </sp:SignedParts>
- * </xmp> </pre>
+ *       &lt;/sp:SignedParts&gt;
+ *   &lt;/xmp&gt;
+ * </pre>
  *
  * @author K.Venugopal@sun.com
  */

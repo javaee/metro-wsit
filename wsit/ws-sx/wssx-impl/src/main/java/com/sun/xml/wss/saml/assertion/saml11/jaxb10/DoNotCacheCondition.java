@@ -72,7 +72,7 @@ public class DoNotCacheCondition extends com.sun.xml.wss.saml.internal.saml11.ja
      * Constructs a <code>DoNotCacheCondition</code> element from
      * an existing XML block.
      *
-     * @param doNotCacheConditionElement A
+     * @param element A
      *        <code>org.w3c.dom.Element</code> representing DOM tree
      *        for <code>DoNotCacheCondition</code> object.
      * @exception SAMLException if it could not process the

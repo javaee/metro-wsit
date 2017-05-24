@@ -80,7 +80,9 @@ public interface BinaryExchange {
      * Gets the decoded value of the text node. This represents the
      *  raw bytes for the Binary Exchange.
      *
-     * @return {@link byte[] }
+     * @return 
+     *     possible object is
+     *     byte[]
      *
      */
     byte[] getRawValue();
@@ -128,7 +130,9 @@ public interface BinaryExchange {
      * Sets the value of the binary exchange as raw bytes.
      * The value that appears in the element will be encoded appropriately.
      *
-     * @param rawText {@link byte[]}
+     * @param rawText
+     *     allowed object is
+     *     byte[]
      *
      */
     void setRawValue(byte[] rawText);

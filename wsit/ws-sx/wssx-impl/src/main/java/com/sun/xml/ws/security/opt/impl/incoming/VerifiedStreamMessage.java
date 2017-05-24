@@ -137,7 +137,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
      *      if null, it means no headers. if non-null,
      *      it will be owned by this message.
      * @param reader
-     *      points at the start element/document of the payload (or the end element of the &lt;s:Body>
+     *      points at the start element/document of the payload (or the end element of the &lt;s:Body&gt;
      *      if there's no payload)
      */
     public VerifiedStreamMessage(
@@ -186,7 +186,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
      * and the complete infoset of the SOAP envelope.
      *
      * <p>
-     * See {@link #StreamMessage(MessageHeaders, AttachmentSet, XMLStreamReader, SOAPVersion)} for
+     * See  #StreamMessage(MessageHeaders, AttachmentSet, XMLStreamReader, SOAPVersion) for
      * the description of the basic parameters.
      *
      * @param headerTag

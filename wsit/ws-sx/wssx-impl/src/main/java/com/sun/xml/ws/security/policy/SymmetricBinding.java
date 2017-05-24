@@ -49,17 +49,17 @@ public interface SymmetricBinding extends Binding{
   
     /**
      * returns the EncryptionToken
-     * @return {@link EncryptionToken}
+     * @return {@link Token}
      */
     public Token getEncryptionToken();
     /**
      * returns token to be used for Signature operations
-     * @return {@link SignatureToken}
+     * @return {@link Token}
      */
     public Token getSignatureToken();
     /**
      * return token to be used for signature and encryption operations.
-     * @return {@link ProtectionToken}
+     * @return {@link Token}
      */
     public Token getProtectionToken();
 }

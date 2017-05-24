@@ -103,7 +103,7 @@ public class SubjectConfirmation extends com.sun.xml.wss.saml.internal.saml11.ja
      * Constructs a subject confirmation element from an existing
      * XML block.
      *
-     * @param subjectConfirmationElement a DOM Element representing the
+     * @param element a DOM Element representing the
      *        <code>SubjectConfirmation</code> object.
      * @throws SAMLException
      */

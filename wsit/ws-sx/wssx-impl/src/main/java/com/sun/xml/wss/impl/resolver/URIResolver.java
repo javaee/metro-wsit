@@ -138,7 +138,7 @@ public class URIResolver extends ResourceResolverSpi {
     * Method engineResolve
     *
     * @param uri
-    * @param BaseURI
+    * @param baseURI
     *
     * @return XMLSignatureInput
     *
@@ -303,7 +303,7 @@ public class URIResolver extends ResourceResolverSpi {
     * Method engineCanResolve
     *
     * @param uri
-    * @param BaseURI
+    * @param baseURI
     *
     * @return true if uri node can be resolved, false otherwise
     */

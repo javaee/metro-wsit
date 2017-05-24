@@ -92,7 +92,7 @@ public interface SecurityElement {
      * 
      * <h3>Performance Expectation</h3>
      * <p>
-     * For some {@link Header} implementations, this operation
+     * For some Header implementations, this operation
      * is a non-trivial operation. Therefore, use of this method
      * is discouraged unless the caller is interested in reading
      * the whole header.
@@ -104,7 +104,7 @@ public interface SecurityElement {
      * that you talk to us.
      * 
      * <p>
-     * {@link Message}s that come from tranport usually provides
+     * Messages that come from tranport usually provides
      * a reasonably efficient implementation of this method.
      * 
      * @return must not null.

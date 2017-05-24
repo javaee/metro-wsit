@@ -72,22 +72,22 @@ import org.w3c.dom.Node;
  *       &lt;Assertion  AssertionID="1124370015917" IssueInstant="2005-08-18T18:30:15.917+05:30"
  *                      Issuer="CN=Assertion Issuer,OU=AI,O=Assertion Issuer,L=Waltham,ST=MA,C=US"
  *                      MajorVersion="1" MinorVersion="1"
- *                      xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
+ *                      xmlns="urn:oasis:names:tc:SAML:1.0:assertion"&gt;
  *         &lt;Conditions NotBefore="2005-08-16T13:21:50.503+05:30"
- *                        NotOnOrAfter="2005-08-16T15:21:50.504+05:30"/>
- *         &lt;Subject xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
- *             &lt;NameIdentifier Format="urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName">
+ *                        NotOnOrAfter="2005-08-16T15:21:50.504+05:30"/&gt;
+ *         &lt;Subject xmlns="urn:oasis:names:tc:SAML:1.0:assertion"&gt;
+ *             &lt;NameIdentifier Format="urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"&gt;
  *                 CN=SAML User,OU=SU,O=SAML User,L=Los Angeles,ST=CA,C=US
- *             &lt;/NameIdentifier>
+ *             &lt;/NameIdentifier&gt;
  *
- *             &lt;SubjectConfirmation>
- *                 &lt;ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:sender-vouches&lt;/ConfirmationMethod>
- *             &lt;/SubjectConfirmation>
- *         &lt;/Subject>
- *         &lt;Attribute AttributeName="attribute1" AttributeNamespace="urn:com:sun:xml:wss:attribute">
- *             &lt;AttributeValue>ATTRIBUTE1&lt;/AttributeValue>
- *         &lt;/Attribute>
- *      &lt;Assertion>
+ *             &lt;SubjectConfirmation&gt;
+ *                 &lt;ConfirmationMethod&gt;urn:oasis:names:tc:SAML:1.0:cm:sender-vouches&lt;/ConfirmationMethod&gt;
+ *             &lt;/SubjectConfirmation&gt;
+ *         &lt;/Subject&gt;
+ *         &lt;Attribute AttributeName="attribute1" AttributeNamespace="urn:com:sun:xml:wss:attribute"&gt;
+ *             &lt;AttributeValue&gt;ATTRIBUTE1&lt;/AttributeValue&gt;
+ *         &lt;/Attribute&gt;
+ *      &lt;Assertion&gt;
  * </pre>
  */
 public interface Assertion extends Token {

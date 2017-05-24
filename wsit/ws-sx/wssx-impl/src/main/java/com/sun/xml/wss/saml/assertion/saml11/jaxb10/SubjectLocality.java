@@ -77,7 +77,7 @@ public class SubjectLocality extends com.sun.xml.wss.saml.internal.saml11.jaxb10
      * Constructs an instance of <code>SubjectLocality</code> from an existing
      * XML block.
      *
-     * @param localityElement A <code>org.w3c.dom.Element</code> representing
+     * @param element A <code>org.w3c.dom.Element</code> representing
      *        DOM tree for <code>SubjectLocality</code> object.
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the

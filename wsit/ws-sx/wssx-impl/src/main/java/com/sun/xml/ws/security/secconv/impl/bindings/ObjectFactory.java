@@ -142,7 +142,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}possible object is byte[]{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://schemas.xmlsoap.org/ws/2005/02/sc", name = "Nonce")

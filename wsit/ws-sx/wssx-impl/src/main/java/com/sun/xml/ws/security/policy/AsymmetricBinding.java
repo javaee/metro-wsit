@@ -49,30 +49,32 @@ package com.sun.xml.ws.security.policy;
  * the message signature from recipient to initiator. This interface represents normalized
  * AsymmetricBinding security policy assertion as shown below.
  *
- * <pre><xmp>
- *      <sp:AsymmetricBinding ... >
- *              <wsp:Policy>
- *                  <sp:InitiatorToken>
- *                      <wsp:Policy> ... </wsp:Policy>
- *                  </sp:InitiatorToken>
- *                  <sp:RecipientToken>
- *                      <wsp:Policy> ... </wsp:Policy>
- *                  </sp:RecipientToken>
- *                  <sp:AlgorithmSuite ... >
+ * <pre>
+ *  &lt;xmp&gt;
+ *      &lt;sp:AsymmetricBinding ... &gt;
+ *              &lt;wsp:Policy&gt;
+ *                  &lt;sp:InitiatorToken&gt;
+ *                      &lt;wsp:Policy&gt; ... &lt;/wsp:Policy&gt;
+ *                  &lt;/sp:InitiatorToken&gt;
+ *                  &lt;sp:RecipientToken&gt;
+ *                      &lt;wsp:Policy&gt; ... &lt;/wsp:Policy&gt;
+ *                  &lt;/sp:RecipientToken&gt;
+ *                  &lt;sp:AlgorithmSuite ... &gt;
  *                      ...
- *                  </sp:AlgorithmSuite>
- *                  <sp:Layout ... > ... </sp:Layout> ?
- *                  <sp:IncludeTimestamp ... /> ?
- *                  <sp:EncryptBeforeSigning ... /> ?
- *                  <sp:EncryptSignature ... /> ?
- *                  <sp:ProtectTokens ... /> ?
- *                  <sp:OnlySignEntireHeadersAndBody ... /> ?
+ *                  &lt;/sp:AlgorithmSuite&gt;
+ *                  &lt;sp:Layout ... &gt; ... &lt;/sp:Layout&gt; ?
+ *                  &lt;sp:IncludeTimestamp ... /&gt; ?
+ *                  &lt;sp:EncryptBeforeSigning ... /&gt; ?
+ *                  &lt;sp:EncryptSignature ... /&gt; ?
+ *                  &lt;sp:ProtectTokens ... /&gt; ?
+ *                  &lt;sp:OnlySignEntireHeadersAndBody ... /&gt; ?
  *                      ...
- *             </wsp:Policy>
+ *             &lt;/wsp:Policy&gt;
  *          ...
- *      </sp:AsymmetricBinding>
+ *      &lt;/sp:AsymmetricBinding&gt;
  *
- *  </xmp></pre>
+ *  &lt;/xmp&gt;
+ * </pre>
  *
  * @author K.Venugopal@sun.com
  */

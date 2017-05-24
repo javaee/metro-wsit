@@ -59,28 +59,28 @@ import com.sun.xml.wss.XWSSecurityException;
 
 /**
  * The schema definition for a SAML <code>Assertion</code> is as follows:
- * <xmp>
- * <element name="Assertion" type="saml:AssertionType"/>
- * <complexType name="AssertionType">
- *     <sequence>
- *         <element ref="saml:Conditions" minOccurs="0"/>
- *         <element ref="saml:Advice" minOccurs="0"/>
- *         <choice maxOccurs="unbounded">
- *             <element ref="saml:Statement"/>
- *             <element ref="saml:SubjectStatement"/>
- *             <element ref="saml:AuthenticationStatement"/>
- *             <element ref="saml:AuthorizationDecisionStatement"/>
- *             <element ref="saml:AttributeStatement"/>
- *         </choice>
- *         <element ref="ds:Signature" minOccurs="0"/>
- *     </sequence>
- *     <attribute name="MajorVersion" type="integer" use="required"/>
- *     <attribute name="MinorVersion" type="integer" use="required"/>
- *     <attribute name="AssertionID" type="saml:IDType" use="required"/>
- *     <attribute name="Issuer" type="string" use="required"/>
- *     <attribute name="IssueInstant" type="dateTime" use="required"/>
- * </complexType>
- * </xmp>
+ * &lt;xmp&gt;
+ * &lt;element name="Assertion" type="saml:AssertionType"/&gt;
+ * &lt;complexType name="AssertionType"&gt;
+ *     &lt;sequence&gt;
+ *         &lt;element ref="saml:Conditions" minOccurs="0"/&gt;
+ *         &lt;element ref="saml:Advice" minOccurs="0"/&gt;
+ *         &lt;choice maxOccurs="unbounded"&gt;
+ *             &lt;element ref="saml:Statement"/&gt;
+ *             &lt;element ref="saml:SubjectStatement"/&gt;
+ *             &lt;element ref="saml:AuthenticationStatement"/&gt;
+ *             &lt;element ref="saml:AuthorizationDecisionStatement"/&gt;
+ *             &lt;element ref="saml:AttributeStatement"/&gt;
+ *         &lt;/choice&gt;
+ *         &lt;element ref="ds:Signature" minOccurs="0"/&gt;
+ *     &lt;/sequence&gt;
+ *     &lt;attribute name="MajorVersion" type="integer" use="required"/&gt;
+ *     &lt;attribute name="MinorVersion" type="integer" use="required"/&gt;
+ *     &lt;attribute name="AssertionID" type="saml:IDType" use="required"/&gt;
+ *     &lt;attribute name="Issuer" type="string" use="required"/&gt;
+ *     &lt;attribute name="IssueInstant" type="dateTime" use="required"/&gt;
+ * &lt;/complexType&gt;
+ * &lt;/xmp&gt;
  *
  * @author Axl Mattheus
  */
@@ -108,8 +108,8 @@ public class SamlAssertionHeaderBlock extends SecurityHeaderBlockImpl implements
     
     
     /**
-     * Constructs code>SamlAssertionHeaderBlock</code> from an existing SAML
-     * <code>Assertion</code>.
+     * Constructs code&gt;SamlAssertionHeaderBlock&lt;/code&gt; from an existing SAML
+     * &lt;code&gt;Assertion&lt;/code&gt;.
      *
      * @param assertion
      * @throws XWSSecurityException
@@ -124,12 +124,12 @@ public class SamlAssertionHeaderBlock extends SecurityHeaderBlockImpl implements
     }
     
     /**
-     * Constructs a SAML <code>Assertion</code> header block from an existing
-     * <code>SOAPElement</code>.
+     * Constructs a SAML &lt;code&gt;Assertion&lt;/code&gt; header block from an existing
+     * &lt;code&gt;SOAPElement&lt;/code&gt;.
      *
      * @param element an existing SAML assertion element.
      * @throws XWSSecurityException when the element is not a valid template
-     *         for a SAML <code>Assertion</code>.
+     *         for a SAML &lt;code&gt;Assertion&lt;/code&gt;.
      */
     public SamlAssertionHeaderBlock(SOAPElement element)
     throws XWSSecurityException {
@@ -190,7 +190,7 @@ public class SamlAssertionHeaderBlock extends SecurityHeaderBlockImpl implements
     /**
      * Set the signature for the Request.
      *
-     * @param elem <code>ds:Signature</code> element.
+     * @param elem &lt;code&gt;ds:Signature&lt;/code&gt; element.
      * @return A boolean value: true if the operation succeeds; false otherwise.
      */
     /*public boolean setSignature(Element elem) {

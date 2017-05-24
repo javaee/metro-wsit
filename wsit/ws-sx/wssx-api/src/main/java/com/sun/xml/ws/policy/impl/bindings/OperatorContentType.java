@@ -69,19 +69,19 @@ import org.w3c.dom.Element;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="OperatorContentType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}Policy"/>
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}All"/>
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}ExactlyOne"/>
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}PolicyReference"/>
- *         &lt;any/>
- *       &lt;/choice>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="OperatorContentType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}Policy"/&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}All"/&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}ExactlyOne"/&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}PolicyReference"/&gt;
+ *         &lt;any/&gt;
+ *       &lt;/choice&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

@@ -74,22 +74,22 @@ import org.w3c.dom.Element;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;element name="PolicyAttachment">
- *   &lt;complexType>
- *     &lt;complexContent>
- *       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *         &lt;sequence>
- *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}AppliesTo"/>
- *           &lt;choice maxOccurs="unbounded">
- *             &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}Policy"/>
- *             &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}PolicyReference"/>
- *           &lt;/choice>
- *           &lt;any/>
- *         &lt;/sequence>
- *       &lt;/restriction>
- *     &lt;/complexContent>
- *   &lt;/complexType>
- * &lt;/element>
+ * &lt;element name="PolicyAttachment"&gt;
+ *   &lt;complexType&gt;
+ *     &lt;complexContent&gt;
+ *       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *         &lt;sequence&gt;
+ *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}AppliesTo"/&gt;
+ *           &lt;choice maxOccurs="unbounded"&gt;
+ *             &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}Policy"/&gt;
+ *             &lt;element ref="{http://schemas.xmlsoap.org/ws/2004/09/policy}PolicyReference"/&gt;
+ *           &lt;/choice&gt;
+ *           &lt;any/&gt;
+ *         &lt;/sequence&gt;
+ *       &lt;/restriction&gt;
+ *     &lt;/complexContent&gt;
+ *   &lt;/complexType&gt;
+ * &lt;/element&gt;
  * </pre>
  * 
  * 

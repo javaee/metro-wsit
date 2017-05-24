@@ -126,7 +126,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
      * Constructs a <code>RequestedSecurityToken</code> element from
      * an existing XML block.
      *
-     * @param requestedSecurityTokenElement A
+     * @param element
      *        <code>org.w3c.dom.Element</code> representing DOM tree
      *        for <code>RequestedSecurityToken</code> object.
      * @exception WSTrustException if it could not process the

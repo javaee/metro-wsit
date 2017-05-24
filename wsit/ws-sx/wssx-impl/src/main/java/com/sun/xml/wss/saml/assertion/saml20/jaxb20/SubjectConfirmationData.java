@@ -88,7 +88,7 @@ public class SubjectConfirmationData extends SubjectConfirmationDataType
      * Constructs a subject confirmation element from an existing
      * XML block.
      *
-     * @param SubjectConfirmationDataElement a DOM Element representing the
+     * @param element a DOM Element representing the
      *        <code>SubjectConfirmationData</code> object.
      * @throws SAMLException
      */
@@ -107,15 +107,6 @@ public class SubjectConfirmationData extends SubjectConfirmationDataType
     /**
      * Constructs an <code>SubjectConfirmationData</code> instance.
      *
-     * @param confirmationMethods A set of <code>confirmationMethods</code>
-     *        each of which is a URI (String) that identifies a protocol
-     *        used to authenticate a <code>Subject</code>. Please refer to
-     *        <code>draft-sstc-core-25</code> Section 7 for
-     *        a list of URIs identifying common authentication protocols.
-     * @param SubjectConfirmationDataData Additional authentication information to
-     *        be used by a specific authentication protocol. Can be passed as
-     *        null if there is no <code>SubjectConfirmationDataData</code> for the
-     *        <code>SubjectConfirmationData</code> object.
      * @param keyInfo An XML signature element that specifies a cryptographic
      *        key held by the <code>Subject</code>.
      * @exception SAMLException if the input data is invalid or

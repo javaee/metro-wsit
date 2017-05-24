@@ -64,27 +64,27 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="DerivedKeyTokenType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}SecurityTokenReference" minOccurs="0"/>
- *         &lt;element name="Properties" type="{http://schemas.xmlsoap.org/ws/2005/02/sc}PropertiesType" minOccurs="0"/>
- *         &lt;sequence minOccurs="0">
- *           &lt;choice>
- *             &lt;element name="Generation" type="{http://www.w3.org/2001/XMLSchema}unsignedLong"/>
- *             &lt;element name="Offset" type="{http://www.w3.org/2001/XMLSchema}unsignedLong"/>
- *           &lt;/choice>
- *           &lt;element name="Length" type="{http://www.w3.org/2001/XMLSchema}unsignedLong" minOccurs="0"/>
- *         &lt;/sequence>
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2005/02/sc}Label" minOccurs="0"/>
- *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2005/02/sc}Nonce" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="Algorithm" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
- *       &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="DerivedKeyTokenType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}SecurityTokenReference" minOccurs="0"/&gt;
+ *         &lt;element name="Properties" type="{http://schemas.xmlsoap.org/ws/2005/02/sc}PropertiesType" minOccurs="0"/&gt;
+ *         &lt;sequence minOccurs="0"&gt;
+ *           &lt;choice&gt;
+ *             &lt;element name="Generation" type="{http://www.w3.org/2001/XMLSchema}unsignedLong"/&gt;
+ *             &lt;element name="Offset" type="{http://www.w3.org/2001/XMLSchema}unsignedLong"/&gt;
+ *           &lt;/choice&gt;
+ *           &lt;element name="Length" type="{http://www.w3.org/2001/XMLSchema}unsignedLong" minOccurs="0"/&gt;
+ *         &lt;/sequence&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2005/02/sc}Label" minOccurs="0"/&gt;
+ *         &lt;element ref="{http://schemas.xmlsoap.org/ws/2005/02/sc}Nonce" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="Algorithm" type="{http://www.w3.org/2001/XMLSchema}anyURI" /&gt;
+ *       &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

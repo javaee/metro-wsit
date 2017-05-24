@@ -70,6 +70,7 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
+                           <excludes>module-info*,javax/transaction/xa/*</excludes>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>javax.jws</groupId>
@@ -184,6 +185,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalJOptions>
+                        <additionalJOption>--add-imports</additionalJOption>
+                        <additionalJOption>java.activation</additionalJOption>
+                    </additionalJOptions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -200,12 +211,6 @@
         <dependency>
             <groupId>javax.xml.soap</groupId>
             <artifactId>javax.xml.soap-api</artifactId>            
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.activation</groupId>
-                    <artifactId>activation</artifactId>
-                </exclusion>
-            </exclusions>    
         </dependency>
         <dependency>
             <groupId>javax.jws</groupId>

@@ -89,7 +89,7 @@ public class AudienceRestrictionCondition extends com.sun.xml.wss.saml.internal.
      * Constructs an <code>AudienceRestrictionCondition</code> element from an
      * existing XML block.
      *
-     * @param audienceRestrictionConditionElement A
+     * @param element A
      *        <code>org.w3c.dom.Element</code> representing DOM tree for
      *        <code>AudienceRestrictionCondition</code> object.
      * @exception SAMLException if it could not process the

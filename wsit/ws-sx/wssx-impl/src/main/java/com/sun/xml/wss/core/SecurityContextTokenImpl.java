@@ -68,11 +68,11 @@ import java.net.URI;
 import java.util.ArrayList;
 
 /**
- *<wsc:SecurityContextToken wsu:Id="..." ...> 
- *    <wsc:Identifier>...</wsc:Identifier> 
- *    <wsc:Instance>...</wsc:Instance> 
+ *&lt;wsc:SecurityContextToken wsu:Id="..." ...&gt; 
+ *    &lt;wsc:Identifier&gt;...&lt;/wsc:Identifier&gt; 
+ *    &lt;wsc:Instance&gt;...&lt;/wsc:Instance&gt; 
  *    ... 
- *</wsc:SecurityContextToken>
+ *&lt;/wsc:SecurityContextToken&gt;
  *
  */
 public class SecurityContextTokenImpl extends SecurityHeaderBlockImpl 

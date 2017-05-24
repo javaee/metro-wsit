@@ -108,7 +108,7 @@ import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
  * The parser expects the root element of an XWS-Security configuration
  * to be either a <code>xwss:JAXRPCSecurity</code> or a <code>xwss:SecurityConfiguration</code>.
  *
- * @see xwssconfig.xsd (the XWS-Security configuration schema)
+ * xwssconfig.xsd (the XWS-Security configuration schema)
  */
 
 public class SecurityConfigurationXmlReader implements ConfigurationConstants {    

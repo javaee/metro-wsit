@@ -75,7 +75,7 @@ public class Evidence extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.E
      * Constructs an <code>Evidence</code> object from a block of existing XML
      * that has already been built into a DOM.
      *
-     * @param assertionSpecifierElement A <code>org.w3c.dom.Element</code>
+     * @param element A <code>org.w3c.dom.Element</code>
      *        representing DOM tree for <code>Evidence</code> object.
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the

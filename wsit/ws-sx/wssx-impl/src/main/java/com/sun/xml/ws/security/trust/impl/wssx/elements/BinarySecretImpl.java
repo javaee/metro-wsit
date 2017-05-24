@@ -88,7 +88,7 @@ public class BinarySecretImpl extends BinarySecretType implements BinarySecret {
      * Constructs a <code>BinarySecret</code> element from
      * an existing XML block.
      *
-     * @param lifetimeElement A
+     * @param element
      *        <code>org.w3c.dom.Element</code> representing DOM tree
      *        for <code>BinarySecret</code> object.
      * @exception WSTrustException if it could not process the

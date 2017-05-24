@@ -77,7 +77,7 @@ public class SubjectLocality extends SubjectLocalityType
      * Constructs an instance of <code>SubjectLocality</code> from an existing
      * XML block.
      *
-     * @param localityElement A <code>org.w3c.dom.Element</code> representing
+     * @param element A <code>org.w3c.dom.Element</code> representing
      *        DOM tree for <code>SubjectLocality</code> object.
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the
@@ -98,9 +98,9 @@ public class SubjectLocality extends SubjectLocalityType
     /**
      * Constructs an instance of <code>SubjectLocality</code>.
      *
-     * @param ipAddress String representing the IP Address of the entity
+     * @param address String representing the IP Address of the entity
      *        that was authenticated.
-     * @param dnsAddress String representing the DNS Address of the entity that
+     * @param dnsName String representing the DNS Address of the entity that
      *        was authenticated. As per SAML specification  they are both
      *        optional, so values can be null.
      */

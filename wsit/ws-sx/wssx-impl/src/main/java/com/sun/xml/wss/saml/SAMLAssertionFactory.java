@@ -69,7 +69,7 @@ import javax.xml.stream.XMLStreamReader;
 public abstract class SAMLAssertionFactory {
     
     /**
-     * SAML Version 1.1 & SAML Version 2.0
+     * SAML Version 1.1 &amp; SAML Version 2.0
      */
     public static final String SAML1_1 = "Saml1.1";
     public static final String SAML2_0 = "Saml2.0";
@@ -85,7 +85,7 @@ public abstract class SAMLAssertionFactory {
      *
      * Create an instance of SAMLAssertionFactory.
      *
-     * @param samlVersion A String representing the saml version. Possible values {SAMLAssertionFactory.SAML1_1} & {SAMLAssertionFactory.SAML2_0}
+     * @param samlVersion A String representing the saml version. Possible values {SAMLAssertionFactory.SAML1_1} &amp; {SAMLAssertionFactory.SAML2_0}
      */
     public static SAMLAssertionFactory newInstance(String samlVersion) throws XWSSecurityException {
         if ( samlVersion.intern() == SAML1_1) {

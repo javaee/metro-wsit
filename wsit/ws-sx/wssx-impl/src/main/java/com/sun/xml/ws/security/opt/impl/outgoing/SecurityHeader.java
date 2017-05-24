@@ -217,7 +217,7 @@ public class SecurityHeader {
      *      if the attribute is found, return the whitespace normalized value.
      *      (meaning no leading/trailing space, no consequtive whitespaces in-between.)
      *      Otherwise null. Note that the XML parsers are responsible for
-     *      whitespace-normalizing attributes, so {@link Header} implementation
+     *      whitespace-normalizing attributes, so Header implementation
      *      doesn't have to do anything.
      */
     public @Nullable String getAttribute(@NotNull String nsUri, @NotNull String localName){
@@ -264,7 +264,7 @@ public class SecurityHeader {
      * Writes out the header to the given SOAPMessage.
      *
      * <p>
-     * Sometimes a {@link Message} needs to produce itself
+     * Sometimes a Message needs to produce itself
      * as {@link SOAPMessage}, in which case each header needs
      * to turn itself into a header.
      *
@@ -280,7 +280,7 @@ public class SecurityHeader {
      * Writes out the header as SAX events.
      *
      * <p>
-     * Sometimes a {@link Message} needs to produce SAX events,
+     * Sometimes a Message needs to produce SAX events,
      * and this method is necessary for headers to participate to it.
      *
      * <p>
@@ -293,7 +293,7 @@ public class SecurityHeader {
      * from {@link ContentHandler} (meaning any parsing error and etc) must
      * be first reported to {@link ErrorHandler}. If the SAX event production
      * cannot be continued and the processing needs to abort, the code may
-     * then throw the same {@link SAXParseException} reported to {@link ErrorHandler}.
+     * then throw the same SAXParseException reported to {@link ErrorHandler}.
      *
      * @param contentHandler
      *      The {@link ContentHandler} that receives SAX events.

@@ -87,7 +87,7 @@ public abstract class KeyInfoStrategy {
      * @param keyInfo
      *    the KeyInfo block into which the Key Information has to be inserted.
      * @param secureMsg the SecurableSoapMessage
-     * @param x509TokenId value of the <xwss:X509Token>/@id in config file
+     * @param x509TokenId value of the &lt;xwss:X509Token&gt;/@id in config file
      * @throws XWSSecurityException
      *     if there was a problem in inserting the key information
      */

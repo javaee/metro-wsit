@@ -58,13 +58,13 @@ import javax.xml.bind.annotation.XmlEnumValue;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="DecisionType">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="Permit"/>
- *     &lt;enumeration value="Deny"/>
- *     &lt;enumeration value="Indeterminate"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="DecisionType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="Permit"/&gt;
+ *     &lt;enumeration value="Deny"/&gt;
+ *     &lt;enumeration value="Indeterminate"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

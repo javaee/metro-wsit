@@ -166,7 +166,7 @@ public class Conditions extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl
     /**
      * Constructs a <code>Conditions</code> element from an existing XML block.
      *
-     * @param conditionsElement A <code>org.w3c.dom.Element</code> representing
+     * @param element A <code>org.w3c.dom.Element</code> representing
      *        DOM tree for <code>Conditions</code> object
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the

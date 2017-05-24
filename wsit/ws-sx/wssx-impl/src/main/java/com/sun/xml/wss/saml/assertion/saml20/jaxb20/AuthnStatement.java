@@ -115,15 +115,9 @@ public class AuthnStatement extends AuthnStatementType
     /**
      * Constructor for authentication statement
      *
-     * @param authMethod (optional) A String specifies the type of authentication
-     *        that took place.
-     * @param authInstant (optional) A GregorianCalendar specifies the time at which the
+     * @param authInstant A GregorianCalendar specifies the time at which the
      *        authentication that took place.
-     * @param subject (required) A Subject object
-     * @param subjectLocality (optional) A <code>SubjectLocality</code> object.
-     * @param authorityBinding (optional) A List of <code>AuthorityBinding</code>
-     *        objects.
-     * @exception SAMLException if there is an error in the sender.
+     * @param subjectLocality A <code>SubjectLocality</code> object.
      */
     public AuthnStatement(
             GregorianCalendar authInstant, SubjectLocality subjectLocality, 

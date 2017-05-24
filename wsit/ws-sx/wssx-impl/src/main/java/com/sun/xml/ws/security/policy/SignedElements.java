@@ -47,12 +47,12 @@ import java.util.Iterator;
  *  <p>
  *      <B>Syntax:
  *          <pre>
- *            <xmp>
- *              <sp:SignedElements XPathVersion="xs:anyURI"? ... >
- *                      <sp:XPath>xs:string</sp:XPath>+
+ *            &lt;xmp&gt;
+ *              &lt;sp:SignedElements XPathVersion="xs:anyURI"? ... &gt;
+ *                      &lt;sp:XPath&gt;xs:string&lt;/sp:XPath&gt;+
  *                              ...
- *              </sp:SignedElements>
- *             </xmp>
+ *              &lt;/sp:SignedElements&gt;
+ *             &lt;/xmp&gt;
  *           </pre>
  * @author K.Venugopal@sun.com
  */

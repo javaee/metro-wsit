@@ -1256,7 +1256,6 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
      *
      * @param creationTime
      * @throws XWSSecurityException
-     * @return
      */
     public void validateCreationTime(
             Map context,

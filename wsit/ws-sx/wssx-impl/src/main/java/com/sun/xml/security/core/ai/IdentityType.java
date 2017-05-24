@@ -67,22 +67,22 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="IdentityType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;choice maxOccurs="unbounded">
- *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Dns" minOccurs="0"/>
- *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Spn" minOccurs="0"/>
- *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Upn" minOccurs="0"/>
- *           &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyInfo" minOccurs="0"/>
- *           &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}BinarySecurityToken" minOccurs="0"/>
- *           &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}SecurityTokenReference" minOccurs="0"/>
- *         &lt;/choice>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="IdentityType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;choice maxOccurs="unbounded"&gt;
+ *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Dns" minOccurs="0"/&gt;
+ *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Spn" minOccurs="0"/&gt;
+ *           &lt;element ref="{http://schemas.xmlsoap.org/ws/2006/02/addressingidentity}Upn" minOccurs="0"/&gt;
+ *           &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyInfo" minOccurs="0"/&gt;
+ *           &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}BinarySecurityToken" minOccurs="0"/&gt;
+ *           &lt;element ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}SecurityTokenReference" minOccurs="0"/&gt;
+ *         &lt;/choice&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
