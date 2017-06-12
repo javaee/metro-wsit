@@ -339,22 +339,32 @@
                     </execution>
                 </executions>
             </plugin>
-             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <additionalJOptions>
-                        <additionalJOption>--add-modules</additionalJOption>
-                        <additionalJOption>java.activation</additionalJOption>
-                        <additionalJOption>--add-exports</additionalJOption>
-                        <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
-                        <additionalJOption>--add-exports</additionalJOption>
-                        <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
-                    </additionalJOptions>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
+   <profiles>
+        <profile>
+            <id>release-9</id>
+            <build>
+              <plugins>
+                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalJOptions>
+                            <additionalJOption>--add-modules</additionalJOption>
+                            <additionalJOption>java.activation</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
+                        </additionalJOptions>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>

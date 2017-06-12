@@ -84,13 +84,41 @@
                             com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
                         </exclude>
                     </excludes>
-                    <argLine>
-                       --add-modules java.activation
-                    </argLine>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release-9</id>
+              <activation>
+                <jdk>9</jdk>
+              </activation>
+            <build>
+              <plugins>
+                <plugin>
+                    <!-- TODO: Remove exlusion of tests once adapted to maven project structure -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
+                            </exclude>
+                            <exclude>
+                                com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
+                            </exclude>
+                        </excludes>
+                        <argLine>
+                           --add-modules java.activation
+                        </argLine>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- Compile scope -->

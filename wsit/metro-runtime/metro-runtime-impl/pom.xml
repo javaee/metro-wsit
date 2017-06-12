@@ -72,18 +72,30 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <inherited>true</inherited>
             </plugin>
-             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>
-                       --add-modules java.activation
-                    </argLine>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
+
+   <profiles>
+        <profile>
+            <id>release-9</id>
+            <activation>
+                <jdk>9</jdk>
+            </activation>
+            <build>
+              <plugins>
+                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>
+                           --add-modules java.activation
+                        </argLine>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- Compile scope -->
