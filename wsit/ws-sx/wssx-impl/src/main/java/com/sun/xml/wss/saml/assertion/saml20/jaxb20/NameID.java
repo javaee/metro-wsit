@@ -68,7 +68,7 @@ public class NameID extends NameIDType implements com.sun.xml.wss.saml.NameID {
      * Constructs a <code>NameIdentifer</code> element from an existing XML
      * block.
      *
-     * @param NameIDElement A <code>org.w3c.dom.Element</code>
+     * @param element A <code>org.w3c.dom.Element</code>
      *        representing DOM tree for <code>NameID</code> object
      * @exception SAMLException if it could not process the
      *            <code>org.w3c.dom.Element</code> properly, implying that there

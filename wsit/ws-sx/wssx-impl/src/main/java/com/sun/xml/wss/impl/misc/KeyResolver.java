@@ -131,7 +131,7 @@ public class KeyResolver {
      * @param sig
      *     true if this method is called by a signature verifier, false if
      *     called by a decrypter
-     * @param secureMsg
+     * @param context
      */
     
     /*

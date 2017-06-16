@@ -107,7 +107,7 @@ import org.w3c.dom.NodeList;
 /**
  * This object stands for <code>Assertion</code> element. An Assertion is a package
  * of information that supplies one or more <code>Statement</code> made by an
- * issuer. There are three kinds of assertions Au     [java] <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ * issuer. There are three kinds of assertions Au     [java] &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
  * [java] <Conditions NotBefore="2005-08-16T13:21:50.503+05:30" NotOnOrAfter="2005-08-16T15:21:50.504+05:30" xmlns="urn:oasis:names:tc:SAML:1.0:assertion"/>
  * [java] <Subject xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
  * [java]     <NameIdentifier Format="urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName">CN=SAML User,OU=SU,O=SAML
@@ -521,7 +521,7 @@ public class Assertion extends AssertionType implements com.sun.xml.wss.saml.Ass
      * This constructor is used to build <code>Assertion</code> object from a
      * block of existing XML that has already been built into a DOM.
      *
-     * @param assertionElement A <code>org.w3c.dom.Element</code> representing
+     * @param element A <code>org.w3c.dom.Element</code> representing
      *        DOM tree for <code>Assertion</code> object
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the

@@ -45,12 +45,14 @@ import java.util.Iterator;
 /**
  * Indentifies target elements in the SOAPMessage that need to be confidentiality protected.
  * <p>
- * <pre><xmp>
- *      <sp:EncryptedElements XPathVersion="xs:anyURI"? ... > 
- *          <sp:XPath>xs:string</sp:XPath>+ 
+ * <pre>
+ *  &lt;xmp&gt;
+ *      &lt;sp:EncryptedElements XPathVersion="xs:anyURI"? ... &gt; 
+ *          &lt;sp:XPath&gt;xs:string&lt;/sp:XPath&gt;+ 
  *              ...
- *      </sp:EncryptedElements>
- *</xmp></pre>
+ *      &lt;/sp:EncryptedElements&gt;
+ *  &lt;/xmp&gt;
+ * </pre>
  * 
  * @author K.Venugopal@sun.com
  */

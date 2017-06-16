@@ -51,7 +51,6 @@ public interface ActAs {
      *
      *
      * @return possible object is
-     *     {@link Element }
      *     {@link Object }
      */
     Object getAny();
@@ -62,7 +61,6 @@ public interface ActAs {
      *
      * @param value
      *     allowed object is
-     *     {@link Element }
      *     {@link Object }
      */
     void setAny(Object value);

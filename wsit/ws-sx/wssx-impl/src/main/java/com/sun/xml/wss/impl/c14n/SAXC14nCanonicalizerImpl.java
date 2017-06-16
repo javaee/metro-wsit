@@ -395,7 +395,7 @@ public class SAXC14nCanonicalizerImpl extends BaseCanonicalizer  implements Cont
      * Tells the parser to resolve the systemId against the baseURI
      * and read the entity text from that resulting absolute URI.
      * Note that because the older
-     * {@link DefaultHandler#resolveEntity DefaultHandler.resolveEntity()},
+     * DefaultHandler#resolveEntity DefaultHandler.resolveEntity(),
      * method is overridden to call this one, this method may sometimes
      * be invoked with null <em>name</em> and <em>baseURI</em>, and
      * with the <em>systemId</em> already absolutized.
@@ -406,7 +406,7 @@ public class SAXC14nCanonicalizerImpl extends BaseCanonicalizer  implements Cont
     
     /**
      * Invokes
-     * {@link EntityResolver2#resolveEntity EntityResolver2.resolveEntity()}
+     * EntityResolver2#resolveEntity EntityResolver2.resolveEntity()
      * with null entity name and base URI.
      * You only need to override that method to use this class.
      */

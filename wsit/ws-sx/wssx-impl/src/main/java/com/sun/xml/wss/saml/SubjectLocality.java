@@ -60,14 +60,14 @@ package com.sun.xml.wss.saml;
  * SAML SubjectLocality element.
  *
  * <pre>
- * &lt;complexType name="SubjectLocalityType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="DNSAddress" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="IPAddress" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="SubjectLocalityType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="DNSAddress" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="IPAddress" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  */

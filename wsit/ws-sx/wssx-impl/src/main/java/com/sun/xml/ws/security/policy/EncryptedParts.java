@@ -45,13 +45,15 @@ import java.util.Iterator;
 /**
  * Identifies targets that if present in the message should be confidentiality protected.
  *<p>
- *  <pre><xmp>
- *      <sp:EncryptedParts ... >
- *          <sp:Body/>?
- *          <sp:Header Name="xs:NCName"? Namespace="xs:anyURI" ... />*
+ *  <pre>
+ *   &lt;xmp&gt;
+ *      &lt;sp:EncryptedParts ... &gt;
+ *          &lt;sp:Body/&gt;?
+ *          &lt;sp:Header Name="xs:NCName"? Namespace="xs:anyURI" ... /&gt;*
  *              ...
- *      </sp:EncryptedParts>
- *</xmp></pre>
+ *      &lt;/sp:EncryptedParts&gt;
+ *    &lt;/xmp&gt;
+ *   </pre>
  * @author K.Venugopal@sun.com
  */
 public interface EncryptedParts extends Target {

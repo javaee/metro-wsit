@@ -237,7 +237,7 @@ public class SecurityHeaderWrapper implements com.sun.xml.ws.api.message.Header 
      * that you talk to us.
      *
      * <p>
-     * {@link Message}s that come from tranport usually provides
+     * Messages that come from tranport usually provides
      * a reasonably efficient implementation of this method.
      *
      * @return
@@ -286,7 +286,7 @@ public class SecurityHeaderWrapper implements com.sun.xml.ws.api.message.Header 
      * Writes out the header to the given SOAPMessage.
      *
      * <p>
-     * Sometimes a {@link Message} needs to produce itself
+     * Sometimes a Message needs to produce itself
      * as {@link SOAPMessage}, in which case each header needs
      * to turn itself into a header.
      *
@@ -302,7 +302,7 @@ public class SecurityHeaderWrapper implements com.sun.xml.ws.api.message.Header 
      * Writes out the header as SAX events.
      *
      * <p>
-     * Sometimes a {@link Message} needs to produce SAX events,
+     * Sometimes a Message needs to produce SAX events,
      * and this method is necessary for headers to participate to it.
      *
      * <p>
@@ -315,7 +315,7 @@ public class SecurityHeaderWrapper implements com.sun.xml.ws.api.message.Header 
      * from {@link ContentHandler} (meaning any parsing error and etc) must
      * be first reported to {@link ErrorHandler}. If the SAX event production
      * cannot be continued and the processing needs to abort, the code may
-     * then throw the same {@link SAXParseException} reported to {@link ErrorHandler}.
+     * then throw the same SAXParseException reported to {@link ErrorHandler}.
      *
      * @param contentHandler
      *      The {@link ContentHandler} that receives SAX events.

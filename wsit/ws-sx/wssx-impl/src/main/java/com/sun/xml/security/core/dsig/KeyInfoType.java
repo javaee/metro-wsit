@@ -71,23 +71,23 @@ import javax.xml.crypto.XMLStructure;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="KeyInfoType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded">
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyName"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyValue"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}RetrievalMethod"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}X509Data"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}PGPData"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}SPKIData"/>
- *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}MgmtData"/>
- *         &lt;any/>
- *       &lt;/choice>
- *       &lt;attribute name="Id" type="{http://www.w3.org/2001/XMLSchema}ID" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="KeyInfoType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded"&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyName"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}KeyValue"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}RetrievalMethod"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}X509Data"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}PGPData"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}SPKIData"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}MgmtData"/&gt;
+ *         &lt;any/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attribute name="Id" type="{http://www.w3.org/2001/XMLSchema}ID" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -140,7 +140,6 @@ public class KeyInfoType {
      * {@link JAXBElement }{@code <}{@link RetrievalMethodType }{@code >}
      * {@link JAXBElement }{@code <}{@link X509DataType }{@code >}
      * {@link String }
-     * {@link Element }
      * {@link JAXBElement }{@code <}{@link KeyValueType }{@code >}
      * {@link JAXBElement }{@code <}{@link SPKIDataType }{@code >}
      * {@link JAXBElement }{@code <}{@link String }{@code >}

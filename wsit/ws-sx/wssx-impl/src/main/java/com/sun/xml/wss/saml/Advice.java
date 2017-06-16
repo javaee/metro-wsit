@@ -63,17 +63,17 @@ import java.util.List;
  * <p>The following schema fragment specifies the expected content contained within SAML Advice element.
  *
  * <pre>
- * &lt;complexType name="AdviceType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}AssertionIDReference"/>
- *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}Assertion"/>
- *         &lt;any/>
- *       &lt;/choice>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="AdviceType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}AssertionIDReference"/&gt;
+ *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}Assertion"/&gt;
+ *         &lt;any/&gt;
+ *       &lt;/choice&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  */

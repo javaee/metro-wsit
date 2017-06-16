@@ -430,7 +430,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EndpointReferenceType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}possible object is EndpointReferenceType{@code >}}
      * 
      */
     @SuppressWarnings("unchecked")
@@ -575,7 +575,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link byte[]}{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}possible object is byte[]{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512", name = "CombinedHash")

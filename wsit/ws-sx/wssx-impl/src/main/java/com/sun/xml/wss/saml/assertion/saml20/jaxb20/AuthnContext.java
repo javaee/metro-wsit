@@ -92,17 +92,6 @@ public class AuthnContext extends AuthnContextType
 
     /**
      *Constructor
-     *@param authKind A integer representing the type of SAML protocol queries
-     *       to which the authority described by this element will
-     *       respond. If you do NO specify this attribute, pass in
-     *       value "-1".
-     *@param location A URI describing how to locate and communicate with the
-     *       authority, the exact syntax of which depends on the
-     *       protocol binding in use.
-     *@param binding A String representing a URI reference identifying the SAML
-     *       protocol binding to use in  communicating with the authority.
-     *@exception SAMLException if there is an error in the sender or in the
-     *           element definition.
      */
     public AuthnContext()
         {

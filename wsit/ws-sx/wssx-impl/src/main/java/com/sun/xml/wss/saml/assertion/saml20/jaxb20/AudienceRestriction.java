@@ -82,7 +82,7 @@ public class AudienceRestriction extends AudienceRestrictionType
      * Constructs an <code>AudienceRestriction</code> element from an
      * existing XML block.
      *
-     * @param AudienceRestrictionElement A
+     * @param element A
      *        <code>org.w3c.dom.Element</code> representing DOM tree for
      *        <code>AudienceRestriction</code> object.
      * @exception SAMLException if it could not process the

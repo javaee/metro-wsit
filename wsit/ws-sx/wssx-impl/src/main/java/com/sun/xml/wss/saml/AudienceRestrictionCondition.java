@@ -62,15 +62,15 @@ import java.util.List;
  * <p>The following schema fragment specifies the expected content contained within SAML
  * AudienceRestrictionCondition element.
  * <pre>
- * &lt;complexType name="AudienceRestrictionConditionType">
- *   &lt;complexContent>
- *     &lt;extension base="{urn:oasis:names:tc:SAML:1.0:assertion}ConditionAbstractType">
- *       &lt;sequence>
- *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}Audience" maxOccurs="unbounded"/>
- *       &lt;/sequence>
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="AudienceRestrictionConditionType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{urn:oasis:names:tc:SAML:1.0:assertion}ConditionAbstractType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{urn:oasis:names:tc:SAML:1.0:assertion}Audience" maxOccurs="unbounded"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 public interface AudienceRestrictionCondition {

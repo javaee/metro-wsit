@@ -70,7 +70,7 @@ public class NameIdentifier extends com.sun.xml.wss.saml.internal.saml11.jaxb10.
      * Constructs a <code>NameIdentifer</code> element from an existing XML
      * block.
      *
-     * @param nameIdentifierElement A <code>org.w3c.dom.Element</code>
+     * @param element A <code>org.w3c.dom.Element</code>
      *        representing DOM tree for <code>NameIdentifier</code> object
      * @exception SAMLException if it could not process the
      *            <code>org.w3c.dom.Element</code> properly, implying that there

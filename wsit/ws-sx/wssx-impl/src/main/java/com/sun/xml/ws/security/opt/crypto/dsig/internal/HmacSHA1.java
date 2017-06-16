@@ -69,7 +69,7 @@ public class HmacSHA1 {
      * Initialize with the key
      *
      * @param key a Hmac key
-     * @param length output length in byte. length should be > 0 for a
+     * @param length output length in byte. length should be &gt; 0 for a
      * specified length or -1 for unspecified length (length of the signed output)
      * @exception InvalidKeyException if key is null
      */
@@ -137,7 +137,7 @@ public class HmacSHA1 {
     /**
      * Verifies the signature
      * 
-     * @param siganture the signature to be verified
+     * @param signature the signature to be verified
      */
     public boolean verify(byte[] signature) throws SignatureException {
         return MessageDigest.isEqual(signature, this.sign());

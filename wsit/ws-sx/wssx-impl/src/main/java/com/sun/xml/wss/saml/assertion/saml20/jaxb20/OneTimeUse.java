@@ -72,7 +72,7 @@ public class OneTimeUse extends OneTimeUseType
      * Constructs a <code>OneTimeUse</code> element from
      * an existing XML block.
      *
-     * @param OneTimeUseElement A
+     * @param element A
      *        <code>org.w3c.dom.Element</code> representing DOM tree
      *        for <code>OneTimeUse</code> object.
      * @exception SAMLException if it could not process the

@@ -66,21 +66,21 @@ import com.sun.xml.security.core.xenc.EncryptedDataType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="EncryptedHeaderType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element ref="{http://www.w3.org/2001/04/xmlenc#}EncryptedData"/>
- *       &lt;/sequence>
- *       &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/>
- *       &lt;attribute ref="{http://schemas.xmlsoap.org/soap/envelope/}actor"/>
- *       &lt;attribute ref="{http://schemas.xmlsoap.org/soap/envelope/}mustUnderstand"/>
- *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}mustUnderstand"/>
- *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}relay"/>
- *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}role"/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="EncryptedHeaderType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{http://www.w3.org/2001/04/xmlenc#}EncryptedData"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/&gt;
+ *       &lt;attribute ref="{http://schemas.xmlsoap.org/soap/envelope/}actor"/&gt;
+ *       &lt;attribute ref="{http://schemas.xmlsoap.org/soap/envelope/}mustUnderstand"/&gt;
+ *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}mustUnderstand"/&gt;
+ *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}relay"/&gt;
+ *       &lt;attribute ref="{http://www.w3.org/2003/05/soap-envelope}role"/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

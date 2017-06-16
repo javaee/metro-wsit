@@ -113,7 +113,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *
      * <h3>Implementation Note</h3>
      * <p>
-     * {@link Message} implementation is allowed to defer
+     * Message implementation is allowed to defer
      * the construction of {@link MessageHeaders} object. So
      * if you only want to check for the existence of any header
      * element, use {@link #hasHeaders()}.
@@ -154,7 +154,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      * on the client side when used with SEI.)
      *
      * @param port
-     *      {@link Message}s are always created under the context of
+     *      Messages are always created under the context of
      *      one {@link WSDLPort} and they never go outside that context.
      *      Pass in that "governing" {@link WSDLPort} object here.
      *      We chose to receive this as a parameter instead of
@@ -176,7 +176,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      * Gets the local name of the payload element.
      *
      * @return
-     *      null if a {@link Message} doesn't have any payload.
+     *      null if a Message doesn't have any payload.
      */
     public String getPayloadLocalPart() {
         return sm.getPayloadLocalPart();
@@ -218,7 +218,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      * Gets the namespace URI of the payload element.
      *
      * @return
-     *      null if a {@link Message} doesn't have any payload.
+     *      null if a Message doesn't have any payload.
      */
     public String getPayloadNamespaceURI(){        
         return sm.getPayloadNamespaceURI();
@@ -226,18 +226,20 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
     // I'm not putting @Nullable on it because doing null check on getPayloadLocalPart() should be suffice
     
     /**
-     * Returns true if a {@link Message} has a payload.
+     * Returns true if a Message has a payload.
      *
      * <p>
      * A message without a payload is a SOAP message that looks like:
-     * <pre><xmp>
-     * <S:Envelope>
-     *   <S:Header>
+     * <pre>
+     * &lt;xmp&gt;
+     * &lt;S:Envelope&gt;
+     *   &lt;S:Header&gt;
      *     ...
-     *   </S:Header>
-     *   <S:Body />
-     * </S:Envelope>
-     * </xmp></pre>
+     *   &lt;/S:Header&gt;
+     *   &lt;S:Body /&gt;
+     * &lt;/S:Envelope&gt;
+     * &lt;/xmp&gt;
+     *</pre>
      */
     public boolean hasPayload(){        
         return true;
@@ -371,7 +373,7 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *      must not be null.
      *      any error encountered during the SAX event production must be
      *      first reported to this error handler. Fatal errors can be then
-     *      thrown as {@link SAXParseException}. {@link SAXException}s thrown
+     *      thrown as SAXParseException. {@link SAXException}s thrown
      *      from {@link ErrorHandler} should propagate directly through this method.
      */
     public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException{
@@ -385,13 +387,13 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
     
     
     /**
-     * Creates a copy of a {@link Message}.
+     * Creates a copy of a Message.
      *
      * <p>
-     * This method creates a new {@link Message} whose header/payload/attachments/properties
-     * are identical to this {@link Message}. Once created, the created {@link Message}
-     * and the original {@link Message} behaves independently --- adding header/
-     * attachment to one {@link Message} doesn't affect another {@link Message}
+     * This method creates a new Message whose header/payload/attachments/properties
+     * are identical to this Message. Once created, the created Message
+     * and the original Message behaves independently --- adding header/
+     * attachment to one Message doesn't affect another Message
      * at all.
      *
      * <p>
@@ -403,14 +405,14 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *
      * <ol>
      *  <li>The original and the copy may not be
-     *      used concurrently by two threads (this allows two {@link Message}s
+     *      used concurrently by two threads (this allows two Messages
      *      to share some internal resources, such as JAXB marshallers.)
      *      Note that it's OK for the original and the copy to be processed
      *      by two threads, as long as they are not concurrent.
      *
      *  <li>The copy has the same 'life scope'
      *      as the original (this allows shallower copy, such as
-     *      JAXB beans wrapped in {@link JAXBMessage}.)
+     *      JAXB beans wrapped in JAXBMessage.)
      * </ol>
      *
      * <p>
@@ -425,17 +427,17 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *
      * <h3>Design Rationale</h3>
      * <p>
-     * Since a {@link Message} body is read-once, sometimes
+     * Since a Message body is read-once, sometimes
      * (such as when you do fail-over, or WS-RM) you need to
-     * create an idential copy of a {@link Message}.
+     * create an idential copy of a Message.
      *
      * <p>
      * The actual copy operation depends on the layout
      * of the data in memory, hence it's best to be done by
-     * the {@link Message} implementation itself.
+     * the Message implementation itself.
      *
      * <p>
-     * The restrictions placed on the use of copied {@link Message} can be
+     * The restrictions placed on the use of copied Message can be
      * relaxed if necessary, but it will make the copy method more expensive.
      */
     // TODO: update the class javadoc with 'lifescope'

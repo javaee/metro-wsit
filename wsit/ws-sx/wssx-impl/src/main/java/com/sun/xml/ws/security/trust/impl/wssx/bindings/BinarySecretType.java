@@ -66,13 +66,13 @@ import javax.xml.namespace.QName;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="BinarySecretType">
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>base64Binary">
- *       &lt;attribute name="Type" type="{http://docs.oasis-open.org/ws-sx/ws-trust/200512/}BinarySecretTypeOpenEnum" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
- * &lt;/complexType>
+ * &lt;complexType name="BinarySecretType"&gt;
+ *   &lt;simpleContent&gt;
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;base64Binary"&gt;
+ *       &lt;attribute name="Type" type="{http://docs.oasis-open.org/ws-sx/ws-trust/200512/}BinarySecretTypeOpenEnum" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/simpleContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

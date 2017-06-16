@@ -62,12 +62,12 @@ package com.sun.xml.wss.saml;
  * <p>The following schema fragment specifies the expected content contained within 
  * SAML DoNotCacheCondition element.
  * <pre>
- * &lt;complexType name="DoNotCacheConditionType">
- *   &lt;complexContent>
- *     &lt;extension base="{urn:oasis:names:tc:SAML:1.0:assertion}ConditionAbstractType">
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="DoNotCacheConditionType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{urn:oasis:names:tc:SAML:1.0:assertion}ConditionAbstractType"&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 public interface OneTimeUse {

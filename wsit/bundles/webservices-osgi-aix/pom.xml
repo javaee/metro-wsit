@@ -328,6 +328,30 @@
         </plugins>
     </build>
 
+     <profiles>
+        <profile>
+            <id>release-9</id>
+            <build>
+              <plugins>
+                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalJOptions>
+                            <additionalJOption>--add-modules</additionalJOption>
+                            <additionalJOption>java.activation</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
+                            <additionalJOption>--add-exports</additionalJOption>
+                            <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
+                        </additionalJOptions>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>javax.xml.registry</groupId>
@@ -356,6 +380,25 @@
             <artifactId>webservices-tools</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.soap</groupId>
+            <artifactId>javax.xml.soap-api</artifactId>     
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.common</groupId>
+          <artifactId>common-util</artifactId>
+          <version>3.0.1</version>
         </dependency>
 
         <!--

@@ -672,8 +672,6 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
      * 
      * @return the default certificate for the current user
      *
-     * @param  keyIdentifier  an Opaque identifier indicating
-     *            the X509 certificate.
      * @throws XWSSecurityException
      */
     public X509Certificate getDefaultCertificate(Map context) 

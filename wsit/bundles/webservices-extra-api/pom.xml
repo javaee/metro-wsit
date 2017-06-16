@@ -154,6 +154,26 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release-9</id>
+            <build>
+              <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalJOptions>
+                            <additionalJOption>--add-modules</additionalJOption>
+                            <additionalJOption>java.activation</additionalJOption>
+                        </additionalJOptions>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- Shaded dependencies -->
         <dependency>
@@ -163,6 +183,15 @@
         <dependency>
             <groupId>javax.xml.registry</groupId>
             <artifactId>javax.xml.registry-api</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+         <dependency>
+            <groupId>javax.xml.soap</groupId>
+            <artifactId>javax.xml.soap-api</artifactId>     
         </dependency>
 
         <!-- Non shaded dependencies -->

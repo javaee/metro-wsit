@@ -357,8 +357,7 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
      * 
      * @return the default certificate for the current user
      *
-     * @param  keyIdentifier  an Opaque identifier indicating
-     *            the X509 certificate.
+     * @param  context
      * @throws XWSSecurityException
      */
     public X509Certificate getDefaultCertificate(Map context) 

@@ -339,6 +339,26 @@
         </resources>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release-9</id>
+            <build>
+              <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalJOptions>
+                            <additionalJOption>--add-modules</additionalJOption>
+                            <additionalJOption>java.activation</additionalJOption>
+                        </additionalJOptions>
+                    </configuration>
+                </plugin>
+              </plugins>
+             </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         
         <!-- Provided dependencies -->

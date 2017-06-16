@@ -208,6 +208,36 @@
             </build>
         </profile>
         
+        <profile>
+            <id>release-9</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <configuration>
+                                <minmemory>128m</minmemory>
+                                <maxmemory>512m</maxmemory>
+                                <additionalJOptions>
+                                  <additionalJOption>--add-modules</additionalJOption>
+                                  <additionalJOption>java.activation</additionalJOption>
+                               </additionalJOptions>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>attach-javadocs</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>jar</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>                    
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
     </profiles>
         
     <dependencies>
@@ -235,6 +265,15 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>webservices-rt</artifactId>
             <version>${project.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.soap</groupId>
+            <artifactId>javax.xml.soap-api</artifactId>     
         </dependency>
     </dependencies>
     <properties>

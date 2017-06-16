@@ -66,16 +66,16 @@ import com.sun.xml.ws.policy.impl.bindings.Policy;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;element name="Policy">
- *   &lt;complexType>
- *     &lt;complexContent>
- *       &lt;extension base="{http://schemas.xmlsoap.org/ws/2004/09/policy}OperatorContentType">
- *         &lt;attribute name="TargetNamespace" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
- *         &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/>
- *       &lt;/extension>
- *     &lt;/complexContent>
- *   &lt;/complexType>
- * &lt;/element>
+ * &lt;element name="Policy"&gt;
+ *   &lt;complexType&gt;
+ *     &lt;complexContent&gt;
+ *       &lt;extension base="{http://schemas.xmlsoap.org/ws/2004/09/policy}OperatorContentType"&gt;
+ *         &lt;attribute name="TargetNamespace" type="{http://www.w3.org/2001/XMLSchema}anyURI" /&gt;
+ *         &lt;attribute ref="{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Id"/&gt;
+ *       &lt;/extension&gt;
+ *     &lt;/complexContent&gt;
+ *   &lt;/complexType&gt;
+ * &lt;/element&gt;
  * </pre>
  * 
  * 

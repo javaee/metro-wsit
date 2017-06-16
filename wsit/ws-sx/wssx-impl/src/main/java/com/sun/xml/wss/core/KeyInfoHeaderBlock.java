@@ -171,7 +171,7 @@ public class KeyInfoHeaderBlock  extends SecurityHeaderBlockImpl {
     /**
      * Method addBinarySecret
      *
-     * @param secret byte[] representing secret
+     * @param binarySecret
      */
     public void addBinarySecret(SOAPElement binarySecret) {
         delegateKeyInfo.addUnknownElement(binarySecret);

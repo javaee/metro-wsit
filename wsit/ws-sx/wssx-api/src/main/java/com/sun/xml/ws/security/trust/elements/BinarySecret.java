@@ -89,7 +89,9 @@ public interface BinarySecret extends XMLStructure {
     /**
        * Gets the decoded value or the raw bytes of the binary secret.
        *
-       * @return {@link byte[]}
+       * @return 
+       *     possible object is
+       *     byte[]
        *
        */
       byte[] getRawValue();
@@ -125,7 +127,9 @@ public interface BinarySecret extends XMLStructure {
        * Sets the value of the binary secret as raw bytes.
        * The value that appears in the element will be encoded appropriately.
        *
-       * @param rawText {@link byte[]}
+       * @param rawText 
+       *     allowed object is
+       *     byte[]
        *
        */
       void setRawValue(byte[] rawText);

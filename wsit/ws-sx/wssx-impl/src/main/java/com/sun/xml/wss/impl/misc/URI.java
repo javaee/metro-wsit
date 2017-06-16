@@ -72,7 +72,7 @@ import java.io.Serializable;
  * <p>
  * Parsing of a URI specification is done according to the URI
  * syntax described in RFC 2396
- * <http://www.ietf.org/rfc/rfc2396.txt?number=2396>. Every URI consists
+ * &lt;http://www.ietf.org/rfc/rfc2396.txt?number=2396&gt;. Every URI consists
  * of a scheme, followed by a colon (':'), followed by a scheme-specific
  * part. For URIs that follow the "generic URI" syntax, the scheme-
  * specific part begins with two slashes ("//") and may be followed
@@ -1335,7 +1335,7 @@ public class URI implements Serializable
    * IPv4 address consists of four decimal digit groups separated by a
    * '.'. A hostname consists of domain labels (each of which must
    * begin and end with an alphanumeric but may contain '-') separated
-   * & by a '.'. See RFC 2396 Section 3.2.2.
+   * &amp; by a '.'. See RFC 2396 Section 3.2.2.
    *
    *
    * @param p_address The address string to check

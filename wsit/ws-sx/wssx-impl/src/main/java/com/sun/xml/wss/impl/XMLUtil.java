@@ -663,16 +663,15 @@ public class XMLUtil {
         }
     }
     
-    /**
-     * Looks up elements with wsu:Id or Id in xenc or dsig namespace.
-     *
-     * @param doc
-     * @param id
-     *
-     * @return element
-     *
-     * @throws TransformerException
-     */
+     // Looks up elements with wsu:Id or Id in xenc or dsig namespace.
+     //
+     // @param doc
+     //@param id
+     //
+     //@return element
+     //
+     // @throws TransformerException
+     //
 //    public static Element getElementById(
 //    Document doc,
 //    String id)

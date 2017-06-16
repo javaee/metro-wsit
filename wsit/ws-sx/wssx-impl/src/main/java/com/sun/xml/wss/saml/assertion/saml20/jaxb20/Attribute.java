@@ -90,8 +90,6 @@ public class Attribute extends AttributeType
      *
      * @param name A String representing <code>AttributeName</code> (the name
      *        of the attribute).
-     * @param nameSpace A String representing the namespace in which
-     *        <code>AttributeName</code> elements are interpreted.
      * @param values A List of DOM element representing the
      *        <code>AttributeValue</code> object.
      * @exception SAMLException if there is an error in the sender or in the

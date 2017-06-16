@@ -143,8 +143,8 @@ public class ProcessingContextImpl extends ProcessingContext {
     
      /**
      * copy operator
-     * @param ctx1 the ProcessingContext to which to copy
-     * @param ctx2 the ProcessingContext from which to copy
+     * @param ctxx1 the ProcessingContext to which to copy
+     * @param ctxx2 the ProcessingContext from which to copy
      * @throws XWSSecurityException if there was an error during the copy operation
      */
     @Override

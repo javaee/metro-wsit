@@ -121,7 +121,7 @@ public class Subject extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.Su
      * This constructor builds a subject element from an existing XML block
      * which has already been built into a DOM.
      *
-     * @param subjectElement An Element representing DOM tree for Subject object
+     * @param element An Element representing DOM tree for Subject object
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the
      *            element definition.

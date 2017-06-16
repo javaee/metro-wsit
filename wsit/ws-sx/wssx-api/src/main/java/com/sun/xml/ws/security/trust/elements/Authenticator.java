@@ -72,7 +72,6 @@ public interface Authenticator {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Element }
      * {@link Object }
      * 
      * 
@@ -82,14 +81,18 @@ public interface Authenticator {
     /**
      * Gets the raw value of the combinedHash property.
      * 
-     * @return byte[]
+     * @return
+     *     possible object is
+     *     byte[]
      */
     byte[] getRawCombinedHash();
 
     /**
      * Sets the value of the combinedHash property. 
      * 
-     * @param rawCombinedHash {@link byte[]}
+     * @param rawCombinedHash
+     *     allowed object is
+     *     byte[]
      */
     void setRawCombinedHash(byte[] rawCombinedHash);
 

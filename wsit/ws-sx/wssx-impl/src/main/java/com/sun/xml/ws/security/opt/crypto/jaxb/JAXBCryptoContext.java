@@ -104,7 +104,7 @@ public class JAXBCryptoContext implements javax.xml.crypto.XMLCryptoContext {
     /**
      * Sets the key selector for finding a key.
      *
-     * @param ks the key selector, or <code>null</code> to remove the current
+     * @param keySelector the key selector, or <code>null</code> to remove the current
      *    setting
      * @see #getKeySelector
      */
@@ -114,7 +114,7 @@ public class JAXBCryptoContext implements javax.xml.crypto.XMLCryptoContext {
 
     /**
      * Returns a <code>URIDereferencer</code> that is used to dereference
-     * {@link URIReference}s.
+     * {@link URIDereferencer}s.
      *
      * @return the <code>URIDereferencer</code>, or <code>null</code> if not
      *    specified
@@ -126,11 +126,11 @@ public class JAXBCryptoContext implements javax.xml.crypto.XMLCryptoContext {
 
     /**
      * Sets a <code>URIDereferencer</code> that is used to dereference
-     * {@link URIReference}s. The specified <code>URIDereferencer</code>
+     * {@link URIDereferencer}s. The specified <code>URIDereferencer</code>
      * is used in place of an implementation's default
      * <code>URIDereferencer</code>.
      *
-     * @param dereferencer the <code>URIDereferencer</code>, or
+     * @param uriDereferencer the <code>URIDereferencer</code>, or
      *    <code>null</code> to remove any current setting
      * @see #getURIDereferencer
      */
@@ -229,7 +229,7 @@ public class JAXBCryptoContext implements javax.xml.crypto.XMLCryptoContext {
      * all namespace URIs not explicitly set by the {@link #putNamespacePrefix
      * putNamespacePrefix} method.
      *
-     * @param defaultPrefix the default namespace prefix, or <code>null</code>
+     * @param defaultNamespacePrefix the default namespace prefix, or <code>null</code>
      *    to remove the current setting. Specify the empty string
      *    (<code>""</code>) to bind no prefix.
      * @see #getDefaultNamespacePrefix

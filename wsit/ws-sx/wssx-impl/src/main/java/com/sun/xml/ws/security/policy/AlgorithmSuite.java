@@ -47,38 +47,40 @@ import java.util.Set;
  * <p>
  * Syntax :
  *
- * <pre><xmp>
- *  <sp:AlgorithmSuite ... >
- *      <wsp:Policy>
+ * <pre>
+ *  &lt;xmp&gt;
+ *  &lt;sp:AlgorithmSuite ... &gt;
+ *      &lt;wsp:Policy&gt;
  *          (
- *          <sp:Basic256 ... /> |
- *          <sp:Basic192 ... /> |
- *          <sp:Basic128 ... /> |
- *          <sp:TripleDes ... /> |
- *          <sp:Basic256Rsa15 ... /> |
- *          <sp:Basic192Rsa15 ... /> |
- *          <sp:Basic128Rsa15 ... /> |
- *          <sp:TripleDesRsa15 ... /> |
- *          <sp:Basic256Sha256 ... /> |
- *          <sp:Basic192Sha256 ... /> |
- *          <sp:Basic128Sha256 ... /> |
- *          <sp:TripleDesSha256 ... /> |
- *          <sp:Basic256Sha256Rsa15 ... /> |
- *          <sp:Basic192Sha256Rsa15 ... /> |
- *          <sp:Basic128Sha256Rsa15 ... /> |
- *          <sp:TripleDesSha256Rsa15 ... /> |
+ *          &lt;sp:Basic256 ... /&gt; |
+ *          &lt;sp:Basic192 ... /&gt; |
+ *          &lt;sp:Basic128 ... /&gt; |
+ *          &lt;sp:TripleDes ... /&gt; |
+ *          &lt;sp:Basic256Rsa15 ... /&gt; |
+ *          &lt;sp:Basic192Rsa15 ... /&gt; |
+ *          &lt;sp:Basic128Rsa15 ... /&gt; |
+ *          &lt;sp:TripleDesRsa15 ... /&gt; |
+ *          &lt;sp:Basic256Sha256 ... /&gt; |
+ *          &lt;sp:Basic192Sha256 ... /&gt; |
+ *          &lt;sp:Basic128Sha256 ... /&gt; |
+ *          &lt;sp:TripleDesSha256 ... /&gt; |
+ *          &lt;sp:Basic256Sha256Rsa15 ... /&gt; |
+ *          &lt;sp:Basic192Sha256Rsa15 ... /&gt; |
+ *          &lt;sp:Basic128Sha256Rsa15 ... /&gt; |
+ *          &lt;sp:TripleDesSha256Rsa15 ... /&gt; |
  *
  *           ...)
- *          <sp:InclusiveC14N ... /> ?
- *          <sp:SOAPNormalization10 ... /> ?
- *          <sp:STRTransform10 ... /> ?
- *          <sp:XPath10 ... /> ?
- *          <sp:XPathFilter20 ... /> ?
+ *          &lt;sp:InclusiveC14N ... /&gt; ?
+ *          &lt;sp:SOAPNormalization10 ... /&gt; ?
+ *          &lt;sp:STRTransform10 ... /&gt; ?
+ *          &lt;sp:XPath10 ... /&gt; ?
+ *          &lt;sp:XPathFilter20 ... /&gt; ?
  *          ...
- *      </wsp:Policy>
+ *      &lt;/wsp:Policy&gt;
  *    ...
- *   </sp:AlgorithmSuite>
- *</xmp></pre>
+ *   &lt;/sp:AlgorithmSuite&gt;
+ * &lt;/xmp&gt;
+ *</pre>
  *
  * @author K.Venugopal@sun.com
  */

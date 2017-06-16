@@ -98,9 +98,6 @@ public class Conditions extends ConditionsType
      * @param condition
      * @param ar the <code>AudienceRestrictionCondition</code> to be
      *        added. Can be null, if no audience restriction.
-     * @param doNotCacheCnd
-     * @exception SAMLException if there is a problem in input data and it
-     *            cannot be processed correctly.
      */
     public Conditions(
             GregorianCalendar notBefore,
@@ -178,7 +175,7 @@ public class Conditions extends ConditionsType
     /**
      * Constructs a <code>Conditions</code> element from an existing XML block.
      *
-     * @param conditionsElement A <code>org.w3c.dom.Element</code> representing
+     * @param element A <code>org.w3c.dom.Element</code> representing
      *        DOM tree for <code>Conditions</code> object
      * @exception SAMLException if it could not process the Element properly,
      *            implying that there is an error in the sender or in the
