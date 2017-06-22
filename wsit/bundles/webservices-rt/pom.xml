@@ -398,11 +398,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gfv2-deployment</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-framework-http</artifactId>
             <scope>provided</scope>
