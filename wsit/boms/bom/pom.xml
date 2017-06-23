@@ -57,27 +57,26 @@
     <version>2.3.2-SNAPSHOT</version>
     <description>Metro Web Services Stack Dependency POM</description>
     
-    <url>http://metro.java.net/</url>
+    <url>http://javaee.github.io/metro</url>
 
     <licenses>
         <license>
-            <name>
-                CDDL+GPL License
-            </name>
-            <url>https://glassfish.java.net/public/CDDL+GPL_1_1.html</url>
+            <name>CDDL + GPLv2 with classpath exception</name>
+            <url>https://oss.oracle.com/licenses/CDDL+GPL-1.1</url>
             <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
-
     <organization>
         <name>Oracle Corporation</name>
         <url>http://www.oracle.com/</url>
     </organization>
 
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk/wsit/boms/bom</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/branches/trunk/wsit/boms/bom</developerConnection>
-        <url>http://java.net/projects/wsit/sources/svn/show/branches/trunk/wsit/boms/bom</url>
+        <connection>scm:git:git@github.com:javaee/metro-wsit.git</connection>
+        <developerConnection>scm:git:git@github.com:javaee/metro-wsit.git</developerConnection>
+        <url>https://github.com/javaee/metro-wsit</url>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>

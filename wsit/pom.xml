@@ -75,7 +75,7 @@
         - SOAP over TCP
         - WS-AtomicTransactions/Coordination
         - WS-MetadataExchange
-        - WS-Policy (policy.java.net)
+        - WS-Policy (github.com/javaee/metro-policy)
         - WS-ReliableMessaging
         - WS-SecureConversation
         - WS-Security
@@ -83,94 +83,44 @@
         - WS-Trust
 
         Note:
-        - WS-Policy (policy.java.net)
+        - WS-Policy (github.com/javaee/metro-policy)
         has its own codebase however WS-Policy related issues can be submitted into
         the Metro (WSIT) Issue tracker
     </description>
-    <url>http://metro.java.net/</url>
+    <url>http://javaee.github.io/metro</url>
     <!-- prerequisites -->
     <issueManagement>
-        <system>jira</system>
-        <url>http://java.net/jira/browse/WSIT</url>
+        <system>IssueTracker</system>
+        <url>https://github.com/javaee/metro/issues</url>
     </issueManagement>
-    <!--ciManagement>
-        <system>Hudson</system>
-        <url>http://hudson.glassfish.org/job/Metro/</url>
-    </ciManagement-->
     <inceptionYear>2005</inceptionYear>
+
     <mailingLists>
         <!-- General Metro Specific Mailing Lists -->
         <mailingList>
-            <name>Metro Announcements</name>
-            <archive>http://java.net/projects/metro/lists/announce/archive</archive>
-            <post>announce@metro.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>Metro Users List</name>
-            <archive>http://java.net/projects/metro/lists/users/archive</archive>
-            <post>users@metro.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>Metro Developers List</name>
-            <archive>http://java.net/projects/metro/lists/dev/archive</archive>
-            <post>dev@metro.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>Metro Issues</name>
-            <archive>http://java.net/projects/metro/lists/issues/archive</archive>
-            <post>issues@metro.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>Metro Commits</name>
-            <archive>http://java.net/projects/metro/lists/commits/archive</archive>
-            <post>commits@metro.java.net</post>
-        </mailingList>
-
-        <!-- WSIT Specific Mailing Lists -->
-        <mailingList>
-            <name>WSIT Announcements</name>
-            <archive>http://java.net/projects/wsit/lists/announce/archive</archive>
-            <post>announce@wsit.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>WSIT Users List</name>
-            <archive>http://java.net/projects/wsit/lists/users/archive</archive>
-            <post>users@wsit.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>WSIT Developers List</name>
-            <archive>http://java.net/projects/wsit/lists/dev/archive</archive>
-            <post>dev@wsit.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>WSIT Issues</name>
-            <archive>http://java.net/projects/wsit/lists/issues/archive</archive>
-            <post>issues@wsit.java.net</post>
-        </mailingList>
-        <mailingList>
-            <name>WSIT Commits</name>
-            <archive>http://java.net/projects/wsit/lists/cvs/archive</archive>
-            <post>cvs@wsit.java.net</post>
+            <name>Metro mailing list</name>
+            <subscribe>metro+subscribe@javaee.groups.io</subscribe>
+            <post>metro@javaee.groups.io</post>
+            <archive>https://javaee.groups.io/g/metro/topics</archive>
         </mailingList>
     </mailingLists>
     <!--developers></developers-->
     <!--contributors></contributors-->
     <licenses>
         <license>
-            <name>
-                CDDL+GPL License
-            </name>
-            <url>https://glassfish.java.net/public/CDDL+GPL_1_1.html</url>
+            <name>CDDL + GPLv2 with classpath exception</name>
+            <url>https://oss.oracle.com/licenses/CDDL+GPL-1.1</url>
             <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
-        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
+        <connection>scm:git:git@github.com:javaee/metro-wsit.git</connection>
+        <developerConnection>scm:git:git@github.com:javaee/metro-wsit.git</developerConnection>
+        <url>https://github.com/javaee/metro-wsit</url>
         <tag>HEAD</tag>
-        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
     </scm>
-    <organization>
+   <organization>
         <name>Oracle Corporation</name>
         <url>http://www.oracle.com/</url>
     </organization>
