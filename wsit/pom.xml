@@ -446,6 +446,8 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.9</version>
                     <configuration>
+                        <!-- disable checking -->
+                        <additionalparam>-Xdoclint:none</additionalparam>
                         <minmemory>128m</minmemory>
                         <maxmemory>768m</maxmemory>
                         <sourcepath>${project.build.sourceDirectory}:target/generated-sources/rsrc-gen</sourcepath>

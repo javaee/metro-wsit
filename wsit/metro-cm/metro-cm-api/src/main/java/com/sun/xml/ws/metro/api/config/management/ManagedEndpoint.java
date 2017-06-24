@@ -113,7 +113,6 @@ public class ManagedEndpoint<T> extends WSEndpoint<T>{
     /**
      * Initializes this endpoint.
      *
-     * @param id A unique ID of the managed endpoint.
      * @param endpoint The wrapped WSEndpoint instance.
      * @param attributes Several attributes that were used to create the original WSEndpoint
      *   instance and that cannot be queried from WSEndpoint itself. This is used by

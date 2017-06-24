@@ -90,25 +90,6 @@
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                   <!-- <argLine>
-                       -add-modules java.activation
-                       -add-modules java.security.jgss
-                       -add-modules java.xml
-                    </argLine> -->
-                    <additionalJOptions>
-                        <additionalJOption>--add-modules</additionalJOption>
-                        <additionalJOption>java.activation</additionalJOption>
-                        <additionalJOption>--add-exports</additionalJOption>
-                        <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
-                        <additionalJOption>--add-exports</additionalJOption>
-                        <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
-                    </additionalJOptions>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -219,7 +200,7 @@
             <artifactId>wssx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>metro-commons</artifactId>
             <version>${project.version}</version>
@@ -261,4 +242,32 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>release-9</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <!-- <argLine>
+                               -add-modules java.activation
+                               -add-modules java.security.jgss
+                               -add-modules java.xml
+                            </argLine> -->
+                            <additionalJOptions>
+                                <additionalJOption>--add-modules</additionalJOption>
+                                <additionalJOption>java.activation</additionalJOption>
+                                <additionalJOption>--add-exports</additionalJOption>
+                                <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
+                                <additionalJOption>--add-exports</additionalJOption>
+                                <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
+                            </additionalJOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
