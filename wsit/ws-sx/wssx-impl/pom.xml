@@ -156,7 +156,7 @@
         </dependency>
         <dependency>
             <groupId>javax.security.auth.message</groupId>
-            <artifactId>jmac</artifactId>
+            <artifactId>javax.security.auth.message-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.santuario</groupId>

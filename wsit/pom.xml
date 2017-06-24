@@ -864,8 +864,8 @@
             </dependency>
             <dependency>
                 <groupId>javax.security.auth.message</groupId>
-                <artifactId>jmac</artifactId>
-                <version>1.0-rev-1</version>
+                <artifactId>javax.security.auth.message-api</artifactId>
+                <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.santuario</groupId>
