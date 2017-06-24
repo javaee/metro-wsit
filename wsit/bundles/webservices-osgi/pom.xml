@@ -181,7 +181,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>        
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -203,7 +203,7 @@
                                     com.sun.istack.localization;version=${jaxb.osgiVersion};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
                                     com.sun.tools.ws.*;version=${jaxws.osgiVersion},
                                     com.sun.wsit.security.*;version=${metro.osgiVersion},
-                                    com.sun.xml.messaging.saaj.*;version=1.3,
+                                    com.sun.xml.messaging.saaj.*;version=1.4,
                                     com.sun.xml.registry.*;version=1.0,
                                     com.sun.xml.rpc.plugins;version=${metro.osgiVersion},
                                     com.sun.xml.rpc.security;version=${metro.osgiVersion},
@@ -256,8 +256,8 @@
                                     com.sun.enterprise.security.*;resolution:=optional,
                                     com.sun.enterprise.transaction.*;resolution:=optional,
                                     com.sun.enterprise.web.*;resolution:=optional,
-                                    com.sun.enterprise.webservice;resolution:=optional,
-                                    com.sun.enterprise.webservice.monitoring;resolution:=optional,
+                                    org.glassfish.webservice;resolution:=optional,
+                                    org.glassfish.webservice.monitoring;resolution:=optional,
                                     com.sun.mail.util;resolution:=optional,
                                     com.sun.msv.*;resolution:=optional,
                                     com.sun.org.apache.xalan.internal.*;resolution:=optional,
@@ -276,11 +276,11 @@
                                     javax.xml.bind.*;version=${jaxb-api.osgiVersion},
                                     org.apache.coyote;resolution:=optional,
                                     javax.xml.crypto.*;resolution:=optional;version=0,
-                                    org.apache.commons.logging;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
+                                    org.relaxng.datatype.helpers;resolution:=optional,
                                     org.apache.xml.dtm;resolution:=optional,
                                     org.apache.xml.utils;resolution:=optional,
                                     org.apache.xpath;resolution:=optional,
@@ -289,13 +289,18 @@
                                     org.apache.xpath.objects;resolution:=optional,
                                     org.w3c.dom;resolution:=optional,
                                     org.xml.sax;resolution:=optional,
+                                    org.apache.log;resolution:=optional,
+                                    org.apache.log4j;resolution:=optional,
+                                    org.apache.avalon.framework.logger;resolution:=optional,
                                     *
                                 </Import-Package>
                                 <Private-Package>
                                     com.sun.xml.stream.*,
                                     com.sun.xml.xwss.*;version=${metro.osgiVersion},
                                     com.sun.xml.util.*;version=${metro.osgiVersion};include="XMLCipherAdapter",
-                                    javanet.staxutils.*
+                                    javanet.staxutils.*,
+                                    org.apache.commons.logging,
+                                    org.apache.commons.logging.impl,
                                 </Private-Package>
                                 <DynamicImport-Package>
                                     org.glassfish.flashlight.provider,
@@ -392,7 +397,7 @@
         </dependency>
         <dependency>
             <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>     
+            <artifactId>javax.xml.soap-api</artifactId>
         </dependency>
          <dependency>
             <groupId>org.apache.ant</groupId>
@@ -407,7 +412,7 @@
         <dependency>
             <groupId>org.glassfish.main.common</groupId>
             <artifactId>common-util</artifactId>
-            <version>4.1.2</version>
+            <scope>provided</scope>
         </dependency>
 
 

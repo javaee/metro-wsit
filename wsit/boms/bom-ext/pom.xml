@@ -56,11 +56,11 @@
     <packaging>pom</packaging>
     <name>Metro Web Services Stack Dependency POM for Metro-CS</name>
     <description>Metro Web Services Stack Dependency POM for Metro-CS</description>
-    
+
     <properties>
         <connector-api.version>1.5</connector-api.version>
-        <transaction-api.version>1.1</transaction-api.version>
-        <glassfish.version>3.2-b06</glassfish.version>
+        <transaction-api.version>1.2</transaction-api.version>
+        <glassfish.version>4.1.2</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>
         <jaxws.home.uri>http://javaee.github.io/metro-jax-ws</jaxws.home.uri>
@@ -78,21 +78,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-        
+
             <!-- Should this really be reexported? -->
             <dependency>
                 <groupId>javax.resource</groupId>
                 <artifactId>connector-api</artifactId>
                 <version>${connector-api.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>javax.transaction</groupId>
-                <artifactId>transaction-api</artifactId>
+                <artifactId>javax.transaction-api</artifactId>
                 <version>${transaction-api.version}</version>
             </dependency>
 
         </dependencies>
     </dependencyManagement>
-    
+
 </project>

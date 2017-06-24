@@ -295,8 +295,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.security</groupId>
+            <groupId>org.glassfish.main.security</groupId>
             <artifactId>security</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.main.security</groupId>
+            <artifactId>security-ee</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -311,7 +316,7 @@
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
-            <artifactId>transaction-api</artifactId>
+            <artifactId>javax.transaction-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -396,5 +401,5 @@
     </dependencies>
     <properties>
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
-    </properties>    
+    </properties>
 </project>

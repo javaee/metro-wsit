@@ -82,7 +82,7 @@
                     <maxmem>512m</maxmem>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -237,8 +237,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.security</groupId>
+            <groupId>org.glassfish.main.security</groupId>
             <artifactId>security</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.main.security</groupId>
+            <artifactId>security-ee</artifactId>
             <scope>provided</scope>
         </dependency>
 

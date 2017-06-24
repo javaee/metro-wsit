@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -263,7 +263,7 @@
                                     <include>com.sun.xml.registry:jaxr-impl</include>
                                     <include>com.sun.xml.rpc:jaxrpc-impl</include>
                                     <include>com.sun.xml.rpc:jaxrpc-spi</include>
-                                    <include>org.apache.santuario:xmlsec</include> 
+                                    <include>org.apache.santuario:xmlsec</include>
                                     <include>com.sun.xml.security:saml-jaxb10-bindings</include>
                                     <include>com.sun.xml.stream.buffer:streambuffer</include>
                                     <include>com.sun.xml.ws:jaxws-rt</include>
@@ -335,7 +335,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-            </resource>        
+            </resource>
         </resources>
     </build>
 
@@ -360,7 +360,7 @@
     </profiles>
 
     <dependencies>
-        
+
         <!-- Provided dependencies -->
         <dependency>
             <groupId>org.apache.ant</groupId>
@@ -378,8 +378,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.security</groupId>
+            <groupId>org.glassfish.main.security</groupId>
             <artifactId>security</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.main.security</groupId>
+            <artifactId>security-ee</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -394,7 +399,7 @@
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
-            <artifactId>transaction-api</artifactId>
+            <artifactId>javax.transaction-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -407,7 +412,7 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <!-- Shaded dependencies -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
@@ -513,7 +518,7 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    
+
     <properties>
         <build.id>${scmBranch}-${buildNumber}; ${timestamp}</build.id>
         <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS-API/${jaxws-api.version} JAXB-RI/${jaxb.version} JAXB-API/${jaxb-api.version}</build.version>
