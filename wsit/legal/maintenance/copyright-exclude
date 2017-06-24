@@ -1,4 +1,5 @@
 /META-INF/services/
+/MANIFEST.MF
 /README
 .gif
 .jpg
@@ -21,6 +22,7 @@
 .ipr
 .envelope
 .txt
+.pdf
 /copyright-exclude
 /LICENSE
 /copyright.txt
@@ -28,3 +30,6 @@ www
 site
 zip
 etc
+/com/sun/xml/ws/security/opt/crypto/dsig/internal/SignerOutputStream.java
+/com/sun/xml/ws/security/opt/crypto/dsig/internal/MacOutputStream.java
+/com/sun/xml/ws/security/opt/crypto/dsig/internal/DigesterOutputStream.java
