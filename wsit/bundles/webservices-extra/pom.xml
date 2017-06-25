@@ -133,7 +133,6 @@
                                     <include>javax.mail:mail</include>
                                 </includes>
                             </artifactSet>
-                            <createSourcesJar>true</createSourcesJar>                            
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -149,26 +148,6 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin> <!-- remove the generated src dir-->
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>clean-unpacked-src-dir</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                            <filesets>
-                                <fileset>
-                                    <directory>${generated.sources.dir}</directory>
-                                </fileset>
-                            </filesets>
                         </configuration>
                     </execution>
                 </executions>
@@ -220,7 +199,7 @@
         </dependency>
          <dependency>
             <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>     
+            <artifactId>javax.xml.soap-api</artifactId>
         </dependency>
     </dependencies>
     <properties>
