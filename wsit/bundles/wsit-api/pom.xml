@@ -180,7 +180,7 @@
                                     <include>${project.groupId}:*</include>
                                 </includes>
                             </artifactSet>
-                            <createSourcesJar>true</createSourcesJar>
+                            <createSourcesJar>false</createSourcesJar>
                             <!--minimizeJar>true</minimizeJar-->
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                             <transformers>

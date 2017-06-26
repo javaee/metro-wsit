@@ -150,7 +150,7 @@
                                         <Main-Class>com.sun.tools.ws.WsImport</Main-Class>
                                         <Class-Path>webservices-rt.jar</Class-Path>
                                     </manifestEntries>
-                                </transformer>                            
+                                </transformer>
                             </transformers>
                         </configuration>
                     </execution>
@@ -182,12 +182,12 @@
                                     </goals>
                                 </execution>
                             </executions>
-                        </plugin>                    
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
         </profile>
-        
+
         <profile>
             <id>release-9</id>
             <build>
@@ -213,13 +213,13 @@
                                     </goals>
                                 </execution>
                             </executions>
-                        </plugin>                    
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
         </profile>
     </profiles>
-        
+
     <dependencies>
         <!-- Shaded dependencies -->
         <dependency>
@@ -253,7 +253,7 @@
         </dependency>
         <dependency>
             <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>     
+            <artifactId>javax.xml.soap-api</artifactId>
         </dependency>
     </dependencies>
     <properties>

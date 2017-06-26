@@ -123,7 +123,7 @@
                                     <include>javax.xml.registry:javax.xml.registry-api</include>
                                 </includes>
                             </artifactSet>
-                            <createSourcesJar>true</createSourcesJar>
+                            <createSourcesJar>false</createSourcesJar>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
