@@ -157,8 +157,20 @@
                                     <message>Property jaxb.osgiVersion not imported or set!</message>
                                 </requireProperty>
                                 <requireProperty>
+                                    <property>jaxb-api.osgiVersion</property>
+                                    <message>Property jaxb-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>saaj-api.osgiVersion</property>
+                                    <message>Property saaj-api.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
                                     <property>jaxws.osgiVersion</property>
                                     <message>Property jaxws.osgiVersion not imported or set!</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>jaxws-api.osgiVersion</property>
+                                    <message>Property jaxws-api.osgiVersion not imported or set!</message>
                                 </requireProperty>
                                 <requireProperty>
                                     <property>metro.osgiVersion</property>
@@ -169,7 +181,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>        
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -185,15 +197,13 @@
                             <excludeDependencies>jaxws-eclipselink-plugin,sdo-eclipselink-plugin</excludeDependencies>
                             <instructions>
                                 <Export-Package>
-                                    com.oracle.webservices.api;version=${jaxws.osgiVersion},
-                                    com.oracle.webservices.api.databinding;version=${jaxws.osgiVersion},
-                                    com.oracle.webservices.api.message;version=${jaxws.osgiVersion},
+                                    com.oracle.webservices.*;version=${jaxws.osgiVersion},
                                     com.oracle.xmlns.webservices.jaxws_databinding;version=${jaxws.osgiVersion},
-                                    com.sun.istack.ws.*;version=${jaxws.osgiVersion},
+                                    com.sun.istack.ws.*;version=${jaxb.osgiVersion},
                                     com.sun.istack.localization;version=${jaxb.osgiVersion};uses:="com.sun.xml.ws.resources,com.sun.tools.ws.resources",
                                     com.sun.tools.ws.*;version=${jaxws.osgiVersion},
                                     com.sun.wsit.security.*;version=${metro.osgiVersion},
-                                    com.sun.xml.messaging.saaj.*;version=1.3,
+                                    com.sun.xml.messaging.saaj.*;version=1.4,
                                     com.sun.xml.registry.*;version=1.0,
                                     com.sun.xml.rpc.plugins;version=${metro.osgiVersion},
                                     com.sun.xml.rpc.security;version=${metro.osgiVersion},
@@ -230,6 +240,9 @@
                                     org.apache.xml.security.*;version=${santuario.version}
                                 </Export-Package>
                                 <Import-Package>
+                                    com.ibm.security.util;resolution:=optional,
+                                    com.ibm.security.x509;resolution:=optional,
+                                    com.sun.istack.*;version=${jaxb.osgiVersion},
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
@@ -243,11 +256,13 @@
                                     com.sun.enterprise.security.*;resolution:=optional,
                                     com.sun.enterprise.transaction.*;resolution:=optional,
                                     com.sun.enterprise.web.*;resolution:=optional,
-                                    com.sun.enterprise.webservice;resolution:=optional,
-                                    com.sun.enterprise.webservice.monitoring;resolution:=optional,
+                                    org.glassfish.webservice;resolution:=optional,
+                                    org.glassfish.webservice.monitoring;resolution:=optional,
                                     com.sun.mail.util;resolution:=optional,
                                     com.sun.msv.*;resolution:=optional,
-                                    com.sun.org.apache.xml.internal.serialize;resolution:=optional,
+                                    com.sun.org.apache.xalan.internal.*;resolution:=optional,
+                                    com.sun.org.apache.xml.internal.*;resolution:=optional,
+                                    com.sun.org.apache.xerces.internal.*;resolution:=optional,
                                     com.sun.xml.bind.api.impl;resolution:=optional,
                                     com.sun.xml.bind.serializer;resolution:=optional,
                                     com.sun.xml.bind.validator;resolution:=optional,
@@ -257,15 +272,16 @@
                                     javax.ejb;resolution:=optional;version=3.0,
                                     javax.jws;version=2.0,
                                     javax.jws.soap;version=2.0,
+                                    javax.xml.soap.*;version=${saaj-api.osgiVersion},
                                     javax.xml.ws.*;version=${jaxws-api.osgiVersion},
                                     javax.xml.bind.*;version=${jaxb-api.osgiVersion},
                                     org.apache.coyote;resolution:=optional,
                                     javax.xml.crypto.*;resolution:=optional;version=0,
-                                    org.apache.commons.logging;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
+                                    org.relaxng.datatype.helpers;resolution:=optional,
                                     org.apache.xml.dtm;resolution:=optional,
                                     org.apache.xml.utils;resolution:=optional,
                                     org.apache.xpath;resolution:=optional,
@@ -274,13 +290,18 @@
                                     org.apache.xpath.objects;resolution:=optional,
                                     org.w3c.dom;resolution:=optional,
                                     org.xml.sax;resolution:=optional,
+                                    org.apache.log;resolution:=optional,
+                                    org.apache.log4j;resolution:=optional,
+                                    org.apache.avalon.framework.logger;resolution:=optional,
                                     *
                                 </Import-Package>
                                 <Private-Package>
                                     com.sun.xml.stream.*,
                                     com.sun.xml.xwss.*;version=${metro.osgiVersion},
                                     com.sun.xml.util.*;version=${metro.osgiVersion};include="XMLCipherAdapter",
-                                    javanet.staxutils.*
+                                    javanet.staxutils.*,
+                                    org.apache.commons.logging,
+                                    org.apache.commons.logging.impl,
                                 </Private-Package>
                                 <DynamicImport-Package>
                                     org.glassfish.flashlight.provider,
@@ -308,27 +329,27 @@
         </plugins>
     </build>
 
-     <profiles>
+    <profiles>
         <profile>
             <id>release-9</id>
             <build>
-              <plugins>
-                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <configuration>
-                        <additionalJOptions>
-                            <additionalJOption>--add-modules</additionalJOption>
-                            <additionalJOption>java.activation</additionalJOption>
-                            <additionalJOption>--add-exports</additionalJOption>
-                            <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
-                            <additionalJOption>--add-exports</additionalJOption>
-                            <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
-                        </additionalJOptions>
-                    </configuration>
-                </plugin>
-              </plugins>
-             </build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalJOptions>
+                                <additionalJOption>--add-modules</additionalJOption>
+                                <additionalJOption>java.activation</additionalJOption>
+                                <additionalJOption>--add-exports</additionalJOption>
+                                <additionalJOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalJOption>
+                                <additionalJOption>--add-exports</additionalJOption>
+                                <additionalJOption>java.xml/com.sun.org.apache.xerces.internal.impl.dv.util=ALL-UNNAMED</additionalJOption>
+                            </additionalJOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -345,11 +366,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>webservices-extra</artifactId>
             <version>${project.version}</version>
@@ -363,7 +379,7 @@
         </dependency>
         <dependency>
             <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>     
+            <artifactId>javax.xml.soap-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
@@ -376,9 +392,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>org.glassfish.common</groupId>
-          <artifactId>common-util</artifactId>
-          <version>3.0.1</version>
+            <groupId>org.glassfish.main.common</groupId>
+            <artifactId>common-util</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!--
@@ -422,6 +438,10 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>sdo-eclipselink-plugin</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
