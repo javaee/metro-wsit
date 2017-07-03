@@ -38,4 +38,6 @@ java_pid*
 wsit/ws-rx/wsrm-impl/PersistentRmJunitTestDb/
 wsit/ws-sx/wssx-impl/golden.mh
 wsit/ws-sx/wssx-impl/golden.msg
+ws-sx/wssx-impl/recvd.mh
+ws-sx/wssx-impl/recvd.msg
 dependency-reduced-pom.xml
