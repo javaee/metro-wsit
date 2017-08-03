@@ -239,7 +239,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.0.1</version>
+                    <version>3.0.0-M1</version>
                     <executions>
                         <execution>
                             <id>enforce-versions</id>
@@ -434,7 +434,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.4</version>
+                    <version>3.0.0-M1</version>
                     <configuration>
                         <!-- disable checking -->
                         <additionalparam>-Xdoclint:none</additionalparam>
@@ -594,7 +594,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
+                        <version>3.0.0-M1</version>
                         <configuration>
                            <additionalparam>-Xdoclint:none</additionalparam>
                            <failOnError>true</failOnError>
