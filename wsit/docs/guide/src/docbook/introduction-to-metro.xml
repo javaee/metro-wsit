@@ -74,7 +74,7 @@
                 container) <itemizedlist>
                         <listitem>
                             <para><link
-                            xlink:href="http://glassfish.java.net/public/downloadsindex.html">GlassFish
+                            xlink:href="http://javaee.github.io/glassfish">GlassFish
                             Server</link></para>
                         </listitem>
 
@@ -87,7 +87,7 @@
             </listitem>
 
             <listitem>
-                <para><link xlink:href="http://metro.java.net/">Metro</link>
+                <para><link xlink:href="http://javaee.github.io/metro">Metro</link>
                 binary. See the particular release page for instructions about
                 downloading and installing Metro in a servlet
                 container.</para>

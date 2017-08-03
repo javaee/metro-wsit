@@ -92,7 +92,7 @@
 
             <listitem>
                 <para><link
-                xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">Wsimport
+                xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/jaxws-maven-plugin">Wsimport
                 and Wsgen Maven2 plugin</link></para>
             </listitem>
         </orderedlist>
@@ -143,11 +143,11 @@
         Maven-based users.</para>
 
         <para>This has changed with <link
-        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link>.
+        xlink:href="http://javaee.github.io/metro/2.1/">Metro 2.1 release</link>.
         Metro 2.1 has brought a significant change to the Metro build process
         as one of the major tasks in the release was to switch Metro build
         system from Ant to Maven. The main Metro build as well as the whole
-        <link xlink:href="http://wsit.java.net">WSIT project</link> modules
+        <link xlink:href="http://javaee.github.io/metro-wsit">WSIT project</link> modules
         have been fully mavenized and currently Metro is built, assembled and
         installed using Maven. Metro releases are deployed to Maven central. 
         The Metro modules share a new common root
@@ -214,7 +214,7 @@
                 xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/usage.html">snippet
                 from pom.xml</link> shows the usage of these maven plugins.
                 More information on using these plugins is available at <link
-                xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">JAX-WS
+                xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/jaxws-maven-plugin/">JAX-WS
                 Maven Plugin Project</link> site.</para>
             </section>
         </section>
@@ -1409,7 +1409,7 @@ public class HelloWorldClient {
         <simplesect>
             <para>You can also use Wsimport and Wsgen Maven2 tools. For
             details see <link
-            xlink:href="http://jax-ws-commons.java.net/jaxws-maven-plugin/">here</link>.
+            xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/jaxws-maven-plugin">here</link>.
             Netbeans offers an easy to use a comprehensive Metro tooling
             choice. On Eclipse you can use SOAP UI or ant build script or CLI
             or even Maven based tools, which does not look bad. There is <link
@@ -1420,7 +1420,7 @@ public class HelloWorldClient {
             will need an equivalent of the <link
             xlink:href="http://websvc.netbeans.org/wsit/">WSIT Plugin</link>
             in NetBeans for Eclipse. Please let <link
-            xlink:href="mailto:users@metro.java.net">us</link> know if you are
+            xlink:href="mailto:metro@javaee.groups.io">us</link> know if you are
             willing to write a WSIT plugin for Eclipse.</para>
         </simplesect>
     </section>
@@ -2036,19 +2036,19 @@ WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
     and Distribution License("CDDL") (collectively, the "License").  You
     may not use this file except in compliance with the License.  You can
     obtain a copy of the License at
-    http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    or packager/legal/LICENSE.txt.  See the License for the specific
+    https://oss.oracle.com/licenses/CDDL+GPL-1.1
+    or LICENSE.txt.  See the License for the specific
     language governing permissions and limitations under the License.
 
     When distributing the software, include this License Header Notice in each
-    file and include the License file at packager/legal/LICENSE.txt.
+    file and include the License file at LICENSE.txt.
 
     GPL Classpath Exception:
     Oracle designates this particular file as subject to the "Classpath"
@@ -2410,7 +2410,7 @@ WEB-INF/wsdl/schema.xsd WSDL imports this Schema</programlisting>
             <title>Efficient Handlers in JAX-WS RI</title>
 
             <para><link
-            xlink:href="http://weblogs.java.net/blog/ramapulavarthi/archive/2007/12/extend_your_web.html">
+            xlink:href="https://community.oracle.com/people/ramapulavarthi/blog/2007/12/13/extend-your-web-service-applications-new-efficient-handlers-jax-ws-ri?customTheme=java">
             Extend your Web Service applications with the new efficient
             Handlers in JAX-WS RI </link>: Use this RI extension to take
             advantage of the JAX-WS RI Message API for efficient access to
@@ -3237,7 +3237,7 @@ byte[] response = proxy.echoStringAsBinary(input);</programlisting>
             <para>Let us try to create a client for the <link
             xlink:href="http://131.107.72.15/MTOM_Service_Indigo/Soap11MtomUtf8.svc">NET
             3.0 MTOM endpoint</link>. I am using <link
-            xlink:href="http://metro.java.net/1.0/">Metro 1.0</link>.</para>
+            xlink:href="http://javaee.github.io/metro/1.0/">Metro 1.0</link>.</para>
 
             <para>First I save the .NET 3.0 MTOM <link
             xlink:href="http://131.107.72.15/MTOM_Service_Indigo/Soap11MtomUtf8.svc?wsdl">WSDL</link>
@@ -3406,13 +3406,13 @@ proxy.sayHello("Hello World!");</programlisting>
         Web Services. <itemizedlist>
                 <listitem>
                     <para><link
-                    xlink:href="http://weblogs.java.net/blog/ramapulavarthi/archive/2006/06/maintaining_ses.html">Maintaining
+                    xlink:href="https://community.oracle.com/blogs/ramapulavarthi/2006/06/07/maintaining-session-jax-ws">Maintaining
                     Session With JAX-WS</link></para>
                 </listitem>
 
                 <listitem>
                     <para><link
-                    xlink:href="http://jax-ws-commons.java.net/http-session-scope/">Making
+                    xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/http-session-scope">Making
                     it easier with @HttpSessionScope.</link></para>
                 </listitem>
 
@@ -3461,7 +3461,7 @@ proxy.sayHello("Hello World!");</programlisting>
         Internet Engineering Steering Group (IESG) for documents serialized
         using this format.</para>
 
-        <para><link xlink:href="http://fi.java.net/">FI</link> is an
+        <para><link xlink:href="https://github.com/javaee/metro-fi">FI</link> is an
         open-source project initiated by Sun Microsystems to provide access to
         a fast, fully-featured and robust implementation of the Fast Infoset
         specification. Metro employs the basic Fast Infoset parsers and
@@ -3513,14 +3513,14 @@ ctxt.put("com.sun.xml.ws.client.ContentNegotiation", "pessimistic");</programlis
         <title>High Availability Support in Metro</title>
 
         <para>Starting with the <link
-        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link> Metro
+        xlink:href="http://javaee.github.io/metro/2.1/">Metro 2.1 release</link> Metro
         officially supports deployment in clustered environment configurations
         including the support for stateful Metro features, namely Reliable
         Messaging (see <xref linkend="using_rm-ha_support"
         xrefstyle="select:title" /> for limitations), Secure Conversation,
         Security NONCE Manager and Stateful Web Services. Currently this
         support is tested with and limited to the <link
-        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        xlink:href="http://javaee.github.io/glassfish">GlassFish</link> Application
         Server.</para>
 
         <para>Clustering support in Metro is automatic, which means that once
@@ -3534,7 +3534,7 @@ ctxt.put("com.sun.xml.ws.client.ContentNegotiation", "pessimistic");</programlis
 
         <para>For more information on configuring Clustering environment in
         GlassFish, please consult the <link
-        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        xlink:href="http://javaee.github.io/glassfish">GlassFish</link> Application
         Server User Guide or watch this <link
         xlink:href="http://www.youtube.com/user/GlassFishVideos#p/c/1808040BD1409BF0/3/LDjXjm9_Q5A">very
         comprehensible basic screencast</link> or another a <link

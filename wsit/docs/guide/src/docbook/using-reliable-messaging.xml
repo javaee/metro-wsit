@@ -1145,14 +1145,14 @@
         <title>High Availability Support in Reliable Messaging</title>
 
         <para>Starting with the <link
-        xlink:href="http://metro.java.net/2.1/">Metro 2.1 release</link> Metro
+        xlink:href="http://javaee.github.io/metro/2.1/">Metro 2.1 release</link> Metro
         implementation of reliable messaging supports deployment in clustered
         environment configurations of the <link
-        xlink:href="http://glassfish.java.net">GlassFish</link> Application
+        xlink:href="http://javaee.github.io/glassfish">GlassFish</link> Application
         Server 3.1 and higher. The only untested and thus currently officially
         unsupported reliable messaging feature in an HA environment is
         in-order message delivery. For more details see <link
-        xlink:href="http://wsit.java.net/status-notes/status-notes-2-1-FCS.html#rm">RM
+        xlink:href="http://javaee.github.io/metro-wsit/status-notes/status-notes-2-1-FCS.html#rm">RM
         section of the WSIT 2.1 Release Notes</link>.</para>
 
         <para>For a general overview of Metro High Availability support,

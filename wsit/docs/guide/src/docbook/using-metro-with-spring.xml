@@ -60,11 +60,11 @@
         <title>Spring Introduction</title>
 
         <para>This <link
-        xlink:href="http://jax-ws-commons.java.net/spring/">project</link>
+        xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/spring">project</link>
         allows you to deploy a JAX-WS endpoint as a <link
         xlink:href="http://www.springframework.org/">Spring</link> Service
         Bean. We won't repeat the information that is on the <link
-        xlink:href="http://jax-ws-commons.java.net/spring/">site</link>
+        xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/spring">site</link>
         already and instead focus on how to get more out of the Spring
         integration in the following sections.</para>
     </section>
@@ -141,8 +141,8 @@
 
             <para>Now we still need to add the JAX-WS Spring library to the
             project. You can download the library from <link
-            xlink:href="http://maven2-repository.java.net/source/browse/maven2-repository/trunk/www/repository/org/jvnet/jax-ws-commons/spring/jaxws-spring/">http://maven2-repository.java.net/source/browse/maven2-repository/trunk/www/repository/org/jvnet/jax-ws-commons/spring/jaxws-spring/</link>.
-            Then move the library (in my case jaxws-spring-1.8.jar) into the
+            xlink:href="https://repo1.maven.org/maven2/org/jvnet/jax-ws-commons/spring/jaxws-spring/">https://repo1.maven.org/maven2/org/jvnet/jax-ws-commons/spring/jaxws-spring/</link>.
+            Then move the library (in my case jaxws-spring-1.9.jar) into the
             lib directory of the NetBeans project. Next, right-click on the
             project in the NetBeans navigator and select Properties. In the
             Properties dialog, select the Libraries category and press the Add
@@ -352,7 +352,7 @@ class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
             xlink:href="http://localhost:8080/MySpringApp/ws">http://localhost:8080/MySpringApp/ws</link>.
             You can find more details on how to configure JAX-WS for Spring
             <link
-            xlink:href="http://jax-ws-commons.java.net/spring/">here</link>.</para>
+            xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/spring">here</link>.</para>
         </section>
     </section>
 
@@ -443,8 +443,8 @@ class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
 
             <para>Now you still need to add the JAX-WS Spring library to the
             project. You can download the library from <link
-            xlink:href="http://maven2-repository.java.net/source/browse/maven2-repository/trunk/www/repository/org/jvnet/jax-ws-commons/spring/jaxws-spring/">http://maven2-repository.java.net/source/browse/maven2-repository/trunk/www/repository/org/jvnet/jax-ws-commons/spring/jaxws-spring/</link>.
-            Then move the library (i.e. jaxws-spring-1.8.jar) into the lib
+            xlink:href="https://repo1.maven.org/maven2/org/jvnet/jax-ws-commons/spring/jaxws-spring/">https://repo1.maven.org/maven2/org/jvnet/jax-ws-commons/spring/jaxws-spring/</link>.
+            Then move the library (i.e. jaxws-spring-1.9.jar) into the lib
             directory of the NetBeans project. Next, right-click on the
             project in the NetBeans navigator and select Properties. In the
             Properties dialog, select the Libraries category and press the Add
@@ -655,7 +655,7 @@ class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
             xlink:href="http://localhost:8080/MySpringApp/ws">http://localhost:8080/MySpringApp/ws</link>.
             You can find more details on how to configure JAX-WS for Spring
             <link
-            xlink:href="http://jax-ws-commons.java.net/spring/">here</link>.</para>
+            xlink:href="https://github.com/javaee/metro-jaxws-commons/tree/master/spring">here</link>.</para>
         </section>
     </section>
 

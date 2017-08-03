@@ -66,7 +66,7 @@
             <title>Provider&lt;Message&gt;</title>
 
             <para><link
-            xlink:href="http://weblogs.java.net/blog/kohsuke/archive/2007/03/dispatch_and_pr.html">JAX-WS
+            xlink:href="https://community.oracle.com/people/kohsuke/blog/2007/03/01/dispatch-and-provider">JAX-WS
             RI extension Provider&lt;Message&gt;</link> can be used to read an
             incoming SOAP message by using <code>XMLStreamReader</code> (among
             other things.) This allows you to read the SOAP message on-demand
@@ -74,7 +74,7 @@
             memory.</para>
 
             <para>See <link
-            xlink:href="http://jaxb.java.net/guide/Dealing_with_large_documents.html">the
+            xlink:href="https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#unmarshalling-dealing-with-large-documents">the
             relevant JAXB users guide section</link> for how to combine JAXB
             with such streaming processing.</para>
         </section>

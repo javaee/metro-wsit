@@ -77,7 +77,7 @@ $ wsimport -p org.acme.foo second.wsdl</programlisting>
         overwritten multiple times, but since they are identical, in the end
         this will produce the desired result. If the common part is separated
         into its own namespace, you can use <link
-        xlink:href="http://jaxb.java.net/guide/Customizing_Java_packages.html">a
+        xlink:href="https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#customization-of-schema-compilation-customizing-java-packages">a
         JAXB customization</link> so that the common part will go to the
         overwritten package while everything else will get its own
         package.</para>
@@ -94,7 +94,7 @@ $ wsimport -p org.acme.foo.first  first.wsdl  -b common.jaxb
 $ wsimport -p org.acme.foo.second second.wsdl -b common.jaxb</programlisting>
 
         <para>You can also compile the schema upfront by xjc, then use <link
-        xlink:href="http://weblogs.java.net/blog/kohsuke/archive/2006/09/separate_compil.html">its
+        xlink:href="https://community.oracle.com/blogs/kohsuke/2006/09/05/separate-compilation-jaxb-ri-21">its
         episode file</link> when later invoking wsimport. For this to work,
         the common schema needs to have a URL that you can pass into xjc. If
         the schema is inlined inside the WSDL, you'll have to pull it out into
@@ -209,7 +209,7 @@ line 1 of http://131.107.72.15/Security_WsSecurity_Service_Indigo/WSSecureConver
             <programlisting>wsimport -p mypackage -keep -b simple.xjb myservice.wsdl</programlisting>
 
             <para>See Kohsuke's <link
-            xlink:href="http://weblogs.java.net/blog/kohsuke/archive/2007/01/using_jaxb_ris.html">blog</link>
+            xlink:href="https://community.oracle.com/people/kohsuke/blog/2007/01/23/using-jaxb-ris-simpler-and-better-binding-mode-jax-ws">blog</link>
             for more details.</para>
         </section>
     </section>

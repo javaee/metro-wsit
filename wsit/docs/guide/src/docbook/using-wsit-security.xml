@@ -1362,7 +1362,7 @@
                         URL:</para>
 
                         <para><link
-                        xlink:href="http://java.net/projects/wsit/sources/svn/content/trunk/wsit/tests/e2e/testcases/xwss/s11/resources/wsit-client.xml">http://java.net/projects/wsit/sources/svn/content/trunk/wsit/tests/e2e/testcases/xwss/s11/resources/wsit-client.xml</link></para>
+                        xlink:href="https://github.com/javaee/metro-wsit/blob/master/wsit/tests/e2e/testcases/xwss/s11/resources/wsit-client.xml">https://github.com/javaee/metro-wsit/blob/master/wsit/tests/e2e/testcases/xwss/s11/resources/wsit-client.xml</link></para>
                     </listitem>
 
                     <listitem>
@@ -1843,7 +1843,7 @@ HTTPS hostname wrong: should be &lt;hostname as in the certificate&gt;</programl
             <para>An STS is a service that implements the protocol defined in
             the WS-Trust specification (you can find a link to this
             specification at <link
-            xlink:href="http://wsit.java.net/">http://wsit.java.net/</link> ).
+            xlink:href="http://javaee.github.io/metro">http://javaee.github.io/metro</link> ).
             This protocol defines message formats and message exchange
             patterns for issuing, renewing, canceling, and validating security
             tokens.</para>
@@ -6485,7 +6485,7 @@ public class SampleWsitDigestPasswordValidator extends
 
             <para>Another STS example application can be found at the
             following URL: <link
-            xlink:href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust">http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust</link>
+            xlink:href="https://github.com/javaee/metro-wsit/tree/master/wsit/samples/ws-trust">https://github.com/javaee/metro-wsit/tree/master/wsit/samples/ws-trust</link>
             .</para>
 
             <task xml:id="gfrlq">

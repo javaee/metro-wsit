@@ -256,7 +256,7 @@ Header h = hl.get(MYHEADER);</programlisting>
             <title>Server Side Schema Validation</title>
 
             <para>The <link
-            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/SchemaValidation.html?raw=true">
+            xlink:href="https://github.com/javaee/metro-jax-ws/blob/master/jaxws-ri/rt/src/main/java/com/sun/xml/ws/developer/SchemaValidation.java">
             <code>@SchemaValidation</code> </link> annotation needs to be
             specified on the endpoint implementation to enable server side
             validation. Both the incoming SOAP request and outgoing SOAP
@@ -277,10 +277,10 @@ public class HelloImpl {
 
             <para>If a application wants to have complete control over
             validation error handling, it can set up a <link
-            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/ValidationErrorHandler.html?raw=true"><code>ValidationErrorHandler</code></link>
+            xlink:href="https://github.com/javaee/metro-jax-ws/blob/master/jaxws-ri/rt/src/main/java/com/sun/xml/ws/developer/ValidationErrorHandler.java"><code>ValidationErrorHandler</code></link>
             to receive notification of errors. The handler has access to the
             <link
-            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/api/message/Packet.html?raw=true"><code>Packet</code></link>
+            xlink:href="https://github.com/javaee/metro-jax-ws/blob/master/jaxws-ri/rt/src/main/java/com/sun/xml/ws/api/message/Packet.java"><code>Packet</code></link>
             and can store any information in its invocationProperties. These
             properties are accessible from the endpoint's
             <code>MessageContext</code>.</para>
@@ -319,7 +319,7 @@ public class MyErrorHandler extends ValidationErrorHandler {
             <title>Client Side Schema Validation</title>
 
             <para>Proxy needs to be created with <link
-            xlink:href="http://java.net/projects/jax-ws-architecture-document/sources/svn/content/trunk/www/doc/com/sun/xml/ws/developer/SchemaValidationFeature.html?raw=true"><code>SchemaValidationFeature</code></link>
+            xlink:href="https://github.com/javaee/metro-jax-ws/blob/master/jaxws-ri/rt/src/main/java/com/sun/xml/ws/developer/SchemaValidationFeature.java"><code>SchemaValidationFeature</code></link>
             to enable client side validation. Both the outgoing SOAP request
             and incoming SOAP response will be validated.</para>
 

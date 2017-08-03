@@ -60,7 +60,7 @@
         <title>Links to more information</title>
 
         <para>For more information on Metro, visit the Metro web site at <link
-        xlink:href="http://metro.java.net/"> http://metro.java.net/</link> .
+        xlink:href="https://javaee.github.io/metro/">https://javaee.github.io/metro/</link> .
         On that site, you will find information about the specifications
         implemented in Metro product, source code, support information, links
         to documentation updates, and much more.</para>
@@ -81,16 +81,16 @@
                 Metro)</para>
 
                 <para><link
-                xlink:href="http://wsit.java.net/docs/tango-overview.pdf">
-                http://wsit.java.net/docs/tango-overview.pdf</link></para>
+                xlink:href="https://javaee.github.io/metro-wsit/docs/tango-overview.pdf">
+                https://javaee.github.io/metro-wsit/docs/tango-overview.pdf</link></para>
             </listitem>
 
             <listitem>
                 <para>Web Services blog:</para>
 
                 <para><link
-                xlink:href="http://blogs.sun.com/arungupta/category/webservices">
-                http://blogs.sun.com/arungupta/category/webservices</link></para>
+                xlink:href="https://blogs.oracle.com/arungupta/webservices-3">
+                https://blogs.oracle.com/arungupta/webservices-3</link></para>
             </listitem>
 
             <listitem>
@@ -98,8 +98,8 @@
                 (and others):</para>
 
                 <para><link
-                xlink:href="http://blogs.sun.com/japod/date/20070226">
-                http://blogs.sun.com/japod/date/20070226</link></para>
+                xlink:href="https://blogs.oracle.com/japod/manual-web-service-configuration-in-from-java-case">
+                https://blogs.oracle.com/japod/manual-web-service-configuration-in-from-java-case</link></para>
             </listitem>
 
             <listitem>
@@ -121,16 +121,16 @@
                 <para>Metro Screencasts:</para>
 
                 <para><link
-                xlink:href="http://metro.java.net/discover/screencasts.html">
-                http://metro.java.net/discover/screencasts.html</link></para>
+                xlink:href="https://javaee.github.io/metro/discover/screencasts.html">
+                https://javaee.github.io/metro/discover/screencasts.html</link></para>
             </listitem>
 
             <listitem>
                 <para>WS-* Specifications Implemented by Metro:</para>
 
                 <para><link
-                xlink:href="http://wsit.java.net/specification-links.html">
-                http://wsit.java.net/specification-links.html</link></para>
+                xlink:href="https://javaee.github.io/metro-wsit/specification-links.html">
+                https://javaee.github.io/metro-wsit/specification-links.html</link></para>
             </listitem>
         </itemizedlist>
     </section>

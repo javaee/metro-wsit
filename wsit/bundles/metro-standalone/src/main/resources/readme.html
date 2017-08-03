@@ -44,14 +44,14 @@
 <html>
     <title>${product.name}</title>
     <body>
-		<div style="float:right;text-align: center;font-weight: bold">
-			<a href="${download.link}">
-				<img  alt="Download ${product.name}" src="http://metro.java.net/download.png" border="0"/>
-			</a>
-			<div class="title">
-				<a href="${download.link}">Download ${product.name}</a>
-			</div>
-		</div>
+        <div style="float:right;text-align: center;font-weight: bold">
+            <a href="${download.link}">
+                <img  alt="Download ${product.name}" src="https://javaee.github.io/metro/download.png" border="0"/>
+            </a>
+            <div class="title">
+                <a href="${download.link}">Download ${product.name}</a>
+            </div>
+        </div>
 
         <h1 style="clear: left;">${product.name}</h1>
         <p><tt>Release Date: ${release.date}</tt></p>
@@ -59,7 +59,7 @@
         <a name="downloading"></a>
         <h2 style="clear: left">Downloading ${product.name}</h2>
         <p>
-            Unless you have already done so, please download the 
+            Unless you have already done so, please download the
             <a href="${download.link}">${product.name} ZIP archive</a>.
             Once downloaded, you can expand it by executing following shell command:
         </p>
@@ -89,7 +89,7 @@
         <p>
             GlassFish bundles Metro by default. You should not update Metro version separately - always update to full Glassfish update.
         <p>
-            In case you want to experiment with an unofficial build or release of Metro, you may try the GlassFish 
+            In case you want to experiment with an unofficial build or release of Metro, you may try the GlassFish
             installer. To stop GlassFish instance, install ${product.name} using the standalone installer on top of it
             and restart the GlassFish instance, execute the following commands:
         </p>
@@ -124,7 +124,7 @@ catalina.sh start
         <p>
             Once a version of Metro web services stack has been installed on a web container, it can be updated
             with a new version of the Metro binaries. To update your Metro installation to ${product.name}, follow
-            the same steps used for the initial install, shown <a href="#installing">above</a>. 
+            the same steps used for the initial install, shown <a href="#installing">above</a>.
         </p>
 
         <a name="uninstalling"></a>
@@ -134,56 +134,56 @@ catalina.sh start
             identical to the ones in the installation process. The following steps will restore your web container
             to the state before Metro installation:
 
-            <h3>GlassFish</h3>
-            <pre>
+        <h3>GlassFish</h3>
+        <pre>
 asadmin stop-domain <i>&lt;domain-name&gt;</i>
 ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml uninstall
 asadmin start-domain <i>&lt;domain-name&gt;</i>
-            </pre>
+        </pre>
 
-            <h3>Tomcat</h3>
-            <pre>
+        <h3>Tomcat</h3>
+        <pre>
 catalina.sh stop
 ant -Dtomcat.home=&lt;TOMCAT_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-tomcat.xml uninstall
 catalina.sh start
-            </pre>
+        </pre>
 
         <h2>Release Notes</h2>
         <p>
             ${product.name} release consists of following components:
         </p>
         <ul>
-            <li>Metro/WSIT ${project.version} - <a href="https://wsit.java.net/status-notes/status-notes-${metro.majorVersion}.${metro.minorVersion}.${metro.incrementalVersion}-FCS.html">Browse the WSIT release notes online.</a></li>
+            <li>Metro/WSIT ${project.version} - <a href="https://javaee.github.io/metro-wsit/status-notes/status-notes-${metro.majorVersion}.${metro.minorVersion}.${metro.incrementalVersion}-FCS.html">Browse the WSIT release notes online.</a></li>
             <li>JAX-WS RI ${jaxws.ri.version} - <a href="${jaxws.home.uri}/${jaxws.ri.version}/docs/ch02.html">Browse the JAX-WS RI release notes online.</a></li>
-            <li>JAXB RI ${jaxb.version} - <a href="http://jaxb.java.net/${jaxb.version}/docs/ch02.html">Browse the JAXB RI release notes online.</a></li>
+            <li>JAXB RI ${jaxb.version} - <a href="https://javaee.github.io/jaxb-v2/${jaxb.version}/docs/ch02.html">Browse the JAXB RI release notes online.</a></li>
         </ul>
 
-    <h2>Users Guide</h2>
-    <p>
-        We have created a <a href="http://metro.java.net/${project.version}/guide/">snapshot of Metro Users Guide</a>
-        at the time of this Metro release. You may also wish to consult <a href="http://metro.java.net/guide/">the latest version</a>
-        of the Metro Users Guide.
-    </p>
+        <h2>Users Guide</h2>
+        <p>
+            We have created a <a href="https://javaee.github.io/metro/${project.version}/guide/">snapshot of Metro Users Guide</a>
+            at the time of this Metro release. You may also wish to consult <a href="https://javaee.github.io/metro/guide/">the latest version</a>
+            of the Metro Users Guide.
+        </p>
 
-    <h2>Technical Support</h2>
-    <p>
-        Please <a href="mailto:users-subscribe@metro.java.net?subject=subscribe">subscribe to the users list</a>
-        and send comments/feedbacks/opinions to <a href="mailto:users@metro.java.net">the list</a>. Additionally,
-        we encourage you to report any bugs you might find while using Metro through our
-        <a href="http://metro.java.net/use/issue-tracker.html">Metro issue trackers</a>.
-    </p>
+        <h2>Technical Support</h2>
+        <p>
+            Please <a href="mailto:metro+subscribe@javaee.groups.io">subscribe to the users list</a>
+            and send comments/feedbacks/opinions to <a href="mailto:metro@javaee.groups.io">the list</a>. Additionally,
+            we encourage you to report any bugs you might find while using Metro through our
+            <a href="https://github.com/javaee/metro/issues">Metro issue trackers</a>.
+        </p>
 
-    <h2>Workspace Snapshot</h2>
-    <p>
-        If you'd like to hack the source code used to build these binaries, please check out the Metro sources 
-        running the following command from the command line:
-    </p>
-    <pre>        
-        svn export https://svn.java.net/svn/wsit~svn/${scmBranch} -r ${buildNumber} metro-sources
-    </pre>
-    <div style="background-color: rgb(255,255,102);">
-        This component is released under the <b><a href="http://glassfish.java.net/public/CDDL+GPL_1_1.html">Common Development and Distribution License (CDDL) version 1.1 + GNU General Public License (GPL) version 2</a></b>.
-        You must agree to these licenses as part of installation before viewing and/or using the code.
-    </div>
-</body>
+        <h2>Workspace Snapshot</h2>
+        <p>
+            If you'd like to hack the source code used to build these binaries, please check out the Metro sources
+            running the following command from the command line:
+        </p>
+        <pre>
+        git clone git@github.com:javaee/metro-wsit.git metro-sources
+        </pre>
+        <div style="background-color: rgb(255,255,102);">
+            This component is released under the <b><a href="https://oss.oracle.com/licenses/CDDL+GPL-1.1">Common Development and Distribution License (CDDL) version 1.1 + GNU General Public License (GPL) version 2</a></b>.
+            You must agree to these licenses as part of installation before viewing and/or using the code.
+        </div>
+    </body>
 </html>

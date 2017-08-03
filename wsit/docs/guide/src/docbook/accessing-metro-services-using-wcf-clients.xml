@@ -109,13 +109,13 @@
                     <listitem>
                         <para>The <code>csclient-enabled-fromjava.zip</code>
                         example bundle, which is availalble for <link
-                        xlink:href="http://metro.java.net/getting-started/download/csclient.zip">download</link>.</para>
+                        xlink:href="https://javaee.github.io/metro/getting-started/download/csclient.zip">download</link>.</para>
                     </listitem>
                 </itemizedlist> You must also deploy the
             <code>addnumbers</code> service described in <xref linkend="ahifl"
             xrefstyle="select:title" />. The service is also available for
             <link
-            xlink:href="http://metro.java.net/getting-started/download/wsit-enabled-fromjava.zip">download</link>.</para>
+            xlink:href="https://javaee.github.io/metro/getting-started/download/wsit-enabled-fromjava.zip">download</link>.</para>
         </section>
 
         <section xml:id="ahigr">

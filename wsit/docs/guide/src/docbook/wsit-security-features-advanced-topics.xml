@@ -618,7 +618,7 @@
                         Properties for more description of the components for
                         each of these algorithm suites. A link to this
                         document can be found at <link
-                        xlink:href="http://wsit.java.net/">http://wsit.java.net/</link>.</para></entry>
+                        xlink:href="http://javaee.github.io/metro">http://javaee.github.io/metro</link>.</para></entry>
                     </row>
 
                     <row>
@@ -876,7 +876,7 @@ Symmetric.svc</programlisting>
                             </itemizedlist> <para>Examples of the layout rules
                         are described in the OASIS WS-SecurityPolicy
                         specification, a link to which can be found at <link
-                        xlink:href="http://wsit.java.net/">http://wsit.java.net/</link>.</para></entry>
+                        xlink:href="http://javaee.github.io/metro">http://javaee.github.io/metro</link>.</para></entry>
                     </row>
 
                     <row>
@@ -990,7 +990,7 @@ Symmetric.svc</programlisting>
         </orderedlist>
 
         <para>As a reference, <link
-        xlink:href="http://java.net/projects/wsit/sources/svn/content/trunk/wsit/samples/ws-trust/basic/src/common/MySTSAttributeProvider.java?rev=6860">
+        xlink:href="https://github.com/javaee/metro-wsit/blob/master/wsit/samples/ws-trust/basic/src/common/MySTSAttributeProvider.java">
         here</link> is a sample STSAttributeProvider.</para>
 
         <section xml:id="sts-claims">
@@ -1162,7 +1162,7 @@ config.setClaims(claims);</programlisting>
                     WS-Trust to define the content of the Claims. So you need
                     to implement com.sun.xml.ws.api.security.trust.Claims to
                     manage claims in your environment. Here is a <link
-                    xlink:href="http://java.net/projects/wsit/sources/svn/content/trunk/wsit/samples/ws-trust/runtime/src/common/MyClaims.java?rev=6860">sample</link>
+                    xlink:href="https://github.com/javaee/metro-wsit/blob/master/wsit/samples/ws-trust/runtime/src/common/MyClaims.java">sample</link>
                     for managing claim types of the following form: <example>
                             <programlisting language="java"
                                             linenumbering="unnumbered">&lt;wst:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity"
@@ -1295,7 +1295,7 @@ int result = port.add(i, j)</programlisting>
 
             <para>To illustrate the usage, you may find a stand alone sample
             <link
-            xlink:href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust/share?rev=6860">here</link>.
+            xlink:href="https://github.com/javaee/metro-wsit/tree/master/wsit/samples/ws-trust/share">here</link>.
             This sample contains 4 parts for client, STS, Service, and
             Service1. Each service is configured to use the STS issued token
             to access. On the client side, the client instances for Service
@@ -1384,7 +1384,7 @@ int result = port.add(i, j)</programlisting>
             </figure>
 
             <para>This feature is better illustrated by the sample <link
-            xlink:href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/samples/ws-trust/delegate?rev=6860">here</link></para>
+            xlink:href="https://github.com/javaee/metro-wsit/tree/master/wsit/samples/ws-trust/delegate">here</link></para>
 
             <orderedlist>
                 <listitem>

@@ -111,7 +111,7 @@
         6.0 Update 29</link> or later, <link
         xlink:href="http://ant.apache.org/">Apache Ant 1.6.5</link> or later,
         and a web container: either <link
-        xlink:href="http://glassfish.java.net/">Glassfish v3.x</link> or <link
+        xlink:href="https://javaee.github.io/glassfish/">Glassfish</link> or <link
         xlink:href="http://tomcat.apache.org/">Apache Tomcat 7.0</link>.
         Further, your Metro build environment needs to be configured as
         described in the <xref linkend="basma-environment"

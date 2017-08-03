@@ -63,8 +63,8 @@
         <title>Preface</title>
         <para>
             This document explains <emphasis>various</emphasis> interesting/complex/tricky aspects of Metro, based on questions posted on the
-            <link xlink:href="http://home.java.net/forums/glassfish/metro-and-jaxb">Metro users forum</link> and answers provided.
-            This is still a work-in-progress. Any <link xlink:href="mailto:users@metro.java.net">feedback</link> is appreciated.<command></command>
+            <link xlink:href="https://javaee.groups.io/g/metro">Metro users forum</link> and answers provided.
+            This is still a work-in-progress. Any <link xlink:href="mailto:metro@javaee.groups.io">feedback</link> is appreciated.<command></command>
         </para>
     </preface>
 

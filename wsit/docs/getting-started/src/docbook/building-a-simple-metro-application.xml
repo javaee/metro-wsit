@@ -132,14 +132,14 @@
 
                 <listitem>
                     <para>web container: either <link
-                    xlink:href="http://glassfish.java.net/">Glassfish
-                    v3.x</link> or <link
+                    xlink:href="https://javaee.github.io/glassfish/">Glassfish</link>
+                    or <link
                     xlink:href="http://tomcat.apache.org/">Apache Tomcat
                     7.0</link></para>
                 </listitem>
 
                 <listitem>
-                    <para><link xlink:href="http://metro.java.net/">Metro
+                    <para><link xlink:href="https://javaee.github.io/metro/">Metro
                     Standalone Budle 2.x</link> (in case of using Apache
                     Tomcat as a web container)</para>
                 </listitem>
