@@ -92,9 +92,9 @@
     <profiles>
         <profile>
             <id>release-9</id>
-              <activation>
-                <jdk>9</jdk>
-              </activation>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
             <build>
               <plugins>
                 <plugin>
