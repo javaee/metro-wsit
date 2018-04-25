@@ -852,7 +852,7 @@
             <dependency>
                 <groupId>com.sun.xml.rpc</groupId>
                 <artifactId>jaxrpc-impl</artifactId>
-                <version>1.1.3_01</version>
+                <version>1.1.4_01</version>
             </dependency>
             <dependency>
                 <groupId>javax.security.auth.message</groupId>
