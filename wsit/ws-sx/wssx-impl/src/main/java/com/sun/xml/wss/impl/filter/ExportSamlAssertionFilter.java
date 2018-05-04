@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -161,8 +161,6 @@ public class ExportSamlAssertionFilter {
                     } else {
                         _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(assertionElement);
                     }
-                } else {
-                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(assertionElement);
                 }
             } catch (SAMLException ex) {
                 //ignore
@@ -190,8 +188,6 @@ public class ExportSamlAssertionFilter {
                 if(!isOptimized){
                     if ( System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
                         ((com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion)_assertion).toElement(securityHeader);
-                    } else {
-                        ((com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion)_assertion).toElement(securityHeader);
                     }
                 } else {
                     she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext) context).getSOAPVersion());
