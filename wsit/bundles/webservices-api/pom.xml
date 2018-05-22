@@ -153,7 +153,7 @@
                                     <include>javax.xml.bind:jaxb-api</include>
                                     <include>javax.xml.soap:javax.xml.soap-api</include>
                                     <include>javax.jws:jsr181-api</include>
-                                    <include>javax.transaction:transaction-api</include>
+                                    <include>javax.transaction:javax.transaction-api</include>
                                 </includes>
                             </artifactSet>
                             <createSourcesJar>false</createSourcesJar>
@@ -179,7 +179,7 @@
                     <configuration>
                         <additionalJOptions>
                             <additionalJOption>--add-modules</additionalJOption>
-                            <additionalJOption>java.activation</additionalJOption>
+                            <additionalJOption>java.activation,java.xml.ws.annotation</additionalJOption>
                         </additionalJOptions>
                     </configuration>
                 </plugin>
