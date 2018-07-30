@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2013-2017 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2013-2018 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -48,7 +48,7 @@
         <groupId>org.glassfish.metro</groupId>
         <artifactId>metro-bom</artifactId>
         <relativePath>../bom/pom.xml</relativePath>
-        <version>2.4.0-SNAPSHOT</version>
+        <version>2.4.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.glassfish.metro</groupId>
@@ -59,7 +59,7 @@
 
     <properties>
         <connector-api.version>1.5</connector-api.version>
-        <transaction-api.version>1.2</transaction-api.version>
+        <transaction-api.version>1.3</transaction-api.version>
         <glassfish.version>4.1.2</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
         <gmbal.version>3.1.0-b001</gmbal.version>

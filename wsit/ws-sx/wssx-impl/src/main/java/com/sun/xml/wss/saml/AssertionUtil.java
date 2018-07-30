@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -308,27 +308,21 @@ public class AssertionUtil {
     public static Assertion fromElement(org.w3c.dom.Element element)
     throws SAMLException {
         try {
-            if ( System.getProperty("com.sun.xml.wss.saml.binding.jaxb") != null ) {
-                JAXBContext jc = SAMLJAXBUtil.getJAXBContext();
-                        
+
+            if (element.getAttributeNode("ID") != null){
+                JAXBContext jc = SAML20JAXBUtil.getJAXBContext();
+
                 javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-                return new com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion(
-                        (com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.AssertionImpl)u.unmarshal(element));
-            } else {
-                if (element.getAttributeNode("ID") != null){                
-                    JAXBContext jc = SAML20JAXBUtil.getJAXBContext();
-                            
-                    javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-                    Object el = u.unmarshal(element);
-                    return new com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion((com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType)((JAXBElement)el).getValue());
-                }else{
-                    JAXBContext jc = SAMLJAXBUtil.getJAXBContext();
-                        
-                    javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-                    Object el = u.unmarshal(element);
-                    return new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion((AssertionType)((JAXBElement)el).getValue());
-                }
+                Object el = u.unmarshal(element);
+                return new com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion((com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType)((JAXBElement)el).getValue());
+            }else{
+                JAXBContext jc = SAMLJAXBUtil.getJAXBContext();
+
+                javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+                Object el = u.unmarshal(element);
+                return new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion((AssertionType)((JAXBElement)el).getValue());
             }
+
         } catch ( Exception ex) {
             // log here
             throw new SAMLException(ex);

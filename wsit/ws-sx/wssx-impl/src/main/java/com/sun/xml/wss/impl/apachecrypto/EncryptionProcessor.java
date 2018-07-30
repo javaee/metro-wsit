@@ -476,8 +476,7 @@ public class EncryptionProcessor {
                     (AuthenticationTokenPolicy.SAMLAssertionBinding)keyBinding;
             
             Assertion assertion1 = null;
-            Assertion assertion2 = null;
-            
+
             try {
                 if (System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null ) {
                     if (samlBinding.getAssertion().getAttributeNode("ID") != null) {
@@ -485,8 +484,6 @@ public class EncryptionProcessor {
                     }else{
                         assertion1 = (Assertion)com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(samlBinding.getAssertion());
                     }
-                } else {
-                    assertion2 = (Assertion)com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(samlBinding.getAssertion());
                 }
             } catch (SAMLException ex) {
                 log.log(Level.SEVERE, "WSS1212.error.SAMLAssertionException");
@@ -499,11 +496,6 @@ public class EncryptionProcessor {
                 //assuming unique IDs
                 assertionID = ((com.sun.xml.wss.saml.Assertion)assertion1).getAssertionID();
                 tokenCache.put(assertionID, assertion1);
-            } else if (assertion2 != null) {
-                HashMap tokenCache = context.getTokenCache();
-                //assuming unique IDs
-                assertionID = ((com.sun.xml.wss.saml.Assertion)assertion2).getAssertionID();
-                tokenCache.put(assertionID, assertion2);
             } else{
                 log.log(Level.SEVERE,"WSS1213.null.SAMLAssertion");
                 throw new XWSSecurityException("SAML Assertion is NULL");
@@ -536,8 +528,6 @@ public class EncryptionProcessor {
             String assertionId = null;
             if ( assertion1 != null) {
                 assertionId = ((com.sun.xml.wss.saml.Assertion)assertion1).getAssertionID();
-            }else if ( assertion2 != null) {
-                assertionId = ((com.sun.xml.wss.saml.Assertion)assertion2).getAssertionID();
             }
             Element binding = samlBinding.getAuthorityBinding();
             samlTokenRef = new SecurityTokenReference(secureMsg.getSOAPPart());

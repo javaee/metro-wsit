@@ -51,7 +51,6 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.XMLUtil;
 import com.sun.xml.wss.XWSSecurityException;
-//import com.sun.xml.wss.saml.assertion.saml11.jaxb10.SAMLUtil;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -71,7 +70,6 @@ import com.sun.xml.wss.core.reference.SamlKeyIdentifier;
 import com.sun.xml.wss.core.reference.X509IssuerSerial;
 import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 
-//import com.sun.xml.wss.saml.assertion.saml11.jaxb10.AuthorityBinding;
 
 
 /**

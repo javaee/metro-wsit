@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -58,7 +58,6 @@ import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
 import com.sun.xml.wss.saml.impl.SAMLAssertion2_1FactoryImpl;
 import com.sun.xml.wss.saml.impl.SAMLAssertion2_2FactoryImpl;
-import com.sun.xml.wss.saml.impl.SAMLAssertion1_1FactoryImpl;
 import javax.xml.bind.JAXBContext;
 import javax.xml.stream.XMLStreamReader;
 
@@ -90,8 +89,6 @@ public abstract class SAMLAssertionFactory {
     public static SAMLAssertionFactory newInstance(String samlVersion) throws XWSSecurityException {
         if ( samlVersion.intern() == SAML1_1) {
             SAML_VER_CHECK = SAML1_1;
-            if ( System.getProperty("com.sun.xml.wss.saml.binding.jaxb") != null )
-                return new SAMLAssertion1_1FactoryImpl();
             return new SAMLAssertion2_1FactoryImpl();
         } else if (samlVersion.intern() == SAML2_0 && System.getProperty("com.sun.xml.wss.saml.binding.jaxb")== null ){
             SAML_VER_CHECK = SAML2_0;
