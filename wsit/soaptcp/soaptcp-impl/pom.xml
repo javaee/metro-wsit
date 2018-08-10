@@ -99,7 +99,7 @@
         </dependency>
         <dependency>
             <groupId>javax.jws</groupId>
-            <artifactId>jsr181-api</artifactId>
+            <artifactId>javax.jws-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>

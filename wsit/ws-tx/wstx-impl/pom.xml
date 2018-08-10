@@ -152,7 +152,7 @@
         </dependency>
         <dependency>
             <groupId>javax.jws</groupId>
-            <artifactId>jsr181-api</artifactId>
+            <artifactId>javax.jws-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>

@@ -143,13 +143,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.sun.xml.bind</groupId>
-                                    <artifactId>jaxb-core</artifactId>
-                                    <classifier>sources</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.sun.xml.bind</groupId>
                                     <artifactId>jaxb-impl</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
@@ -256,7 +249,6 @@
                                 <includes>
                                     <include>${project.parent.groupId}:wsit*</include>
                                     <include>com.sun.org.apache.xml.internal:resolver</include>
-                                    <include>com.sun.xml.bind:jaxb-core</include>
                                     <include>com.sun.xml.bind:jaxb-impl</include>
                                     <include>com.sun.xml.fastinfoset:FastInfoset</include>
                                     <include>com.sun.xml.messaging.saaj:saaj-impl</include>
@@ -469,10 +461,6 @@
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.external</groupId>

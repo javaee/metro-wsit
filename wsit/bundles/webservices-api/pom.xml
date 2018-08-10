@@ -74,7 +74,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>javax.jws</groupId>
-                                    <artifactId>jsr181-api</artifactId>
+                                    <artifactId>javax.jws-api</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -152,7 +152,7 @@
                                     <include>javax.xml.ws:jaxws-api</include>
                                     <include>javax.xml.bind:jaxb-api</include>
                                     <include>javax.xml.soap:javax.xml.soap-api</include>
-                                    <include>javax.jws:jsr181-api</include>
+                                    <include>javax.jws:javax.jws-api</include>
                                     <include>javax.transaction:javax.transaction-api</include>
                                 </includes>
                             </artifactSet>
@@ -207,7 +207,7 @@
         </dependency>
         <dependency>
             <groupId>javax.jws</groupId>
-            <artifactId>jsr181-api</artifactId>
+            <artifactId>javax.jws-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
