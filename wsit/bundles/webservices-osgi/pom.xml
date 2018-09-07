@@ -456,6 +456,6 @@
         <generated.sources.dir>${project.build.directory}/generated-sources</generated.sources.dir>
         <cobertura.skip>true</cobertura.skip>
         <mf.dir>${project.build.outputDirectory}</mf.dir>
-        <jaxb.osgiVersion>2.4.0</jaxb.osgiVersion>
+        <jaxb.osgiVersion>[2.3,3.0)</jaxb.osgiVersion>
     </properties>
 </project>
