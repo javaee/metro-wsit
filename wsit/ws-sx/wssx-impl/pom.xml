@@ -157,10 +157,6 @@
             <artifactId>saaj-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>saml-jaxb10-bindings</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jvnet.staxex</groupId>
             <artifactId>stax-ex</artifactId>
         </dependency>

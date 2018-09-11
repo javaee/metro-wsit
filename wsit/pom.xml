@@ -305,7 +305,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -870,11 +870,6 @@
             <dependency>
                 <groupId>com.sun.xml.wss.core.reference</groupId>
                 <artifactId>keyidspi-ibm-impl</artifactId>
-                <version>1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.security</groupId>
-                <artifactId>saml-jaxb10-bindings</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
