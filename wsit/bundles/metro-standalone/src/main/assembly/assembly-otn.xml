@@ -111,7 +111,7 @@
                 <include>${project.groupId}:webservices-api-osgi</include>
                 <include>${project.groupId}:webservices-extra-jdk-packages</include>
                 <include>${project.groupId}:webservices-osgi</include>
-                <include>org.codehaus.woodstox:woodstox-core-asl</include>
+                <include>com.fasterxml.woodstox:woodstox-core</include>
                 <include>org.codehaus.woodstox:stax2-api</include>
                 <include>org.apache.santuario:xmlsec</include>
                 <include>commons-logging:commons-logging</include>

@@ -133,7 +133,7 @@
             <fileset dir="${as.lib.home}">
                 <include name="webservices-osgi.jar"/>
                 <include name="webservices-extra-jdk-packages.jar"/>
-                <include name="woodstox-core-asl.jar"/>
+                <include name="woodstox-core.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
                 <include name="xmlsec.jar"/>
@@ -160,7 +160,7 @@
             <fileset dir="osgi">
                 <include name="webservices-osgi.jar"/>
                 <include name="webservices-extra-jdk-packages.jar"/>
-                <include name="woodstox-core-asl.jar"/>
+                <include name="woodstox-core.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
                 <include name="xmlsec.jar"/>
@@ -216,7 +216,7 @@
             <fileset dir="${backup.dir}">
                 <include name="webservices-osgi.jar"/>
                 <include name="webservices-extra-jdk-packages.jar"/>
-                <include name="woodstox-core-asl.jar"/>
+                <include name="woodstox-core.jar"/>
                 <include name="stax2-api.jar"/>
                 <include name="jaxb-osgi.jar"/>
                 <include name="xmlsec.jar"/>
