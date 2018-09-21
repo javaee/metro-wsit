@@ -161,8 +161,8 @@
                                     javax.xml.soap.*;version=${saaj-api.osgiVersion}
                                 </Export-Package>
                                 <Import-Package>
-                                    javax.xml.bind;version=${jaxb-api.osgiVersion},
-                                    javax.xml.bind.*;version=${jaxb-api.osgiVersion},
+                                    javax.xml.bind;version=${jaxb-api-osgi.version},
+                                    javax.xml.bind.*;version=${jaxb-api-osgi.version},
                                     *
                                 </Import-Package>
                                 <DynamicImport-Package>org.glassfish.hk2.osgiresourcelocator</DynamicImport-Package>
