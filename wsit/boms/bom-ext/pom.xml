@@ -62,9 +62,9 @@
         <transaction-api.version>1.3</transaction-api.version>
         <glassfish.version>4.1.2</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
-        <gmbal.version>3.1.0-b001</gmbal.version>
+        <gmbal.version>4.0.0-b002</gmbal.version>
         <jaxws.home.uri>http://javaee.github.io/metro-jax-ws</jaxws.home.uri>
-        <santuario.version>1.5.8</santuario.version>
+        <santuario.version>2.1.2</santuario.version>
     </properties>
 
     <dependencyManagement>
