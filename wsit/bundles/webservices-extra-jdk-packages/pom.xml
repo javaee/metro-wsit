@@ -63,6 +63,7 @@
                         <manifestFile>${mf.dir}/META-INF/MANIFEST.MF</manifestFile>
                         <manifestEntries>
                             <Export-Package>
+                                javax.activation;version="1.2",
                                 com.sun.org.apache.xml.internal.resolver.tools,
                                 com.sun.org.apache.xml.internal.resolver,
                                 com.sun.source.tree,
