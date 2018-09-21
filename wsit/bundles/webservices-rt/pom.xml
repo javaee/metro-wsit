@@ -70,6 +70,7 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
+                            <excludes>module-info*,javax/transaction/xa/*</excludes>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.sun.org.apache.xml.internal</groupId>
