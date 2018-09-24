@@ -47,7 +47,7 @@
     <parent>
         <groupId>org.glassfish.metro</groupId>
         <artifactId>bundles</artifactId>
-        <version>2.4.1-SNAPSHOT</version>
+        <version>2.4.2-b180924.0745</version>
     </parent>
 
     <artifactId>wsit-impl</artifactId>
