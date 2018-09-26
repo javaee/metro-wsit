@@ -53,7 +53,6 @@ import java.util.logging.Logger;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.xml.security.utils.resolver.ResourceResolverContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -119,8 +118,6 @@ public class ResolverId extends ResourceResolverSpi {
     */
    public XMLSignatureInput engineResolve(Attr uri, String BaseURI)
            throws ResourceResolverException {
-
-      String uriToResolve = uri != null ? uri.getValue() : null;
       String uriNodeValue = uri.getNodeValue();
       if (MessageConstants.debug) {
           log.log(Level.FINEST, "uri = " + uriNodeValue);
@@ -149,14 +146,14 @@ public class ResolverId extends ResourceResolverSpi {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSS_0603_XPATHAPI_TRANSFORMER_EXCEPTION(e.getMessage()),
                     e.getMessage());
-            throw new ResourceResolverException("empty", e, uriToResolve, BaseURI);
+            throw new ResourceResolverException("empty", e, uri, BaseURI);
          }
       }
 
       if (selectedElem == null) {
           log.log(Level.SEVERE,
                   LogStringsMessages.WSS_0604_CANNOT_FIND_ELEMENT());
-          throw new ResourceResolverException("empty", uriToResolve, BaseURI);
+          throw new ResourceResolverException("empty", uri, BaseURI);
       }
       Set resultSet = dereferenceSameDocumentURI(selectedElem);
       XMLSignatureInput result = new XMLSignatureInput(resultSet);
@@ -390,15 +387,5 @@ public class ResolverId extends ResourceResolverSpi {
 		nodeSet.add(node);
 	}
    }
-
-    @Override
-    public XMLSignatureInput engineResolveURI(ResourceResolverContext context) throws ResourceResolverException {
-        return engineResolve(context.attr, context.baseUri);
-    }
-
-    @Override
-    public boolean engineCanResolveURI(ResourceResolverContext context) {
-        return engineCanResolve(context.attr, context.baseUri);
-    }
 }
 
