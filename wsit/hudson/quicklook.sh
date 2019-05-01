@@ -78,8 +78,9 @@ if [ -z "$QL_TEST_PROFILE" ]; then
     echo "setting QL_TEST_PROFILE to $QL_TEST_PROFILE"
 fi
 
+INSTANCE_PORT=7998
 set_common
-
+set_ports
 print_env
 echo "Test settings:"
 echo "====================="
@@ -108,17 +109,27 @@ _unzip $GF_ZIP $GF_WORK_DIR
 
 if [ -d "$GF_WORK_DIR/glassfish4" ]; then
     SERVER_DIR=glassfish4
+elif [ -d "$GF_WORK_DIR/glassfish5" ]; then
+    SERVER_DIR=glassfish5
 else
     SERVER_DIR=glassfish3
 fi
 
+AS_HOME=$GF_WORK_DIR/$SERVER_DIR/glassfish
+
+echo "AS_HOME: $AS_HOME"
+
+#domain setup
+echo "Creating new domain with $INSTANCE_PORT"
+create_domain
+
 if [ ! -z "$METRO_ZIP" ]; then
     install_metro $GF_WORK_DIR/$SERVER_DIR/glassfish
 fi
-
 echo "Running GlassFish QuickLook (Profile: $QL_TEST_PROFILE) tests..."
 
 pushd $GF_SVN_ROOT/appserver/tests/quicklook
+
 mvn -s $MVN_SETTINGS -P$QL_TEST_PROFILE -Dglassfish.home=$GF_WORK_DIR/$SERVER_DIR/glassfish test | tee $WORK_DIR/test-quicklook-$QL_TEST_PROFILE.log.txt
 popd
 

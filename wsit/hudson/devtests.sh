@@ -108,6 +108,8 @@ _unzip $GF_ZIP $GF_WORK_DIR
 
 if [ -d "$GF_WORK_DIR/glassfish4" ]; then
     SERVER_DIR=glassfish4
+elif [ -d "$GF_WORK_DIR/glassfish5" ]; then
+    SERVER_DIR=glassfish5
 else
     SERVER_DIR=glassfish3
 fi
